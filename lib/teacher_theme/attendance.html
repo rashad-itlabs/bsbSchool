@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            const loggedIn = sessionStorage.getItem('teacher_logged_in');
+            if (!loggedIn) {
+                window.location.href = 'login.html';
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <div class="card-glow"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title-container">
+                <a href="index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </a>
+                <h2>Student Attendance</h2>
+            </div>
+            <button class="profile-btn" aria-label="Profile" type="button">
+                <span class="profile-icon">EB</span>
+            </button>
+        </header>
+
+        <!-- Filters -->
+        <div class="limit-card" style="padding: 16px;">
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>Class Group</label>
+                <select class="form-control" id="class-select" onchange="updateStudentList()">
+                    <option value="10a">Class 10 "A"</option>
+                    <option value="11b">Class 11 "B"</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Date</label>
+                <input type="date" class="form-control" id="date-select">
+            </div>
+        </div>
+
+        <!-- Student List Header -->
+        <div class="limit-header" style="margin-bottom: 12px;">
+            <h3 class="limit-title" style="font-size: 15px; font-weight: 700;">Student List</h3>
+            <span class="limit-action" id="stats-summary">Present: 5 | Absent: 0</span>
+        </div>
+
+        <!-- Students Container -->
+        <div class="list-container" id="students-container" style="margin-bottom: 30px;">
+            <!-- Dynamically loaded by JS -->
+        </div>
+
+        <!-- Save Button / Edit Button Toggle -->
+        <div style="position: relative; z-index: 1; margin-bottom: 40px;">
+            <button class="primary-btn" id="action-btn" onclick="handleBtnClick()">
+                Save Attendance Records
+            </button>
+        </div>
+
+        <!-- Toast element -->
+        <div id="toast" class="toast">
+            <span id="toast-text">Success!</span>
+        </div>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="timetable.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span class="nav-label">Timetable</span>
+            </a>
+            <a href="attendance.html" class="nav-item active" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                <span class="nav-label">Attendance</span>
+            </a>
+            <a href="homework.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span class="nav-label">Homework</span>
+            </a>
+            <a href="settings.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span class="nav-label">Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        let isSaved = false;
+
+        // Set today's date in datepicker
+        document.getElementById('date-select').valueAsDate = new Date();
+        document.getElementById('date-select').addEventListener('change', () => {
+            resetSaveState();
+            updateStudentList();
+        });
+
+        function resetSaveState() {
+            isSaved = false;
+            const btn = document.getElementById('action-btn');
+            if (btn) {
+                btn.textContent = "Save Attendance Records";
+                btn.style.backgroundColor = "var(--accent-green)";
+                btn.style.color = "#000";
+                btn.style.border = "none";
+                btn.style.boxShadow = "0 10px 25px var(--accent-green-glow)";
+            }
+            const switches = document.querySelectorAll('.attendance-switch');
+            switches.forEach(sw => {
+                sw.style.pointerEvents = "auto";
+                sw.style.opacity = "1";
+            });
+        }
+
+        const studentsData = {
+            "10a": [
+                { id: 1, name: "Samir Aliyev", code: "STD-292", status: "P", initials: "SA" },
+                { id: 2, name: "Nigar Aliyeva", code: "STD-293", status: "P", initials: "NA" },
+                { id: 3, name: "Elhan Hatamov", code: "STD-104", status: "P", initials: "EH" },
+                { id: 4, name: "Maria Smirnova", code: "STD-342", status: "P", initials: "MS" },
+                { id: 5, name: "Alexey Ivanov", code: "STD-851", status: "A", initials: "AI" }
+            ],
+            "11b": [
+                { id: 6, name: "Jamila Mammadova", code: "STD-990", status: "P", initials: "JM" },
+                { id: 7, name: "Tural Aliyev", code: "STD-847", status: "P", initials: "TA" },
+                { id: 8, name: "Leyla Gasimova", code: "STD-542", status: "L", initials: "LG" },
+                { id: 9, name: "Farid Huseynov", code: "STD-112", status: "P", initials: "FH" }
+            ]
+        };
+
+        function updateStudentList() {
+            resetSaveState();
+            const classSelect = document.getElementById('class-select').value;
+            const container = document.getElementById('students-container');
+            const students = studentsData[classSelect] || [];
+            
+            container.innerHTML = '';
+            
+            students.forEach(student => {
+                const row = document.createElement('div');
+                row.className = 'student-row';
+                row.innerHTML = `
+                    <div class="student-info">
+                        <div class="student-avatar">${student.initials}</div>
+                        <div class="student-details">
+                            <h4>${student.name}</h4>
+                            <p>${student.code}</p>
+                        </div>
+                    </div>
+                    <div class="attendance-switch">
+                        <div class="att-option ${student.status === 'P' ? 'active' : ''}" data-student="${student.id}" data-val="P" onclick="toggleStatus(this)">P</div>
+                        <div class="att-option ${student.status === 'A' ? 'active' : ''}" data-student="${student.id}" data-val="A" onclick="toggleStatus(this)">A</div>
+                        <div class="att-option ${student.status === 'L' ? 'active' : ''}" data-student="${student.id}" data-val="L" onclick="toggleStatus(this)">L</div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            
+            updateStats();
+        }
+
+        function toggleStatus(element) {
+            const studentId = parseInt(element.getAttribute('data-student'));
+            const statusVal = element.getAttribute('data-val');
+            
+            // Find student in data and update
+            const classSelect = document.getElementById('class-select').value;
+            const students = studentsData[classSelect] || [];
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.status = statusVal;
+            }
+
+            // Update UI active class
+            const parent = element.parentElement;
+            parent.querySelectorAll('.att-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const classSelect = document.getElementById('class-select').value;
+            const students = studentsData[classSelect] || [];
+            
+            let present = 0;
+            let absent = 0;
+            let late = 0;
+            
+            students.forEach(s => {
+                if (s.status === 'P') present++;
+                else if (s.status === 'A') absent++;
+                else if (s.status === 'L') late++;
+            });
+            
+            const statsSummary = document.getElementById('stats-summary');
+            statsSummary.textContent = `Present: ${present} | Absent: ${absent} | Late: ${late}`;
+        }
+
+        function handleBtnClick() {
+            const btn = document.getElementById('action-btn');
+            const switches = document.querySelectorAll('.attendance-switch');
+            
+            if (!isSaved) {
+                // Save Action
+                isSaved = true;
+                btn.textContent = "Edit Attendance Records";
+                btn.style.backgroundColor = "var(--bg-surface-light)";
+                btn.style.color = "var(--text-main)";
+                btn.style.border = "1px solid var(--border-color)";
+                btn.style.boxShadow = "none";
+                
+                // Disable selectors
+                switches.forEach(sw => {
+                    sw.style.pointerEvents = "none";
+                    sw.style.opacity = "0.7";
+                });
+                
+                showToast("Attendance saved successfully!");
+            } else {
+                // Edit Action
+                isSaved = false;
+                btn.textContent = "Save Attendance Records";
+                btn.style.backgroundColor = "var(--accent-green)";
+                btn.style.color = "#000";
+                btn.style.border = "none";
+                btn.style.boxShadow = "0 10px 25px var(--accent-green-glow)";
+                
+                // Enable selectors
+                switches.forEach(sw => {
+                    sw.style.pointerEvents = "auto";
+                    sw.style.opacity = "1";
+                });
+                
+                showToast("Editing mode active.");
+            }
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            toastText.textContent = text;
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 2500);
+        }
+
+        // Initial Load
+        updateStudentList();
+    </script>
+</body>
+</html>

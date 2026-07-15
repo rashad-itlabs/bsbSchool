@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ev Tapşırıqları</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="mobile-container homework-page">
+        <!-- Header -->
+        <header class="schedule-header">
+            <a href="index.html" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+            <h2>Tapşırıqlar</h2>
+            <div class="header-spacer"></div>
+        </header>
+
+        <!-- Status Tabs -->
+        <div class="filter-scroll">
+            <div class="filter-chip active">Gözləyən</div>
+            <div class="filter-chip">Bitmiş</div>
+            <div class="filter-chip">Gecikmiş</div>
+        </div>
+
+        <!-- Lesson Filter -->
+        <div class="lesson-filter-box">
+            <label for="lessonFilter">Fənn seçin</label>
+            <select id="lessonFilter">
+                <option value="all">Bütün dərslər</option>
+                <option value="riyaziyyat">Riyaziyyat</option>
+                <option value="kimya">Kimya</option>
+                <option value="english">English</option>
+            </select>
+        </div>
+
+        <!-- Homework List -->
+        <div class="homework-list">
+            
+            <!-- Item 1 -->
+            <div class="service-card" style="margin-bottom: 16px; padding: 20px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div class="service-icon" style="background: rgba(177, 255, 41, 0.1); color: var(--accent-green);">📐</div>
+                    <div style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 8px; text-transform: uppercase;">2 gün qalıb</div>
+                </div>
+                <h3 style="font-size: 16px; margin-bottom: 4px;">Riyaziyyat: Triqonometriya</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Səhifə 142, tapşırıq 5, 8, 12-ni həll edin.</p>
+                                <div style="font-size: 12px; color: var(--text-muted); padding-top: 15px; border-top: 1px solid var(--border-color);">Deadline: <span style="color: var(--text-main); font-weight: 500;">10 May</span></div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="service-card" style="margin-bottom: 16px; padding: 20px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div class="service-icon" style="background: rgba(0, 210, 211, 0.1); color: #00d2d3;">🧪</div>
+                    <div style="background: rgba(177, 255, 41, 0.1); color: var(--accent-green); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 8px; text-transform: uppercase;">Yeni</div>
+                </div>
+                <h3 style="font-size: 16px; margin-bottom: 4px;">Kimya: Laboratoriya işi</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Oksigenin alınması reaksiyasını təsvir edin.</p>
+                                <div style="font-size: 12px; color: var(--text-muted); padding-top: 15px; border-top: 1px solid var(--border-color);">Deadline: <span style="color: var(--text-main); font-weight: 500;">12 May</span></div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="service-card" style="margin-bottom: 16px; padding: 20px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div class="service-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">🇬🇧</div>
+                    <div style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 8px; text-transform: uppercase;">4 gün qalıb</div>
+                </div>
+                <h3 style="font-size: 16px; margin-bottom: 4px;">English: Essay Writing</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Write an essay about "Future of AI in Education" (250 words).</p>
+                                <div style="font-size: 12px; color: var(--text-muted); padding-top: 15px; border-top: 1px solid var(--border-color);">Deadline: <span style="color: var(--text-main); font-weight: 500;">15 May</span></div>
+            </div>
+
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span class="nav-label">Home</span>
+            </a>
+            <a href="idcard.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><path d="M7 9h10"></path><circle cx="12" cy="14" r="2"></circle><path d="M8 18h8"></path></svg><span class="nav-label">Food Card</span>
+            </a>
+            <a href="schedule.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><path d="M7 15h4M15 15h2M7 11h2M15 11h2"></path></svg><span class="nav-label">Tuition</span>
+            </a>
+            <a href="notifications.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="nav-label">Notifs</span>
+            </a>
+            <a href="pass.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-label">Pass</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

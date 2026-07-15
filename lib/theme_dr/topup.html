@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balansı artır</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="mobile-container topup-page">
+        <!-- Header -->
+        <header class="schedule-header">
+            <a href="index.html" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+            <h2>Balansı artır</h2>
+            <div class="header-spacer"></div>
+        </header>
+
+        <!-- Amount Input Section -->
+        <div class="amount-section">
+            <div class="amount-display">
+                <input type="number" class="amount-input" value="50" placeholder="0">
+                <span class="currency">₼</span>
+            </div>
+        </div>
+
+        <!-- Quick Amounts -->
+        <div class="quick-amounts">
+            <div class="quick-btn">+ 10</div>
+            <div class="quick-btn active">+ 50</div>
+            <div class="quick-btn">+ 100</div>
+            <div class="quick-btn">+ 200</div>
+        </div>
+
+        <!-- Card Form -->
+        <div class="payment-card-form">
+            <div class="form-header">
+                <h3>Ödəniş kartı</h3>
+                <div class="card-icons">
+                    <!-- Visa SVG -->
+                    <svg viewBox="0 0 50 16" height="14" fill="#fff" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.9;">
+                        <path d="M21.93 0L19.46 15.39H15.42L17.88 0H21.93ZM34.2 0.38C33.56 0.13 32.4 0 31.02 0C27.1 0 24.36 2.05 24.34 4.98C24.31 7.15 26.29 8.35 27.78 9.07C29.31 9.8 29.82 10.26 29.82 10.92C29.82 11.93 28.59 12.38 27.35 12.38C25.61 12.38 24.59 11.9 23.77 11.51L23.16 11.23L22.61 14.65C23.47 15.05 25.09 15.42 26.8 15.45C31.02 15.45 33.7 13.38 33.73 10.35C33.75 8.6 32.61 7.28 28.02 5.1C26.63 4.43 25.79 3.98 25.82 3.12C25.82 2.22 26.8 1.41 28.59 1.41C29.97 1.38 31.02 1.71 31.85 2.07L32.25 2.25L32.8 0.38H34.2ZM42.58 15.39H46.16L43.21 0H39.84C38.99 0 38.3 0.48 37.95 1.25L32.42 15.39H36.46L37.26 13.15H42.2L42.58 15.39ZM38.41 10.02L40.42 4.48L41.57 10.02H38.41ZM14.96 0L10.82 10.51L10.38 8.3C10.02 6.13 8.35 3.32 5.25 1.95L6.37 15.39H10.43L14.96 0ZM4.54 1.98C3.12 1.41 1.5 0.77 0 0.38L0.8 4.22C1.55 4.4 2.87 4.76 4.09 5.39L4.54 1.98Z"/>
+                    </svg>
+                    <!-- Mastercard SVG -->
+                    <svg viewBox="0 0 24 15" height="16" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
+                        <circle cx="7.5" cy="7.5" r="7.5" fill="#ea001b"/>
+                        <circle cx="16.5" cy="7.5" r="7.5" fill="#f79e1b"/>
+                        <path d="M12 13.65a7.48 7.48 0 0 0 3-6.15c0-2.39-1.12-4.51-2.85-5.85a7.48 7.48 0 0 0-3 6.15c0 2.39 1.12 4.51 2.85 5.85z" fill="#ff5f00"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Kartın nömrəsi</label>
+                <div class="input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                    <input type="text" placeholder="0000 0000 0000 0000" maxlength="19">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-group">
+                    <label>Müddət</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="AA/İİ" maxlength="5">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>CVV</label>
+                    <div class="input-wrapper">
+                        <input type="password" placeholder="•••" maxlength="3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Kart Sahibinin Adı</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="AD VƏ SOYAD" style="text-transform: uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="primary-btn">
+            Ödəniş et
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </button>
+
+    </div>
+</body>
+</html>

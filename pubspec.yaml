@@ -1,0 +1,64 @@
+name: bsbschool
+description: "A School application built with Clean Architecture."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_bloc: ^9.0.0
+  equatable: ^2.0.5
+
+  # Dependency injection
+  get_it: ^8.0.3
+
+  # Functional error handling
+  dartz: ^0.10.1
+
+  # Networking
+  dio: ^5.7.0
+
+  # Local storage
+  shared_preferences: ^2.3.3
+
+  # Value formatting
+  intl: ^0.20.2
+
+  # In-app book reader
+  syncfusion_flutter_pdfviewer: ^33.2.13
+
+  # Opening / downloading homework attachments in the system browser
+  url_launcher: ^6.3.1
+
+  # Pinned: a transitive dep of the pdf viewer. 12.4.0 calls the iOS 26.1-only
+  # `isiOSAppOnVision`, which fails to compile against the iOS 26.0 SDK.
+  device_info_plus: 12.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # App icon generation
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  image_path: "assets/appIcon/app_logo.png"
+
+  android: "ic_launcher"
+  adaptive_icon_background: "#051228"
+  adaptive_icon_foreground: "assets/appIcon/app_logo_foreground.png"
+  adaptive_icon_foreground_inset: 14
+
+  ios: true
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true

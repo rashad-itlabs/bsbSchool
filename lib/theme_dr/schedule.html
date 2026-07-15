@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödəniş cədvəli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="mobile-container schedule-page">
+        <!-- Header -->
+        <header class="schedule-header">
+            <a href="index.html" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
+            <h2>Ödəniş cədvəli</h2>
+            <div class="header-spacer"></div>
+        </header>
+
+        <!-- Donut Chart -->
+        <div class="chart-container">
+            <div class="chart-wrapper">
+                <svg width="220" height="220" viewBox="0 0 220 220">
+                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--bg-surface-light)" stroke-width="24" />
+                    <!-- Progress: 1/12 = 8.33% -->
+                    <!-- Circumference = 2 * pi * 90 = 565.48 -->
+                    <!-- Offset = 565.48 * (1 - 1/12) = 518.35 -->
+                    <circle cx="110" cy="110" r="90" fill="none" stroke="var(--accent-green)" stroke-width="24" 
+                            stroke-dasharray="565.48" stroke-dashoffset="518.35" stroke-linecap="round" 
+                            transform="rotate(-90 110 110)" style="filter: drop-shadow(0 0 8px var(--accent-green-glow));" />
+                </svg>
+                <div class="chart-text">
+                    <span class="chart-label">Ödəniş</span>
+                    <span class="chart-value">1/12</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pay Button -->
+        <div class="payment-card-form">
+            <div class="form-header">
+                <div>
+                    <h3>Ödəniş bölməsi</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">Pul köçürməsi üçün düyməni sıxın.</p>
+                </div>
+                <div class="card-icons">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><path d="M2 10h20"></path></svg>
+                </div>
+            </div>
+            <a href="topup.html" class="primary-btn" style="justify-content: center;">
+                Ödəniş et
+            </a>
+        </div>
+
+        <!-- Table Schedule Header -->
+        <h3 style="margin-top: 32px; margin-bottom: 16px; font-size: 16px; font-weight: 600;">Ödəniş Cədvəli</h3>
+
+            <div class="schedule-table-header">
+                <div class="col-date">Ödəniş tarixi</div>
+                <div class="col-amount">Ödəniş məbləği</div>
+                <div class="col-remaining">Qalıq borc</div>
+            </div>
+            
+            <div class="schedule-list">
+                <!-- Paid Row -->
+                <div class="schedule-row status-paid">
+                    <div class="col-date">22/09/2026</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">13750.00 ₼</div>
+                </div>
+                <!-- Upcoming Rows -->
+                <div class="schedule-row">
+                    <div class="col-date">22/10/2026</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">12500.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/11/2026</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">11250.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/12/2026</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">10000.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/01/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">8750.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/02/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">7500.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/03/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">6250.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/04/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">5000.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/05/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">3750.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/06/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">2500.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/07/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">1250.00 ₼</div>
+                </div>
+                <div class="schedule-row">
+                    <div class="col-date">22/08/2027</div>
+                    <div class="col-amount">1250.00 ₼</div>
+                    <div class="col-remaining">0.00 ₼</div>
+                </div>
+            </div>
+        </div>
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span class="nav-label">Home</span>
+            </a>
+            <a href="idcard.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><path d="M7 9h10"></path><circle cx="12" cy="14" r="2"></circle><path d="M8 18h8"></path></svg><span class="nav-label">Food Card</span>
+            </a>
+            <!-- Central Button -->
+            <a href="schedule.html" class="nav-item active" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect><path d="M7 15h4M15 15h2M7 11h2M15 11h2"></path></svg><span class="nav-label">Tuition</span>
+            </a>
+            <a href="notifications.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="nav-label">Notifs</span>
+            </a>
+            <a href="pass.html" class="nav-item" style="text-decoration: none;">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span class="nav-label">Pass</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>
