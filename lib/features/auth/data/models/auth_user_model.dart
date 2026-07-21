@@ -2,9 +2,10 @@ import '../../domain/entities/auth_user.dart';
 
 class AuthUserModel extends AuthUser {
   const AuthUserModel({
-    required super.id,
+    super.id,
     required super.name,
     required super.childName,
+    required super.role,
     required super.email,
     super.classId,
     super.className,
@@ -13,10 +14,14 @@ class AuthUserModel extends AuthUser {
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
     return AuthUserModel(
       // The login response names it `user_id`; the copy we cache back through
-      // [toJson] (and any nested `user` object) names it `id`.
-      id: _asInt(json['user_id'] ?? json['id']) ?? 0,
+      // [toJson] (and any nested `user` object) names it `id`. Kept null when
+      // absent rather than defaulting to 0, because a parent with no student
+      // linked yet is exactly the `user_id: null` case — see
+      // [AuthUser.needsChild].
+      id: _asInt(json['user_id'] ?? json['id']),
       name: json['name'] as String? ?? '',
       childName: json['child_name'] as String? ?? '',
+      role: json['role'] as String? ?? '',
       email: json['email'] as String? ?? '',
       classId: _asInt(json['class_id']),
       className: _asNullableString(json['className'] ?? json['class_name']),
@@ -27,6 +32,7 @@ class AuthUserModel extends AuthUser {
         'id': id,
         'name': name,
         'child_name': childName,
+        'role': role,
         'email': email,
         'class_id': classId,
         'className': className,

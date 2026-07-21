@@ -45,6 +45,12 @@ class UserStorageImpl implements UserStorage {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map<String, dynamic>) return null;
+      // Caches written before `role` was persisted would silently restore a
+      // teacher as a roleless account and drop them into the student portal.
+      // They're indistinguishable from a real empty role, so treat them as
+      // logged out and make the user sign in again — same reasoning as
+      // `AuthRepositoryImpl.isLoggedIn`.
+      if (!decoded.containsKey('role')) return null;
       return AuthUserModel.fromJson(decoded);
     } on FormatException {
       return null;

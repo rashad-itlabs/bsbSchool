@@ -13,10 +13,14 @@ class DrBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  /// Defaults to the student/parent tabs; the teacher shell passes its own.
+  final List<DrNavDestination> items;
+
   const DrBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.items = destinations,
   });
 
   static const destinations = <DrNavDestination>[
@@ -25,6 +29,14 @@ class DrBottomNav extends StatelessWidget {
     DrNavDestination(Icons.receipt_long_outlined, 'Tuition'),
     DrNavDestination(Icons.notifications_none_rounded, 'Notifs'),
     DrNavDestination(Icons.person_outline_rounded, 'Pass'),
+  ];
+
+  static const teacherDestinations = <DrNavDestination>[
+    DrNavDestination(Icons.home_rounded, 'Home'),
+    DrNavDestination(Icons.calendar_today_outlined, 'Timetable'),
+    DrNavDestination(Icons.how_to_reg_outlined, 'Attendance'),
+    DrNavDestination(Icons.menu_book_outlined, 'Homework'),
+    DrNavDestination(Icons.settings_outlined, 'Settings'),
   ];
 
   @override
@@ -39,7 +51,7 @@ class DrBottomNav extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 12, 8, 10),
           child: Row(
-            children: List.generate(destinations.length, (i) {
+            children: List.generate(items.length, (i) {
               final active = i == currentIndex;
               final color = active ? context.dr.textMain : context.dr.textMuted;
               return Expanded(
@@ -49,10 +61,10 @@ class DrBottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(destinations[i].icon, size: 22, color: color),
+                      Icon(items[i].icon, size: 22, color: color),
                       const SizedBox(height: 5),
                       Text(
-                        destinations[i].label.toUpperCase(),
+                        items[i].label.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.visible,
                         style: TextStyle(

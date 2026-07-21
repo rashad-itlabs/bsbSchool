@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/injection_container.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'dr/screens/add_child_screen.dart';
 import 'dr/screens/home_shell.dart';
 import 'dr/screens/login_screen.dart';
+import 'dr/screens/teacher/teacher_shell.dart';
 import 'dr/theme/dr_theme.dart';
 import 'dr/theme/theme_controller.dart';
 
@@ -46,10 +48,18 @@ class AuthGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
-      buildWhen: (p, c) => p.status != c.status,
+      buildWhen: (p, c) =>
+          p.status != c.status ||
+          p.user?.isTeacher != c.user?.isTeacher ||
+          p.user?.needsChild != c.user?.needsChild,
       builder: (context, state) {
         switch (state.status) {
           case AuthStatus.authenticated:
+            final user = state.user;
+            if (user?.isTeacher ?? false) return const TeacherShell();
+            // A parent with no student linked yet has nothing to show in the
+            // dashboard — collect an admission number first.
+            if (user?.needsChild ?? false) return const AddChildScreen();
             return const HomeShell();
           case AuthStatus.unknown:
             return const Scaffold(

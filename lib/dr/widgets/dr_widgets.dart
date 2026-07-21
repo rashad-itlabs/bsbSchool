@@ -591,6 +591,8 @@ class DrTextField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final TextInputAction? textInputAction;
   final bool enabled;
+  final bool autofocus;
+  final TextCapitalization textCapitalization;
   const DrTextField({
     super.key,
     this.label,
@@ -604,6 +606,8 @@ class DrTextField extends StatelessWidget {
     this.onSubmitted,
     this.textInputAction,
     this.enabled = true,
+    this.autofocus = false,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -639,6 +643,8 @@ class DrTextField extends StatelessWidget {
                   onSubmitted: onSubmitted,
                   textInputAction: textInputAction,
                   enabled: enabled,
+                  autofocus: autofocus,
+                  textCapitalization: textCapitalization,
                   obscureText: obscure,
                   keyboardType: keyboardType,
                   textAlign: textAlign,
@@ -650,8 +656,10 @@ class DrTextField extends StatelessWidget {
                     isCollapsed: true,
                     border: InputBorder.none,
                     hintText: hint,
+                    // Was hardcoded white@20%, which is invisible on the light
+                    // palette's near-white field fill.
                     hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: context.dr.textMuted.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
