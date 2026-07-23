@@ -33,7 +33,16 @@ class DrScaffold extends StatelessWidget {
 class DrBackHeader extends StatelessWidget {
   final String title;
   final bool showBack;
-  const DrBackHeader({super.key, required this.title, this.showBack = true});
+
+  /// Optional action rendered on the right; falls back to a spacer that keeps
+  /// the title centred against the back button.
+  final Widget? trailing;
+  const DrBackHeader({
+    super.key,
+    required this.title,
+    this.showBack = true,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +62,13 @@ class DrBackHeader extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: context.dr.textMain,
               ),
             ),
           ),
-          const SizedBox(width: 44),
+          trailing ?? const SizedBox(width: 44),
         ],
       ),
     );

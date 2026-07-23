@@ -67,7 +67,7 @@ const _news = <_News>[
 class _DashboardScreenState extends State<DashboardScreen> {
   final _pageController = PageController();
   int _newsIndex = 0;
-  bool _showExtra = false;
+  bool _showExtra = true;
 
   @override
   void dispose() {
@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 30),
           _actionsGrid(),
           const SizedBox(height: 20),
-          Center(child: _moreButton()),
+          // Center(child: _moreButton()),
           if (_showExtra) ...[
             const SizedBox(height: 20),
             _extraGrid(),
@@ -121,10 +121,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Good morning,',
-                style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
-            const SizedBox(height: 4),
-            Text(childName == '' ? name :childName,
+            // Text('Good morning,',
+            //     style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
+            // const SizedBox(height: 4),
+            Text(childName == '' ? '$name 👋' : '$childName 👋',
                 style: const TextStyle(
                     fontSize: 20, fontWeight: FontWeight.w600)),
           ],

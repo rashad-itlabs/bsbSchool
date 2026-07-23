@@ -98,7 +98,7 @@ class _Body extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const DrSectionHeader(title: 'Kitablar'),
+       // const DrSectionHeader(title: 'Kitablar'),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,

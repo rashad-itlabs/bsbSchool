@@ -69,7 +69,7 @@ class _NotificationsViewState extends State<_NotificationsView> {
                 const DrSectionHeader(title: 'Bildiriş parametrləri'),
                 DrListCard(
                   children: [
-                    _settingRow('attendance', '🏫', 'Məktəbə gəlmə',
+                    _settingRow('attendance', '🏫', 'Davamiyyət',
                         'Uşağın məktəbə gəlişi və dərsdən çıxışı barədə bildirişlər.'),
                     _settingRow('cafeteria', '☕', 'Bufet',
                         'Uşağın bufetdə nəyə xərclədiyi barədə bildirişlər.'),

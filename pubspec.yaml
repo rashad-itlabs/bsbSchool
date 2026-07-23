@@ -28,6 +28,9 @@ dependencies:
   # Local storage
   shared_preferences: ^2.3.3
 
+  # Saving downloaded library PDFs to app storage for offline reading
+  path_provider: ^2.1.5
+
   # Value formatting
   intl: ^0.20.2
 

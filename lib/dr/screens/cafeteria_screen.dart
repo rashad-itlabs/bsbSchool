@@ -20,65 +20,65 @@ class CafeteriaScreen extends StatelessWidget {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Qidalanma'),
-          _limitCard(context),
-          const SizedBox(height: 30),
-          DrSectionHeader(title: 'Həftəlik statistika'),
-          DrCard(
-            child: SizedBox(
-              height: 130,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: _bars.map((b) {
-                  final active = b[2] as bool;
-                  final h = b[1] as double;
-                  return Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: FractionallySizedBox(
-                            alignment: Alignment.bottomCenter,
-                            heightFactor: h == 0 ? 0.01 : h,
-                            child: Container(
-                              width: 30,
-                              decoration: BoxDecoration(
-                                color: active
-                                    ? DrColors.accentGreen
-                                    : context.dr.bgSurfaceLight,
-                                borderRadius: BorderRadius.circular(6),
-                                boxShadow: active
-                                    ? [
-                                        BoxShadow(
-                                            color: DrColors.accentGreen
-                                                .withValues(alpha: 0.4),
-                                            blurRadius: 12)
-                                      ]
-                                    : null,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(b[0] as String,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color: active
-                                    ? context.dr.textMain
-                                    : context.dr.textMuted,
-                                fontWeight: active
-                                    ? FontWeight.w600
-                                    : FontWeight.w400)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          DrSectionHeader(title: 'Son əməliyyatlar', action: 'Hamısı'),
+          const DrBackHeader(title: 'Son əməliyyatlar'),
+          // _limitCard(context),
+          // const SizedBox(height: 30),
+          // DrSectionHeader(title: 'Həftəlik statistika'),
+          // DrCard(
+          //   child: SizedBox(
+          //     height: 130,
+          //     child: Row(
+          //       crossAxisAlignment: CrossAxisAlignment.end,
+          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //       children: _bars.map((b) {
+          //         final active = b[2] as bool;
+          //         final h = b[1] as double;
+          //         return Expanded(
+          //           child: Column(
+          //             mainAxisAlignment: MainAxisAlignment.end,
+          //             children: [
+          //               Expanded(
+          //                 child: FractionallySizedBox(
+          //                   alignment: Alignment.bottomCenter,
+          //                   heightFactor: h == 0 ? 0.01 : h,
+          //                   child: Container(
+          //                     width: 30,
+          //                     decoration: BoxDecoration(
+          //                       color: active
+          //                           ? DrColors.accentGreen
+          //                           : context.dr.bgSurfaceLight,
+          //                       borderRadius: BorderRadius.circular(6),
+          //                       boxShadow: active
+          //                           ? [
+          //                               BoxShadow(
+          //                                   color: DrColors.accentGreen
+          //                                       .withValues(alpha: 0.4),
+          //                                   blurRadius: 12)
+          //                             ]
+          //                           : null,
+          //                     ),
+          //                   ),
+          //                 ),
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Text(b[0] as String,
+          //                   style: TextStyle(
+          //                       fontSize: 12,
+          //                       color: active
+          //                           ? context.dr.textMain
+          //                           : context.dr.textMuted,
+          //                       fontWeight: active
+          //                           ? FontWeight.w600
+          //                           : FontWeight.w400)),
+          //             ],
+          //           ),
+          //         );
+          //       }).toList(),
+          //     ),
+          //   ),
+          // ),
+          // const SizedBox(height: 30),
+          // DrSectionHeader(title: 'Son əməliyyatlar'),
           const DrListCard(
             children: [
               DrTransactionTile(

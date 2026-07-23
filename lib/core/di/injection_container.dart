@@ -75,10 +75,15 @@ import '../../features/notifications/presentation/bloc/notifications_bloc.dart';
 // Buffet
 import '../../features/buffet_cart/data/datasources/buffet_remote_data_source.dart';
 import '../../features/buffet_cart/data/repositories/buffet_repository_impl.dart';
+import '../../features/buffet_cart/data/repositories/buffet_card_repository_impl.dart';
+import '../../features/buffet_cart/data/services/buffet_card_service.dart';
 import '../../features/buffet_cart/domain/repositories/buffet_repository.dart';
+import '../../features/buffet_cart/domain/repositories/buffet_card_repository.dart';
 import '../../features/buffet_cart/domain/usecases/get_products.dart';
 import '../../features/buffet_cart/domain/usecases/place_order.dart';
+import '../../features/buffet_cart/domain/usecases/get_buffet_card.dart';
 import '../../features/buffet_cart/presentation/cubit/buffet_cubit.dart';
+import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
 
 /// Service locator. Call [initDependencies] once before runApp.
 final sl = GetIt.instance;
@@ -259,6 +264,7 @@ void _initWeeklyPlan() {
 }
 
 void _initBuffet() {
+  // ---- Cafeteria menu / ordering (mock) ----
   sl.registerFactory(() => BuffetCubit(getProducts: sl(), placeOrder: sl()));
   sl.registerLazySingleton(() => GetProducts(sl()));
   sl.registerLazySingleton(() => PlaceOrder(sl()));
@@ -268,4 +274,19 @@ void _initBuffet() {
       ));
   sl.registerLazySingleton<BuffetRemoteDataSource>(
       () => BuffetRemoteDataSourceMock());
+
+  // ---- Buffet card (GET /getBuffetCart) ----
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => BuffetCardBloc(getBuffetCard: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetBuffetCard(sl()));
+
+  // Repository
+  sl.registerLazySingleton<BuffetCardRepository>(
+      () => BuffetCardRepositoryImpl(service: sl()));
+
+  // Service
+  sl.registerLazySingleton<BuffetCardService>(
+      () => BuffetCardServiceImpl(sl()));
 }
