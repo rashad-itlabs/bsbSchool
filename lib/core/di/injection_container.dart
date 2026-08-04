@@ -13,7 +13,9 @@ import '../../features/auth/data/services/auth_service.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
+import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 
 // Balance
 import '../../features/balance/data/datasources/balance_local_data_source.dart';
@@ -65,6 +67,13 @@ import '../../features/weekly_plan/domain/repositories/weekly_plan_repository.da
 import '../../features/weekly_plan/domain/usecases/get_weekly_plan.dart';
 import '../../features/weekly_plan/presentation/cubit/weekly_plan_cubit.dart';
 
+// News
+import '../../features/news/data/repositories/news_repository_impl.dart';
+import '../../features/news/data/services/news_service.dart';
+import '../../features/news/domain/repositories/news_repository.dart';
+import '../../features/news/domain/usecases/get_news.dart';
+import '../../features/news/presentation/bloc/news_bloc.dart';
+
 // Notifications
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
 import '../../features/notifications/data/services/notifications_service.dart';
@@ -114,6 +123,22 @@ Future<void> initDependencies() async {
   _initWeeklyPlan();
   _initBuffet();
   _initNotifications();
+  _initNews();
+}
+
+void _initNews() {
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => NewsBloc(getNews: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetNews(sl()));
+
+  // Repository
+  sl.registerLazySingleton<NewsRepository>(
+      () => NewsRepositoryImpl(service: sl()));
+
+  // Service
+  sl.registerLazySingleton<NewsService>(() => NewsServiceImpl(sl()));
 }
 
 void _initNotifications() {
@@ -143,9 +168,13 @@ void _initAuth() {
         repository: sl(),
       ));
 
+  // Cubit — new instance per "şifrəni unutdum" sheet.
+  sl.registerFactory(() => ForgotPasswordCubit(resetPassword: sl()));
+
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => LogoutUser(sl()));
+  sl.registerLazySingleton(() => ResetPassword(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(

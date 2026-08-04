@@ -40,7 +40,7 @@ class _PassScreenState extends State<PassScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('PIN kodu dəyiş',
+                  const Text('Şifrəni dəyiş',
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w600)),
                   GestureDetector(
@@ -51,7 +51,7 @@ class _PassScreenState extends State<PassScreen> {
               ),
               const SizedBox(height: 24),
               const DrTextField(
-                  label: 'Yeni PIN',
+                  label: 'Yeni Şifrə',
                   hint: '••••',
                   obscure: true,
                   textAlign: TextAlign.center),
@@ -149,15 +149,15 @@ class _PassScreenState extends State<PassScreen> {
           DrSectionHeader(title: 'Tənzimləmələr'),
           DrListCard(
             children: [
-              DrSettingItem(
-                icon: Icons.lock_outline,
-                iconColor: DrColors.accentGreen,
-                title: 'Şifrəni dəyiş',
-                subtitle: 'Turniket və yeməkxana üçün',
-                onTap: _changePin,
-                trailing: Icon(Icons.chevron_right,
-                    color: context.dr.textMuted, size: 18),
-              ),
+              // DrSettingItem(
+              //   icon: Icons.lock_outline,
+              //   iconColor: DrColors.accentGreen,
+              //   title: 'Şifrəni dəyiş',
+              //   subtitle: 'Turniket və yeməkxana üçün',
+              //   onTap: _changePin,
+              //   trailing: Icon(Icons.chevron_right,
+              //       color: context.dr.textMuted, size: 18),
+              // ),
               DrSettingItem(
                 icon: Icons.light_mode_outlined,
                 iconColor: DrColors.orange,

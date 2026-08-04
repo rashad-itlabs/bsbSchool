@@ -64,6 +64,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> resetPassword({
+    required String email,
+    required String password,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await service.resetPassword(email: email, password: password);
+      return const Right(unit);
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> logout() async {
     try {
       // Best-effort revoke; ignore network/server errors on the way out.

@@ -14,6 +14,13 @@ abstract class AuthRepository {
   /// Revokes the token on the server (best-effort) and clears it locally.
   Future<Either<Failure, Unit>> logout();
 
+  /// Sets a new password for [email] without signing the user in.
+  /// Fails with a [ValidationFailure] when the e-mail is unknown.
+  Future<Either<Failure, Unit>> resetPassword({
+    required String email,
+    required String password,
+  });
+
   /// True when a token is already stored (used to skip the login screen).
   bool get isLoggedIn;
 

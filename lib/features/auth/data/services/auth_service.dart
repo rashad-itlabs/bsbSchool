@@ -14,9 +14,19 @@ abstract class AuthService {
   });
 
   Future<void> logout();
+
+  /// Sets a new password for the account matching [email].
+  Future<void> resetPassword({
+    required String email,
+    required String password,
+  });
 }
 
 class AuthServiceImpl implements AuthService {
+  /// Backend route that swaps the password of a known e-mail. Kept here so a
+  /// rename on the Laravel side is a one-line change.
+  static const String resetPasswordPath = '/changePassword';
+
   final Dio dio;
   const AuthServiceImpl(this.dio);
 
@@ -61,6 +71,61 @@ class AuthServiceImpl implements AuthService {
     } on DioException catch (e) {
       throw ServerException(_dioMessage(e));
     }
+  }
+
+  @override
+  Future<void> resetPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await dio.post(
+        resetPasswordPath,
+        data: {
+          'email': email,
+          'new_password': password,
+          // Laravel's `confirmed` rule on `new_password` looks for this exact
+          // key; without it the request fails validation.
+          'new_password_confirmation': password,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      // The endpoint answers `{"success": true, "message": "..."}` — trust the
+      // flag over the status code when both are present.
+      if (status == 200 || status == 201 || status == 204) {
+        if (data is Map && data['success'] == false) {
+          throw ValidationException(_resetMessageFrom(data, status));
+        }
+        return;
+      }
+
+      // 422 — unknown e-mail, or the password failed `min:6` / `confirmed`.
+      throw ValidationException(_resetMessageFrom(data, status));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  /// Laravel's ValidationException body is `{"message": ..., "errors": {field:
+  /// [msg, ...]}}`. The nested error is the specific one ("Bu email ilə
+  /// istifadəçi tapılmadı."), so it wins over the generic top-level message.
+  String _resetMessageFrom(dynamic data, int status) {
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first.toString();
+        if (first != null) return first.toString();
+      }
+      if (data['message'] != null) return data['message'].toString();
+    }
+    if (status == 404 || status == 422) {
+      return 'Bu e-mail ilə istifadəçi tapılmadı';
+    }
+    return 'Server xətası baş verdi';
   }
 
   String _messageFrom(dynamic data, int status) {

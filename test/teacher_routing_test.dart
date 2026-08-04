@@ -48,6 +48,13 @@ class _FakeAuthRepository implements AuthRepository {
     _user = null;
     return const Right(unit);
   }
+
+  @override
+  Future<Either<Failure, Unit>> resetPassword({
+    required String email,
+    required String password,
+  }) async =>
+      const Right(unit);
 }
 
 AuthUser _user({required String role, int? id = 4108}) => AuthUser(

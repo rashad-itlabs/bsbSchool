@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_week_overview.dart';
 import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/news/domain/entities/news_item.dart';
+import '../../features/news/presentation/bloc/news_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_ring.dart';
 import '../widgets/dr_widgets.dart';
@@ -41,28 +44,11 @@ const _exams = <_Exam>[
   _Exam('Geography', '🌍', DrColors.purple, 'KSQ-1', 75, 'C'),
 ];
 
-class _News {
-  final String tag;
-  final Color tagColor;
-  final Color tagText;
-  final String title;
-  final String body;
-  final List<Color> bg;
-  const _News(
-      this.tag, this.tagColor, this.tagText, this.title, this.body, this.bg);
-}
+/// Shown behind slides whose image is missing or fails to load, so a card is
+/// never a blank rectangle.
+const _newsFallbackGradient = <Color>[Color(0xFF1E3A8A), Color(0xFF172554)];
 
-const _news = <_News>[
-  _News('Xəbər', DrColors.accentGreen, Colors.black, 'Yeni tədris ili başlayır!',
-      'British School in Baku-da yeni tədris ilinə qeydiyyat davam edir.',
-      [Color(0xFF1E3A8A), Color(0xFF172554)]),
-  _News('Elan', Color(0xFF3B82F6), Colors.white, 'Kembric İmtahanları',
-      'Qeydiyyat üçün son tarix: 25 May. Gecikməyin!',
-      [Color(0xFF991B1B), Color(0xFF7F1D1D)]),
-  _News('Tədbir', Color(0xFFF59E0B), Colors.white, 'Məktəblilərarası Turnir',
-      'Bahar idman turniri bu həftəsonu məktəbin stadionunda keçiriləcək.',
-      [Color(0xFF065F46), Color(0xFF064E3B)]),
-];
+const _newsSliderHeight = 180.0;
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final _pageController = PageController();
@@ -83,10 +69,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _header(),
           const SizedBox(height: 30),
-          _newsSlider(),
-          const SizedBox(height: 16),
-          _dots(),
-          const SizedBox(height: 30),
+          // Carries its own bottom spacing so it can vanish entirely when the
+          // feed is empty.
+          _newsSection(),
           _actionsGrid(),
           const SizedBox(height: 20),
           // Center(child: _moreButton()),
@@ -121,14 +106,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text('Good morning,',
-            //     style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
-            // const SizedBox(height: 4),
-            Text(childName == '' ? '$name 👋' : '$childName 👋',
+            Text('$name 👋',
                 style: const TextStyle(
                     fontSize: 20, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(childName == '' ? '$name' : '$childName',
+                style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
           ],
         ),
+        /// bu hissede instagram terzi profil deyisdirme olacaq.
+        ///
+        ///
+        ///
+        ///
+        /// 
         Container(
           width: 44,
           height: 44,
@@ -161,86 +152,118 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _newsSlider() {
-    return SizedBox(
-      height: 180,
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: _news.length,
-        onPageChanged: (i) => setState(() => _newsIndex = i),
-        itemBuilder: (_, i) {
-          final n = _news[i];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: n.bg,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: n.tagColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          n.tag.toUpperCase(),
-                          style: TextStyle(
-                            color: n.tagText,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(n.title,
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white)),
-                          const SizedBox(height: 6),
-                          Text(n.body,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                      Colors.white.withValues(alpha: 0.7))),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+  /// The slider plus its page dots, driven by `GET /getNews`.
+  Widget _newsSection() {
+    return BlocProvider(
+      create: (_) => sl<NewsBloc>()..add(const NewsFetched()),
+      child: BlocBuilder<NewsBloc, NewsState>(
+        builder: (context, state) {
+          // Nothing published yet — drop the whole block rather than leave a
+          // hole between the greeting and the action grid.
+          if (state.isEmpty) return const SizedBox.shrink();
+
+          final Widget slider;
+          if (state.items.isNotEmpty) {
+            slider = _newsSlider(state.items);
+          } else if (state.status == NewsStatus.error) {
+            slider = _newsPlaceholder(
+              child: _newsError(context, state.errorMessage),
+            );
+          } else {
+            // initial / first load
+            slider = _newsPlaceholder(
+              child: const CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(DrColors.accentGreen),
               ),
-            ),
+            );
+          }
+
+          return Column(
+            children: [
+              slider,
+              if (state.items.length > 1) ...[
+                const SizedBox(height: 16),
+                _dots(state.items.length),
+              ],
+              const SizedBox(height: 30),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _dots() {
+  Widget _newsSlider(List<NewsItem> items) {
+    return SizedBox(
+      height: _newsSliderHeight,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: items.length,
+        onPageChanged: (i) => setState(() => _newsIndex = i),
+        itemBuilder: (_, i) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: _NewsCard(item: items[i]),
+        ),
+      ),
+    );
+  }
+
+  /// A slide-sized card used while loading and on failure, so the dashboard
+  /// doesn't jump once the feed arrives.
+  Widget _newsPlaceholder({required Widget child}) {
+    return Container(
+      height: _newsSliderHeight,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: context.dr.bgSurface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.dr.border),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _newsError(BuildContext context, String? message) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.wifi_off_rounded, size: 24, color: context.dr.textMuted),
+        const SizedBox(height: 10),
+        Text(
+          message ?? 'Xəbərlər yüklənmədi',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+        ),
+        const SizedBox(height: 12),
+        GestureDetector(
+          onTap: () => context.read<NewsBloc>().add(const NewsRefreshed()),
+          behavior: HitTestBehavior.opaque,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Text(
+              'Yenidən cəhd et',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: DrColors.accentGreen,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _dots(int count) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_news.length, (i) {
-        final active = i == _newsIndex;
+      children: List.generate(count, (i) {
+        // The feed can shrink under the controller after a refresh, so the
+        // stored index is clamped rather than trusted.
+        final active = i == _newsIndex.clamp(0, count - 1);
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -399,5 +422,123 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _push(Widget page) {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+}
+
+/// One slide: the news image full-bleed, with the publish date on top and the
+/// title / description over a scrim at the bottom.
+class _NewsCard extends StatelessWidget {
+  final NewsItem item;
+  const _NewsCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Sits under the photo, so a slow or broken image still reads as a
+          // card rather than a blank rectangle.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _newsFallbackGradient,
+              ),
+            ),
+          ),
+          if (item.hasImage)
+            Image.network(
+              item.image!,
+              fit: BoxFit.cover,
+              loadingBuilder: (_, child, progress) => progress == null
+                  ? child
+                  : const Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(Colors.white70),
+                        ),
+                      ),
+                    ),
+              // A dead URL just falls through to the gradient underneath.
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          // Keeps the white text legible over bright photos.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Color(0xCC000000)],
+                stops: [0.3, 1],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Stack(
+              children: [
+                if (item.createdAt != null)
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        DateFormat('dd MMM yyyy').format(item.createdAt!),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (item.description.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          item.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

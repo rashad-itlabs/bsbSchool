@@ -5,6 +5,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../features/library/domain/entities/book.dart';
 import '../services/book_download_service.dart';
+import '../services/public_downloads.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 
@@ -74,14 +75,16 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
         },
       );
       if (!mounted) return;
-      setState(() {
-        _downloaded = true;
-        _downloading = false;
-        // Adopt the local copy only if the viewer is still on the network
-        // source, so a document that's already open isn't reloaded.
-        _localFile ??= file;
-      });
-      _toast('Kitab telefona yükləndi');
+      _markDownloaded(file);
+      _toast('Kitab "${PublicDownloads.locationName}" bölməsinə yükləndi');
+    } on BookExportException catch (e) {
+      // The book itself is on the phone and readable; only the visible copy
+      // failed, so say what is missing rather than claiming the whole
+      // download failed.
+      if (!mounted) return;
+      _markDownloaded(e.file);
+      _toast('Kitab yükləndi, ancaq "${PublicDownloads.locationName}" '
+          'bölməsinə yazıla bilmədi');
     } catch (_) {
       if (!mounted) return;
       setState(() => _downloading = false);
@@ -89,14 +92,23 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
     }
   }
 
+  void _markDownloaded(File file) => setState(() {
+        _downloaded = true;
+        _downloading = false;
+        // Adopt the local copy only if the viewer is still on the network
+        // source, so a document that's already open isn't reloaded.
+        _localFile ??= file;
+      });
+
   Future<void> _confirmDelete() async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.dr.bgSurface,
         title: const Text('Yüklənmiş faylı sil?'),
-        content: const Text(
-          'Kitab telefondan silinəcək. İnternet olduqda yenidən oxuya bilərsiniz.',
+        content: Text(
+          'Kitab telefondan və "${PublicDownloads.locationName}" bölməsindən '
+          'silinəcək. İnternet olduqda yenidən oxuya bilərsiniz.',
         ),
         actions: [
           TextButton(
