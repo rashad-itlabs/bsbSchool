@@ -42,7 +42,7 @@ class _TimetableView extends StatelessWidget {
                 DrBackHeader(
                   title: state.className == null
                       ? 'Dərs cədvəli'
-                      : 'Dərs cədvəli • ${state.className}',
+                      : 'Dərs cədvəli',
                 ),
                 DrChipBar(
                   labels: [for (final t in tabs) t.name],
@@ -243,7 +243,7 @@ String _emojiFor(String subject) {
 
 Color _colorFor(String subject) {
   final palette = [
-    DrColors.accentGreen,
+    DrColors.green,
     DrColors.teal,
     DrColors.purple,
     DrColors.orange,

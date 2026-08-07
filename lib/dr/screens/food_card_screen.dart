@@ -6,6 +6,9 @@ import '../../core/di/injection_container.dart';
 import '../../features/buffet_cart/domain/entities/buffet_card.dart';
 import '../../features/buffet_cart/domain/entities/buffet_transaction.dart';
 import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
+import '../../features/payment/domain/entities/payment_result.dart';
+import '../../features/payment/presentation/cubit/payment_cubit.dart';
+import '../../features/payment/presentation/pages/payment_webview_page.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import 'cafeteria_screen.dart';
@@ -17,8 +20,13 @@ class FoodCardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<BuffetCardBloc>()..add(const BuffetCardFetched()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => sl<BuffetCardBloc>()..add(const BuffetCardFetched()),
+        ),
+        BlocProvider(create: (_) => sl<PaymentCubit>()),
+      ],
       child: const _FoodCardView(),
     );
   }
@@ -39,6 +47,81 @@ class _FoodCardViewState extends State<_FoodCardView> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Asks for the amount, opens the bank page the server minted for it, and
+  /// reports whatever `/payment/status` says once the parent is back.
+  ///
+  /// Card data never touches the app: it only carries a reference around. The
+  /// balance is credited by the gateway's callback, so the card is reloaded
+  /// from the API rather than adjusted locally.
+  Future<void> _addBalance() async {
+    final payment = context.read<PaymentCubit>();
+    if (payment.state.isBusy) return;
+
+    final amount = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _AddBalanceSheet(),
+    );
+
+    // Sheet dismissed without confirming.
+    if (amount == null || !mounted) return;
+
+    final session = await payment.start(amount);
+    if (!mounted) return;
+
+    if (session == null) {
+      _toast(payment.state.errorMessage ?? 'Ödəniş başladıla bilmədi');
+      payment.reset();
+      return;
+    }
+
+    final signal = await Navigator.of(context).push<PaymentReturn>(
+      MaterialPageRoute(builder: (_) => PaymentWebViewPage(session: session)),
+    );
+    if (!mounted) return;
+
+    // The return URL is only a signal; the outcome always comes from the API.
+    final result = await payment.confirm(
+      session.reference,
+      bankSaidSuccess: signal == PaymentReturn.success,
+    );
+    if (!mounted) return;
+
+    if (result == null) {
+      _toast(payment.state.errorMessage ?? 'Ödənişin statusu alınmadı');
+      payment.reset();
+      return;
+    }
+
+    if (result.isSuccess) {
+      context.read<BuffetCardBloc>().add(const BuffetCardRefreshed());
+    }
+
+    // Backed out before paying: still unpaid and nothing happened, so there is
+    // nothing worth interrupting the parent with.
+    final backedOut = signal == PaymentReturn.cancelled && result.isPending;
+    if (!backedOut) await _showResult(result);
+
+    if (mounted) payment.reset();
+  }
+
+  /// The outcome, with the balance the API reported after settling.
+  Future<void> _showResult(PaymentResult result) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: !result.isPending,
+      builder: (_) => _PaymentResultSheet(result: result),
+    );
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -92,9 +175,10 @@ class _FoodCardViewState extends State<_FoodCardView> {
     final transactions = state.recentTransactions;
 
     return [
-      const SizedBox(height: 8),
+      const SizedBox(height: 4),
       SizedBox(
-        height: 150,
+        // Tall enough for the crest strip the card now carries above the number.
+        height: 220,
         child: PageView(
           controller: _controller,
           onPageChanged: (i) => setState(() => _index = i),
@@ -121,13 +205,26 @@ class _FoodCardViewState extends State<_FoodCardView> {
             width: active ? 18 : 6,
             height: 6,
             decoration: BoxDecoration(
-              color: active ? DrColors.accentGreen : context.dr.border,
+              color: active ? context.dr.accent : context.dr.border,
               borderRadius: BorderRadius.circular(4),
             ),
           );
         }),
       ),
       const SizedBox(height: 24),
+      // The button carries the whole top-up: a spinner while the link is being
+      // minted and again while the outcome is read back from the API.
+      BlocBuilder<PaymentCubit, PaymentState>(
+        builder: (context, payment) => DrPrimaryButton(
+          label: payment.stage == PaymentStage.checking
+              ? 'Ödəniş yoxlanılır'
+              : 'Balansı artır',
+          trailingIcon: Icons.add_card_outlined,
+          loading: payment.isBusy,
+          onTap: _addBalance,
+        ),
+      ),
+      const SizedBox(height: 28),
       DrSectionHeader(
         title: 'Son əməliyyatlar',
         // action: 'Hamısı',
@@ -153,6 +250,225 @@ class _FoodCardViewState extends State<_FoodCardView> {
 
 /// Formats an AZN amount as `X.XX ₼`.
 String _money(num value) => '${value.toStringAsFixed(2)} ₼';
+
+/// Asks for the top-up amount and nothing else — the card itself is entered on
+/// the payment firm's own page. Returns the amount through [Navigator.pop], or
+/// null when the parent closes the sheet.
+class _AddBalanceSheet extends StatefulWidget {
+  const _AddBalanceSheet();
+
+  @override
+  State<_AddBalanceSheet> createState() => _AddBalanceSheetState();
+}
+
+class _AddBalanceSheetState extends State<_AddBalanceSheet> {
+  final _amount = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  /// Mirrors the API's own `min:1|max:1000`, so a bad amount is caught before
+  /// the round trip instead of coming back as a validation error.
+  static const _min = 1.0;
+  static const _max = 1000.0;
+
+  void _submit() {
+    // A comma is what the AZ keyboard offers as the decimal separator.
+    final value =
+        double.tryParse(_amount.text.trim().replaceAll(',', '.'));
+
+    if (value == null || value <= 0) {
+      setState(() => _error = 'Məbləği düzgün yazın');
+      return;
+    }
+
+    if (value < _min || value > _max) {
+      setState(() => _error =
+          'Məbləğ ${_min.toStringAsFixed(0)}–${_max.toStringAsFixed(0)} ₼ aralığında olmalıdır');
+      return;
+    }
+
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      // Lifts the sheet above the keyboard while the amount is being typed.
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+        decoration: BoxDecoration(
+          color: context.dr.bgSurface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Balansı artır',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(Icons.close, color: context.dr.textMuted),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Ödəniş bank səhifəsində tamamlanır.',
+                style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IntrinsicWidth(
+                    child: TextField(
+                      controller: _amount,
+                      autofocus: true,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
+                      textAlign: TextAlign.center,
+                      onChanged: (_) {
+                        if (_error != null) setState(() => _error = null);
+                      },
+                      onSubmitted: (_) => _submit(),
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.w700,
+                        color: context.dr.textMain,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        isCollapsed: true,
+                        hintText: '0',
+                        hintStyle: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w700,
+                          color: context.dr.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '₼',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                      color: context.dr.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(
+                        fontSize: 13, color: DrColors.redStrong),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              DrPrimaryButton(
+                label: 'Təsdiqlə',
+                trailingIcon: Icons.arrow_forward,
+                onTap: _submit,
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What `/payment/status` came back with, in the app's own words. The message
+/// is the API's — it already knows whether the balance was credited.
+class _PaymentResultSheet extends StatelessWidget {
+  final PaymentResult result;
+
+  const _PaymentResultSheet({required this.result});
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, color) = switch (result.status) {
+      PaymentStatus.success => (Icons.check_rounded, DrColors.green),
+      PaymentStatus.failed => (Icons.close_rounded, DrColors.redStrong),
+      PaymentStatus.pending => (Icons.hourglass_empty_rounded, DrColors.orange),
+    };
+
+    final balance = result.balance;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+      decoration: BoxDecoration(
+        color: context.dr.bgSurface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 34),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _money(result.amount),
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              result.message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: context.dr.textMuted),
+            ),
+            if (balance != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                'Cari balans: ${_money(balance)}',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            DrPrimaryButton(
+              label: 'Bağla',
+              onTap: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _TransactionTile extends StatelessWidget {
   final BuffetTransaction transaction;
@@ -210,6 +526,49 @@ class _LimitCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Card issuer strip, the way a bank card carries its bank's mark.
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(150),
+                child: Image.asset(
+                  'assets/appIcon/app_logo_foreground.png',
+                  width: 35,
+                  height: 35,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BRITISH SCHOOL IN BAKU',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.2,
+                        color: context.dr.textMain,
+                      ),
+                    ),
+                    Text(
+                      'Food Cart',
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: context.dr.accent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +577,7 @@ class _LimitCard extends StatelessWidget {
                 context,
                 'Kart nömrəsi',
                 card.cardId1 ?? '—',
-                DrColors.accentGreen,
+                context.dr.accent,
               ),
               _amountColumn(
                 context,
@@ -229,7 +588,7 @@ class _LimitCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

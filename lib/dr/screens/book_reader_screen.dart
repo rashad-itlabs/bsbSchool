@@ -215,7 +215,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
           child: CircularProgressIndicator(
             value: _progress == 0 ? null : _progress,
             strokeWidth: 2.5,
-            color: DrColors.accentGreen,
+            color: context.dr.accent,
           ),
         ),
       );

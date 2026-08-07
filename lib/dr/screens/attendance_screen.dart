@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/di/injection_container.dart';
 import '../../features/attendance/domain/entities/attendance_record.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
-import '../../features/attendance/presentation/widgets/attendance_week_overview.dart';
+import '../../features/attendance/presentation/widgets/attendance_month_calendar.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 
@@ -81,7 +81,7 @@ class _Body extends StatelessWidget {
           children: [
             Expanded(
               child: _stat(context, '${summary.attendanceRate}%', 'İştirak',
-                  DrColors.accentGreen),
+                  context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -95,7 +95,7 @@ class _Body extends StatelessWidget {
           children: [
             Expanded(
               child: _stat(context, '${summary.present}', 'Gəlib',
-                  DrColors.accentGreen),
+                  context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -105,7 +105,7 @@ class _Body extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 30),
-        AttendanceWeekOverview(records: records),
+        AttendanceMonthCalendar(records: records),
         const SizedBox(height: 30),
         const DrSectionHeader(title: 'Son qeydlər'),
         if (records.isEmpty)
@@ -138,7 +138,7 @@ class _Body extends StatelessWidget {
 
   Widget _log(BuildContext context, AttendanceRecord record,
       {bool divider = true}) {
-    final tag = _statusTag(record);
+    final tag = _statusTag(context, record);
     final title = record.section ?? record.subject ?? 'Dərs';
     final subtitle = [
       if (record.date != null) DateFormat('dd MMM yyyy').format(record.date!),
@@ -191,9 +191,11 @@ class _StatusTag {
   const _StatusTag(this.label, this.color);
 }
 
-_StatusTag _statusTag(AttendanceRecord record) {
+/// Takes a [context] because the "present" tag paints the brand accent as a dot
+/// and as text, both of which need the light theme's darker variant.
+_StatusTag _statusTag(BuildContext context, AttendanceRecord record) {
   if (record.isAbsent) return const _StatusTag('Qayıb', DrColors.red);
   if (record.isLate) return const _StatusTag('Gecikib', DrColors.teal);
-  if (record.isPresent) return const _StatusTag('Gəlib', DrColors.accentGreen);
-  return _StatusTag(record.status, DrColors.accentGreen);
+  if (record.isPresent) return _StatusTag('Gəlib', context.dr.accent);
+  return _StatusTag(record.status, context.dr.accent);
 }

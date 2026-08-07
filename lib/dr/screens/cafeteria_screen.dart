@@ -142,11 +142,11 @@ class CafeteriaScreen extends StatelessWidget {
                       style:
                           TextStyle(fontSize: 12, color: context.dr.textMuted)),
                   const SizedBox(height: 4),
-                  const Text('2.50 ₼',
+                  Text('2.50 ₼',
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: DrColors.accentGreen)),
+                          color: context.dr.accent)),
                 ],
               ),
               Column(
@@ -174,10 +174,10 @@ class CafeteriaScreen extends StatelessWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: DrColors.accentGreen,
+                      color: context.dr.accent,
                       boxShadow: [
                         BoxShadow(
-                            color: DrColors.accentGreen.withValues(alpha: 0.4),
+                            color: context.dr.accent.withValues(alpha: 0.4),
                             blurRadius: 10),
                       ],
                     ),

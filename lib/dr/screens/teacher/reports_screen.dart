@@ -215,17 +215,15 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: DrColors.accentGreen.withValues(
-                                alpha: 0.15,
-                              ),
+                              color: context.dr.accentSoft,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               report.type.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.w700,
-                                color: DrColors.accentGreen,
+                                color: context.dr.accent,
                               ),
                             ),
                           ),
@@ -260,9 +258,9 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
                         const SizedBox(height: 4),
                         Text(
                           '📎 ${report.file}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: DrColors.accentGreen,
+                            color: context.dr.accent,
                           ),
                         ),
                       ],

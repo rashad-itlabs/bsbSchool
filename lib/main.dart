@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/injection_container.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/notifications/presentation/notification_prefs.dart';
 import 'dr/screens/add_child_screen.dart';
 import 'dr/screens/home_shell.dart';
 import 'dr/screens/login_screen.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initDependencies();
   await ThemeController.instance.load();
+  await NotificationPrefs.instance.load();
   runApp(const BsbSchoolApp());
 }
 

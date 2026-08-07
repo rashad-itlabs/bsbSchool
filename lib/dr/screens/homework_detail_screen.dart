@@ -221,7 +221,7 @@ String _emojiFor(String? subject) {
 
 Color _colorFor(String? subject) {
   final palette = [
-    DrColors.accentGreen,
+    DrColors.green,
     DrColors.teal,
     DrColors.purple,
     DrColors.red,

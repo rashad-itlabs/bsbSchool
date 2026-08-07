@@ -36,7 +36,7 @@ class TuitionScreen extends StatelessWidget {
               progress: 1 / 12,
               size: 220,
               stroke: 24,
-              color: DrColors.accentGreen,
+              color: context.dr.accent,
               center: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -130,8 +130,8 @@ class TuitionScreen extends StatelessWidget {
                   Container(
                     width: 6,
                     height: 6,
-                    decoration: const BoxDecoration(
-                        color: DrColors.accentGreen, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                        color: context.dr.accent, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 8),
                 ],

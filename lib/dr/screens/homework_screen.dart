@@ -41,7 +41,7 @@ class _HomeworkView extends StatelessWidget {
                 DrBackHeader(
                   title: state.className == null
                       ? 'Tapşırıqlar'
-                      : 'Tapşırıqlar • ${state.className}',
+                      : 'Tapşırıqlar',
                 ),
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
@@ -96,7 +96,6 @@ class _Body extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const DrSectionHeader(title: 'Tapşırıqlar'),
         for (final hw in items) ...[
           _HomeworkCard(homework: hw),
           const SizedBox(height: 16),
@@ -121,7 +120,7 @@ class _HomeworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desc = _stripHtml(homework.description);
-    final tag = _deadlineTag(homework.submitDate);
+    final tag = _deadlineTag(context, homework.submitDate);
 
     return GestureDetector(
       onTap: () => _open(context),
@@ -228,7 +227,9 @@ class _DeadlineTag {
   const _DeadlineTag(this.label, this.color);
 }
 
-_DeadlineTag? _deadlineTag(DateTime? submitDate) {
+/// Takes a [context] because the "plenty of time left" tag paints the brand
+/// accent as text, which needs the light theme's darker variant.
+_DeadlineTag? _deadlineTag(BuildContext context, DateTime? submitDate) {
   if (submitDate == null) return null;
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
@@ -238,7 +239,7 @@ _DeadlineTag? _deadlineTag(DateTime? submitDate) {
   if (days < 0) return const _DeadlineTag('Gecikmiş', DrColors.red);
   if (days == 0) return const _DeadlineTag('Bu gün', DrColors.red);
   if (days == 1) return const _DeadlineTag('Sabah', DrColors.teal);
-  return _DeadlineTag('$days gün qalıb', DrColors.accentGreen);
+  return _DeadlineTag('$days gün qalıb', context.dr.accent);
 }
 
 String _formatDate(DateTime? date) =>
@@ -284,7 +285,7 @@ String _emojiFor(String? subject) {
 
 Color _colorFor(String? subject) {
   final palette = [
-    DrColors.accentGreen,
+    DrColors.green,
     DrColors.teal,
     DrColors.purple,
     DrColors.red,

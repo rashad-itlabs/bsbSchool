@@ -541,27 +541,27 @@ class TeacherUploadZone extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: DrColors.accentGreen.withValues(alpha: 0.1),
+                  color: context.dr.accentSoft,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: DrColors.accentGreen),
+                  border: Border.all(color: context.dr.accent),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_rounded,
                       size: 14,
-                      color: DrColors.accentGreen,
+                      color: context.dr.accent,
                     ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         fileName!,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: DrColors.accentGreen,
+                          color: context.dr.accent,
                         ),
                       ),
                     ),
@@ -751,7 +751,7 @@ class TeacherClassCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: ongoing
-                    ? DrColors.accentGreen.withValues(alpha: 0.15)
+                    ? context.dr.accentSoft
                     : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -761,7 +761,7 @@ class TeacherClassCard extends StatelessWidget {
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: ongoing ? DrColors.accentGreen : context.dr.textMuted,
+                  color: ongoing ? context.dr.accent : context.dr.textMuted,
                 ),
               ),
             ),
@@ -859,7 +859,7 @@ class _ToastState extends State<_Toast> with SingleTickerProviderStateMixin {
                   decoration: BoxDecoration(
                     color: widget.palette.bgSurface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: DrColors.accentGreen),
+                    border: Border.all(color: widget.palette.accent),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x4D000000),

@@ -40,6 +40,10 @@ dependencies:
   # Opening / downloading homework attachments in the system browser
   url_launcher: ^6.3.1
 
+  # The bank's checkout page for buffet top-ups. It runs in-app so we can catch
+  # the gateway's return URL and bring the parent straight back to the card.
+  webview_flutter: ^4.10.0
+
   # Pinned: a transitive dep of the pdf viewer. 12.4.0 calls the iOS 26.1-only
   # `isiOSAppOnVision`, which fails to compile against the iOS 26.0 SDK.
   device_info_plus: 12.1.0
@@ -65,3 +69,7 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+
+  # The launcher-icon artwork doubles as the in-app school crest (buffet card).
+  assets:
+    - assets/appIcon/

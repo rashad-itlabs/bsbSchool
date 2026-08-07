@@ -43,7 +43,7 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
             children: [
               DrSettingItem(
                 icon: Icons.lock_outline_rounded,
-                iconColor: DrColors.accentGreen,
+                iconColor: context.dr.accent,
                 title: 'Change PIN Code',
                 subtitle: 'Turnstile and gate access security PIN',
                 trailing: _chevron(context),
@@ -161,11 +161,11 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
-          color: DrColors.accentGreen,
+          color: context.dr.accent,
         ),
       ),
     );

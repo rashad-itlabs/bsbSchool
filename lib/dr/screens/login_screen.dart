@@ -133,23 +133,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: DrColors.accentGreen.withValues(alpha: 0.08),
+                          color: context.dr.accent.withValues(alpha: 0.08),
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  DrColors.accentGreen.withValues(alpha: 0.2),
+                                  context.dr.accent.withValues(alpha: 0.2),
                               blurRadius: 30,
                               spreadRadius: 4,
                             ),
                           ],
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
                             'BSB',
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.w800,
-                              color: DrColors.accentGreen,
+                              color: context.dr.accent,
                               letterSpacing: 1,
                             ),
                           ),
@@ -198,10 +198,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: _showForgotSheet,
-                        child: const Text(
+                        child: Text(
                           'Şifrəni unutmusunuz?',
                           style: TextStyle(
-                            color: DrColors.accentGreen,
+                            color: context.dr.accent,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -399,10 +399,10 @@ class _SupportOption extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: DrColors.accentGreen.withValues(alpha: 0.12),
+                color: context.dr.accentSoft,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 20, color: DrColors.accentGreen),
+              child: Icon(icon, size: 20, color: context.dr.accent),
             ),
             const SizedBox(width: 14),
             Expanded(

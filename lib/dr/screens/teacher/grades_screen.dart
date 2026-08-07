@@ -54,7 +54,7 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
   }
 
   static Color _colorOf(String letter, BuildContext context) => switch (letter) {
-        'A' => DrColors.accentGreen,
+        'A' => context.dr.accent,
         'B' => DrColors.teal,
         'C' => DrColors.orange,
         'D' => DrColors.purple,
@@ -175,10 +175,10 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
           children: [
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: DrColors.accentGreen,
+                color: context.dr.accent,
               ),
             ),
             const SizedBox(height: 2),
@@ -277,7 +277,7 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
                 _numberInput(
                   slot: 'score-$index',
                   value: entry.score,
-                  color: DrColors.accentGreen,
+                  color: context.dr.accent,
                   onChanged: (v) => setState(() => entry.score = v),
                 ),
                 const SizedBox(width: 4),

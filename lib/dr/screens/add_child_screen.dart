@@ -78,8 +78,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Çıxış',
-                style: TextStyle(color: DrColors.accentGreen)),
+            child: Text('Çıxış',
+                style: TextStyle(color: dialogContext.dr.accent)),
           ),
         ],
       ),
@@ -114,20 +114,20 @@ class _AddChildScreenState extends State<AddChildScreen> {
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: DrColors.accentGreen.withValues(alpha: 0.08),
+                      color: context.dr.accent.withValues(alpha: 0.08),
                       boxShadow: [
                         BoxShadow(
-                          color: DrColors.accentGreen.withValues(alpha: 0.2),
+                          color: context.dr.accent.withValues(alpha: 0.2),
                           blurRadius: 30,
                           spreadRadius: 4,
                         ),
                       ],
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Icon(
                         Icons.person_add_alt_1_rounded,
                         size: 44,
-                        color: DrColors.accentGreen,
+                        color: context.dr.accent,
                       ),
                     ),
                   ),
@@ -251,8 +251,8 @@ class _WhereToFindCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.help_outline_rounded,
-                  size: 18, color: DrColors.accentGreen),
+              Icon(Icons.help_outline_rounded,
+                  size: 18, color: context.dr.accent),
               const SizedBox(width: 8),
               Text(
                 'Qəbul nömrəsi haradadır?',
@@ -280,8 +280,8 @@ class _WhereToFindCard extends StatelessWidget {
                     child: Container(
                       width: 4,
                       height: 4,
-                      decoration: const BoxDecoration(
-                        color: DrColors.accentGreen,
+                      decoration: BoxDecoration(
+                        color: context.dr.accent,
                         shape: BoxShape.circle,
                       ),
                     ),

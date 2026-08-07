@@ -74,6 +74,13 @@ import '../../features/news/domain/repositories/news_repository.dart';
 import '../../features/news/domain/usecases/get_news.dart';
 import '../../features/news/presentation/bloc/news_bloc.dart';
 
+// Events (school calendar)
+import '../../features/events/data/repositories/events_repository_impl.dart';
+import '../../features/events/data/services/events_service.dart';
+import '../../features/events/domain/repositories/events_repository.dart';
+import '../../features/events/domain/usecases/get_events.dart';
+import '../../features/events/presentation/bloc/events_bloc.dart';
+
 // Notifications
 import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
 import '../../features/notifications/data/services/notifications_service.dart';
@@ -93,6 +100,14 @@ import '../../features/buffet_cart/domain/usecases/place_order.dart';
 import '../../features/buffet_cart/domain/usecases/get_buffet_card.dart';
 import '../../features/buffet_cart/presentation/cubit/buffet_cubit.dart';
 import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
+
+// Payment (buffet top-up)
+import '../../features/payment/data/repositories/payment_repository_impl.dart';
+import '../../features/payment/data/services/payment_service.dart';
+import '../../features/payment/domain/repositories/payment_repository.dart';
+import '../../features/payment/domain/usecases/get_payment_status.dart';
+import '../../features/payment/domain/usecases/start_top_up.dart';
+import '../../features/payment/presentation/cubit/payment_cubit.dart';
 
 /// Service locator. Call [initDependencies] once before runApp.
 final sl = GetIt.instance;
@@ -122,8 +137,44 @@ Future<void> initDependencies() async {
   _initExamination();
   _initWeeklyPlan();
   _initBuffet();
+  _initPayment();
   _initNotifications();
   _initNews();
+  _initEvents();
+}
+
+void _initEvents() {
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => EventsBloc(getEvents: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetEvents(sl()));
+
+  // Repository
+  sl.registerLazySingleton<EventsRepository>(
+      () => EventsRepositoryImpl(service: sl()));
+
+  // Service
+  sl.registerLazySingleton<EventsService>(() => EventsServiceImpl(sl()));
+}
+
+void _initPayment() {
+  // Cubit — new instance per screen mount.
+  sl.registerFactory(() => PaymentCubit(
+        startTopUp: sl(),
+        getPaymentStatus: sl(),
+      ));
+
+  // Use cases
+  sl.registerLazySingleton(() => StartTopUp(sl()));
+  sl.registerLazySingleton(() => GetPaymentStatus(sl()));
+
+  // Repository
+  sl.registerLazySingleton<PaymentRepository>(
+      () => PaymentRepositoryImpl(service: sl()));
+
+  // Service
+  sl.registerLazySingleton<PaymentService>(() => PaymentServiceImpl(sl()));
 }
 
 void _initNews() {

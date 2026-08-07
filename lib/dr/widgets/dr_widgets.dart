@@ -141,9 +141,9 @@ class DrSectionHeader extends StatelessWidget {
               onTap: onAction,
               child: Text(
                 action!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: DrColors.accentGreen,
+                  color: context.dr.accent,
                   fontWeight: FontWeight.w600,
                 ),
               ),

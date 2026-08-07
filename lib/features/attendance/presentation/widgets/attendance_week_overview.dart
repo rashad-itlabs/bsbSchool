@@ -47,7 +47,7 @@ class AttendanceWeekOverview extends StatelessWidget {
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                        color: _dotColor(day), shape: BoxShape.circle),
+                        color: _dotColor(context, day), shape: BoxShape.circle),
                   ),
                 ],
               );
@@ -60,7 +60,7 @@ class AttendanceWeekOverview extends StatelessWidget {
 
   /// The worst status logged on [day] wins (absent > late > present) so a single
   /// missed lesson shows up even when the other sessions were attended.
-  Color _dotColor(DateTime day) {
+  Color _dotColor(BuildContext context, DateTime day) {
     final onDay = records.where((r) {
       final d = r.date;
       return d != null &&
@@ -68,9 +68,11 @@ class AttendanceWeekOverview extends StatelessWidget {
           d.month == day.month &&
           d.day == day.day;
     });
-    if (onDay.isEmpty) return Colors.white.withValues(alpha: 0.05);
+    // The "no session" dot was a white wash, invisible on the light theme's
+    // white card; the border token reads on both.
+    if (onDay.isEmpty) return context.dr.border;
     if (onDay.any((r) => r.isAbsent)) return DrColors.red;
     if (onDay.any((r) => r.isLate)) return DrColors.teal;
-    return DrColors.accentGreen;
+    return context.dr.accent;
   }
 }

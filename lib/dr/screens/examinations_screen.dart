@@ -177,10 +177,10 @@ class _Mark extends StatelessWidget {
       children: [
         Text(
           _formatMark(result.mark!),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: DrColors.accentGreen,
+            color: context.dr.accent,
           ),
         ),
         if (result.grade != null)
@@ -296,7 +296,7 @@ String _emojiFor(String? subject) {
 
 Color _colorFor(String? subject) {
   final palette = [
-    DrColors.accentGreen,
+    DrColors.green,
     DrColors.teal,
     DrColors.purple,
     DrColors.orange,

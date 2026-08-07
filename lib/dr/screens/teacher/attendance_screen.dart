@@ -110,10 +110,10 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 ),
                 Text(
                   'Present: $present | Absent: $absent | Late: $late',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: DrColors.accentGreen,
+                    color: context.dr.accent,
                   ),
                 ),
               ],

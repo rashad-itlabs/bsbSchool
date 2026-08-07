@@ -3,20 +3,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
+import '../../core/utils/html_text.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_week_overview.dart';
 import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/events/presentation/bloc/events_bloc.dart';
+import '../../features/events/presentation/widgets/events_calendar_card.dart';
 import '../../features/news/domain/entities/news_item.dart';
 import '../../features/news/presentation/bloc/news_bloc.dart';
+import '../../features/news/presentation/widgets/news_image.dart';
 import '../theme/dr_colors.dart';
-import '../widgets/dr_ring.dart';
 import '../widgets/dr_widgets.dart';
 import 'attendance_screen.dart';
 import 'examinations_screen.dart';
 import 'homework_screen.dart';
 import 'library_screen.dart';
 import 'live_lessons_screen.dart';
+import 'news_detail_screen.dart';
 import 'timetable_screen.dart';
 
 /// Port of `index.html` — the home dashboard.
@@ -26,27 +30,6 @@ class DashboardScreen extends StatefulWidget {
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
-
-class _Exam {
-  final String subject;
-  final String emoji;
-  final Color color;
-  final String tag;
-  final int score;
-  final String grade;
-  const _Exam(
-      this.subject, this.emoji, this.color, this.tag, this.score, this.grade);
-}
-
-const _exams = <_Exam>[
-  _Exam('Mathematics', '📐', DrColors.orange, 'KSQ-2', 92, 'A'),
-  _Exam('Azerbaijani', '🇦🇿', DrColors.teal, 'BSQ-1', 88, 'B+'),
-  _Exam('Geography', '🌍', DrColors.purple, 'KSQ-1', 75, 'C'),
-];
-
-/// Shown behind slides whose image is missing or fails to load, so a card is
-/// never a blank rectangle.
-const _newsFallbackGradient = <Color>[Color(0xFF1E3A8A), Color(0xFF172554)];
 
 const _newsSliderHeight = 180.0;
 
@@ -80,12 +63,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _extraGrid(),
           ],
           const SizedBox(height: 30),
-          _monthlyOverview(),
+          // _monthlyOverview(),
           const SizedBox(height: 30),
-          DrSectionHeader(title: 'Exam Performance', action: 'See all',onAction: (){
-            Navigator.push(context, MaterialPageRoute(builder: (_)=>ExaminationsScreen()));
-          },),
-          _examChart(),
+          const DrSectionHeader(title: 'Calendar'),
+          _calendar(),
           const SizedBox(height: 20),
         ],
       ),
@@ -172,9 +153,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           } else {
             // initial / first load
             slider = _newsPlaceholder(
-              child: const CircularProgressIndicator(
+              child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(DrColors.accentGreen),
+                valueColor: AlwaysStoppedAnimation(context.dr.accent),
               ),
             );
           }
@@ -203,7 +184,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onPageChanged: (i) => setState(() => _newsIndex = i),
         itemBuilder: (_, i) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: _NewsCard(item: items[i]),
+          child: _NewsCard(
+            item: items[i],
+            onTap: () => _push(NewsDetailScreen(item: items[i])),
+          ),
         ),
       ),
     );
@@ -241,14 +225,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         GestureDetector(
           onTap: () => context.read<NewsBloc>().add(const NewsRefreshed()),
           behavior: HitTestBehavior.opaque,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Text(
               'Yenidən cəhd et',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: DrColors.accentGreen,
+                color: context.dr.accent,
               ),
             ),
           ),
@@ -270,7 +254,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           width: active ? 18 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: active ? DrColors.accentGreen : context.dr.border,
+            color: active ? context.dr.accent : context.dr.border,
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -372,50 +356,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _examChart() {
-    return DrGlowCard(
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _exams.map((e) {
-          return Expanded(
-            child: Column(
-              children: [
-                DrRing(
-                  progress: e.score / 100,
-                  size: 80,
-                  stroke: 5,
-                  color: e.color,
-                  center: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('${e.score}%',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: context.dr.textMain)),
-                      Text(e.grade,
-                          style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w700,
-                              color: e.color)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text('${e.emoji} ${e.subject}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 11, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(e.tag,
-                    style:
-                        TextStyle(fontSize: 9, color: context.dr.textMuted)),
-              ],
-            ),
-          );
-        }).toList(),
+  /// The school calendar, driven by `GET /getEvent`. The whole year arrives in
+  /// one call, so paging between months costs nothing.
+  Widget _calendar() {
+    return BlocProvider(
+      create: (_) => sl<EventsBloc>()..add(const EventsFetched()),
+      child: BlocBuilder<EventsBloc, EventsState>(
+        builder: (context, state) => EventsCalendarCard(
+          events: state.events,
+          loading: state.isInitialLoading,
+          errorMessage:
+              state.status == EventsStatus.error ? state.errorMessage : null,
+          onRetry: () => context.read<EventsBloc>().add(const EventsRefreshed()),
+        ),
       ),
     );
   }
@@ -426,119 +379,108 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 /// One slide: the news image full-bleed, with the publish date on top and the
-/// title / description over a scrim at the bottom.
+/// title / description over a scrim at the bottom. Tapping it opens
+/// [NewsDetailScreen], where the text isn't clipped to two lines.
 class _NewsCard extends StatelessWidget {
   final NewsItem item;
-  const _NewsCard({required this.item});
+  final VoidCallback onTap;
+  const _NewsCard({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Sits under the photo, so a slow or broken image still reads as a
-          // card rather than a blank rectangle.
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: _newsFallbackGradient,
+    // The panel sends rich text; the preview shows the first lines of it as
+    // plain text rather than raw `<p>` tags.
+    final preview = stripHtmlTags(item.description).replaceAll('\n', ' ');
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            NewsImage(url: item.image),
+            // Keeps the white text legible over bright photos.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Color(0xCC000000)],
+                  stops: [0.3, 1],
+                ),
               ),
             ),
-          ),
-          if (item.hasImage)
-            Image.network(
-              item.image!,
-              fit: BoxFit.cover,
-              loadingBuilder: (_, child, progress) => progress == null
-                  ? child
-                  : const Center(
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(Colors.white70),
-                        ),
-                      ),
-                    ),
-              // A dead URL just falls through to the gradient underneath.
-              errorBuilder: (_, _, _) => const SizedBox.shrink(),
-            ),
-          // Keeps the white text legible over bright photos.
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color(0xCC000000)],
-                stops: [0.3, 1],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Stack(
-              children: [
-                if (item.createdAt != null)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        DateFormat('dd MMM yyyy').format(item.createdAt!),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (item.description.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          item.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.7),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Stack(
+                children: [
+                  if (item.createdAt != null)
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: _pill(
+                        child: Text(
+                          DateFormat('dd MMM yyyy').format(item.createdAt!),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
+                      ),
+                    ),
+                  // Says out loud that the slide leads somewhere; without it a
+                  // photo doesn't look tappable.
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (preview.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            preview,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  /// The translucent black chip both corner labels sit in.
+  Widget _pill({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: child,
     );
   }
 }

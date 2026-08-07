@@ -92,13 +92,13 @@ class TeacherDashboardScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "TODAY'S OVERVIEW",
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
-                  color: DrColors.accentGreen,
+                  color: context.dr.accent,
                 ),
               ),
               Text(
@@ -114,13 +114,13 @@ class TeacherDashboardScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             children: [
-              _stat(context, 0.96, '96%', 'Attendance', DrColors.accentGreen),
+              _stat(context, 0.96, '96%', 'Attendance', context.dr.accent),
               _stat(
                 context,
                 0.40,
                 '40%',
                 'KSQ Grades',
-                DrColors.accentGreen.withValues(alpha: 0.6),
+                context.dr.accent.withValues(alpha: 0.6),
               ),
               _stat(context, 0.50, '50%', 'Reports', DrColors.orange),
             ],

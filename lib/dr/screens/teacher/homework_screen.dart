@@ -181,10 +181,10 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                           children: [
                             Text(
                               hw.group.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: DrColors.accentGreen,
+                                color: context.dr.accent,
                               ),
                             ),
                             const SizedBox(height: 4),

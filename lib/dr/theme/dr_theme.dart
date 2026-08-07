@@ -17,9 +17,12 @@ class DrTheme {
             : const ColorScheme.light())
         .copyWith(
       surface: palette.bgSurface,
-      primary: DrColors.accentGreen,
-      onPrimary: Colors.black,
-      secondary: DrColors.accentGreen,
+      // Material paints these onto surfaces — progress indicators, cursors,
+      // selection handles — so they follow the readable accent rather than the
+      // neon fill, which the light theme renders invisible.
+      primary: palette.accent,
+      onPrimary: isDark ? Colors.black : Colors.white,
+      secondary: palette.accent,
     );
 
     return ThemeData(
@@ -37,7 +40,7 @@ class DrTheme {
         bodyColor: palette.textMain,
         displayColor: palette.textMain,
       ),
-      splashColor: DrColors.accentGreenSoft,
+      splashColor: palette.accentSoft,
       highlightColor: Colors.transparent,
       extensions: [palette],
     );

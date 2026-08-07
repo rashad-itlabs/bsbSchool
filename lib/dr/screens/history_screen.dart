@@ -83,7 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: entry.value[i].positive
-                            ? DrColors.accentGreen
+                            ? context.dr.accent
                             : context.dr.textMain,
                       ),
                     ),

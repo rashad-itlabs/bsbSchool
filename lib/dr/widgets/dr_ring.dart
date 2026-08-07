@@ -32,7 +32,9 @@ class DrRing extends StatelessWidget {
           width: size,
           height: size,
           child: CustomPaint(
-            painter: _RingPainter(value, stroke, color),
+            // The unfilled part of the ring was a hardcoded white wash, which
+            // vanished against the light theme's white cards.
+            painter: _RingPainter(value, stroke, color, context.dr.border),
             child: Center(child: center),
           ),
         );
@@ -45,8 +47,9 @@ class _RingPainter extends CustomPainter {
   final double progress;
   final double stroke;
   final Color color;
+  final Color trackColor;
 
-  _RingPainter(this.progress, this.stroke, this.color);
+  _RingPainter(this.progress, this.stroke, this.color, this.trackColor);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -56,7 +59,7 @@ class _RingPainter extends CustomPainter {
     final track = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
-      ..color = Colors.white.withValues(alpha: 0.06);
+      ..color = trackColor;
     canvas.drawCircle(center, radius, track);
 
     final arc = Paint()
@@ -75,7 +78,9 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.progress != progress || old.color != color;
+      old.progress != progress ||
+      old.color != color ||
+      old.trackColor != trackColor;
 }
 
 /// Soft radial glow (the `card-glow` / ambient accent behind headers).

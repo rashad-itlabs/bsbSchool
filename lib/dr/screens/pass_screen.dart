@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/notifications/presentation/widgets/notification_settings_card.dart';
 import '../theme/dr_colors.dart';
 import '../theme/theme_controller.dart';
 import '../widgets/dr_widgets.dart';
@@ -82,8 +83,8 @@ class _PassScreenState extends State<PassScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Çıxış',
-                style: TextStyle(color: DrColors.accentGreen)),
+            child: Text('Çıxış',
+                style: TextStyle(color: dialogContext.dr.accent)),
           ),
         ],
       ),
@@ -111,7 +112,7 @@ class _PassScreenState extends State<PassScreen> {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Buraxılış', showBack: false),
+          const DrBackHeader(title: 'Tənzimləmələr', showBack: false),
           const SizedBox(height: 8),
           Center(
             child: Column(
@@ -121,15 +122,15 @@ class _PassScreenState extends State<PassScreen> {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: DrColors.accentGreen.withValues(alpha: 0.15),
+                    color: context.dr.accentSoft,
                     border: Border.all(color: context.dr.bgSurface, width: 4),
                   ),
                   child: Center(
                     child: Text(AuthUser.initialsOf(name),
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: DrColors.accentGreen)),
+                            color: context.dr.accent)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -146,7 +147,6 @@ class _PassScreenState extends State<PassScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          DrSectionHeader(title: 'Tənzimləmələr'),
           DrListCard(
             children: [
               // DrSettingItem(
@@ -178,6 +178,11 @@ class _PassScreenState extends State<PassScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 24),
+          const DrSectionHeader(title: 'Bildiriş parametrləri'),
+          // Same switches as the notifications tab, driven by the shared
+          // NotificationPrefs, so both places stay in agreement.
+          const NotificationSettingsCard(),
           const SizedBox(height: 10),
           DrListCard(
             children: [

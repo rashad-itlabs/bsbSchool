@@ -45,6 +45,8 @@ class _LibraryView extends StatelessWidget {
                 _SearchField(
                   onChanged: (value) => bloc.add(LibrarySearchChanged(value)),
                 ),
+                const SizedBox(height: 12),
+                const _PaidNote(),
                 const SizedBox(height: 20),
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
@@ -139,6 +141,39 @@ class _SearchField extends StatelessWidget {
                 border: InputBorder.none,
                 hintText: 'Axtarış...',
                 hintStyle: TextStyle(color: context.dr.textMuted),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Reassurance line under the search box: the books are already paid for, so
+/// nothing in this screen costs the family anything.
+class _PaidNote extends StatelessWidget {
+  const _PaidNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.dr.accentSoft,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.verified_rounded, size: 16, color: context.dr.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '£19.99 məktəb tərəfindən ödənilib',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: context.dr.accent,
               ),
             ),
           ),

@@ -74,13 +74,13 @@ class LiveLessonsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: live
-              ? DrColors.accentGreen.withValues(alpha: 0.3)
+              ? context.dr.accent.withValues(alpha: 0.3)
               : Colors.white.withValues(alpha: 0.05),
         ),
         boxShadow: live
             ? [
                 BoxShadow(
-                    color: DrColors.accentGreen.withValues(alpha: 0.1),
+                    color: context.dr.accent.withValues(alpha: 0.1),
                     blurRadius: 30,
                     offset: const Offset(0, 10))
               ]
@@ -107,8 +107,7 @@ class LiveLessonsScreen extends StatelessWidget {
                 ),
               ),
               if (live)
-                _statusBadge('Canlı', DrColors.accentGreen,
-                    DrColors.accentGreen.withValues(alpha: 0.15),
+                _statusBadge('Canlı', context.dr.accent, context.dr.accentSoft,
                     showDot: true)
               else
                 _statusBadge(badge ?? '', context.dr.textMuted,

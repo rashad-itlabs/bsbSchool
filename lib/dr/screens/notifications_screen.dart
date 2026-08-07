@@ -23,17 +23,8 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
-class _NotificationsView extends StatefulWidget {
+class _NotificationsView extends StatelessWidget {
   const _NotificationsView();
-
-  @override
-  State<_NotificationsView> createState() => _NotificationsViewState();
-}
-
-class _NotificationsViewState extends State<_NotificationsView> {
-  // Local, client-side delivery preferences — kept in the UI as in the HTML
-  // port; the server feed itself is not filtered by these.
-  final _settings = {'attendance': true, 'cafeteria': true, 'exam': true};
 
   @override
   Widget build(BuildContext context) {
@@ -63,22 +54,8 @@ class _NotificationsViewState extends State<_NotificationsView> {
                     ],
                   ),
                 ),
-                const DrSectionHeader(title: 'Son bildirişlər'),
                 _Feed(state: state),
                 const SizedBox(height: 28),
-                const DrSectionHeader(title: 'Bildiriş parametrləri'),
-                DrListCard(
-                  children: [
-                    _settingRow('attendance', '🏫', 'Davamiyyət',
-                        'Uşağın məktəbə gəlişi və dərsdən çıxışı barədə bildirişlər.'),
-                    _settingRow('cafeteria', '☕', 'Bufet',
-                        'Uşağın bufetdə nəyə xərclədiyi barədə bildirişlər.'),
-                    _settingRow('exam', '📚', 'İmtahanlar',
-                        'Uşağın imtahan nəticələri və imtahana girilməsi barədə bildirişlər.',
-                        last: true),
-                  ],
-                ),
-                const SizedBox(height: 20),
               ],
             ),
           );
@@ -87,51 +64,6 @@ class _NotificationsViewState extends State<_NotificationsView> {
     );
   }
 
-  Widget _settingRow(String key, String emoji, String title, String subtitle,
-      {bool last = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        border: last
-            ? null
-            : Border(bottom: BorderSide(color: context.dr.border)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(emoji, style: const TextStyle(fontSize: 18)),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 4),
-                Text(subtitle,
-                    style:
-                        TextStyle(fontSize: 12, color: context.dr.textMuted)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          DrSwitch(
-            value: _settings[key]!,
-            onChanged: (v) => setState(() => _settings[key] = v),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// The server-driven "Son bildirişlər" list with its loading / error / empty
@@ -179,7 +111,7 @@ class _Feed extends StatelessWidget {
     ].join('\n');
 
     return DrTransactionTile(
-      leading: DrEmojiBadge(emoji: _emojiFor(item), color: DrColors.accentGreen),
+      leading: DrEmojiBadge(emoji: _emojiFor(item), color: context.dr.accent),
       title: item.title.isEmpty ? 'Bildiriş' : item.title,
       subtitle: subtitle.isEmpty ? '—' : subtitle,
       divider: divider,

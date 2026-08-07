@@ -4,10 +4,22 @@ import 'package:flutter/material.dart';
 class DrColors {
   DrColors._();
 
-  // Accent
+  // Accent.
+  //
+  // The neon lime is a *fill* colour: black on it reads at 17:1 on either
+  // theme, so buttons, chips and badges keep it. It is NOT usable as a
+  // foreground — on the light palette's white surfaces it lands at 1.2:1,
+  // i.e. invisible. Text, icons, dots and thin strokes must use
+  // `context.dr.accent` instead, which darkens with the light theme.
   static const Color accentGreen = Color(0xFFB1FF29);
   static Color accentGreenGlow = const Color(0xFFB1FF29).withValues(alpha: 0.4);
   static Color accentGreenSoft = const Color(0xFFB1FF29).withValues(alpha: 0.1);
+
+  /// Readable-on-light counterpart of [accentGreen]. Hue 84° against the
+  /// lime's 82°, so it still reads as the same brand green, but dark enough to
+  /// clear 4.5:1 on every light surface (5.6:1 white, 5.1:1 page, 4.8:1 the
+  /// tinted card fill).
+  static const Color accentGreenDark = Color(0xFF467400);
 
   // Categorical accents used by icons / tags across screens
   static const Color orange = Color(0xFFFF9F43);
@@ -32,6 +44,17 @@ class DrPalette extends ThemeExtension<DrPalette> {
   final Color textMain;
   final Color textMuted;
 
+  /// The accent as a *foreground*: links, icons, dots, rings, thin strokes and
+  /// any text that must stay legible on [bgSurface] / [bgDark].
+  ///
+  /// Filled surfaces (buttons, active chips, badges) keep [DrColors.accentGreen]
+  /// instead — black on neon lime reads fine on both themes, and swapping it
+  /// would cost the design its signature.
+  final Color accent;
+
+  /// Tint used behind [accent] icons and status pills.
+  final Color accentSoft;
+
   const DrPalette({
     required this.bgDark,
     required this.bgSurface,
@@ -40,6 +63,8 @@ class DrPalette extends ThemeExtension<DrPalette> {
     required this.nav,
     required this.textMain,
     required this.textMuted,
+    required this.accent,
+    required this.accentSoft,
   });
 
   /// Dark tokens ported 1:1 from `theme_dr/style.css` (Leo-bank style dark UI).
@@ -51,6 +76,9 @@ class DrPalette extends ThemeExtension<DrPalette> {
     nav: Color(0xE61C1C1F), // rgba(28,28,31,0.9)
     textMain: Color(0xFFFFFFFF),
     textMuted: Color(0xA6FFFFFF), // white @ 65%
+    // The neon lime already reads at 14:1 on these surfaces.
+    accent: DrColors.accentGreen,
+    accentSoft: Color(0x1AB1FF29), // lime @ 10%
   );
 
   /// Light counterpart of [dark].
@@ -62,6 +90,9 @@ class DrPalette extends ThemeExtension<DrPalette> {
     nav: Color(0xE6FFFFFF), // rgba(255,255,255,0.9)
     textMain: Color(0xFF121316),
     textMuted: Color(0x8C121316), // near-black @ ~55%
+    // Same hue family as the lime, dark enough to read on white.
+    accent: DrColors.accentGreenDark,
+    accentSoft: Color(0x1F467400), // deep lime @ 12%
   );
 
   @override
@@ -73,6 +104,8 @@ class DrPalette extends ThemeExtension<DrPalette> {
     Color? nav,
     Color? textMain,
     Color? textMuted,
+    Color? accent,
+    Color? accentSoft,
   }) {
     return DrPalette(
       bgDark: bgDark ?? this.bgDark,
@@ -82,6 +115,8 @@ class DrPalette extends ThemeExtension<DrPalette> {
       nav: nav ?? this.nav,
       textMain: textMain ?? this.textMain,
       textMuted: textMuted ?? this.textMuted,
+      accent: accent ?? this.accent,
+      accentSoft: accentSoft ?? this.accentSoft,
     );
   }
 
@@ -96,6 +131,8 @@ class DrPalette extends ThemeExtension<DrPalette> {
       nav: Color.lerp(nav, other.nav, t)!,
       textMain: Color.lerp(textMain, other.textMain, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
     );
   }
 }
