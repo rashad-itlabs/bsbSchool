@@ -9,6 +9,7 @@ import 'package:bsbschool/dr/screens/teacher/teacher_shell.dart';
 import 'package:bsbschool/dr/theme/dr_theme.dart';
 import 'package:bsbschool/features/auth/domain/entities/auth_session.dart';
 import 'package:bsbschool/features/auth/domain/entities/auth_user.dart';
+import 'package:bsbschool/features/auth/domain/entities/child_account.dart';
 import 'package:bsbschool/features/auth/domain/repositories/auth_repository.dart';
 import 'package:bsbschool/features/auth/domain/usecases/login_user.dart';
 import 'package:bsbschool/features/auth/domain/usecases/logout_user.dart';
@@ -24,6 +25,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// out) and [loginResult] is who the login endpoint hands back.
 class _FakeAuthRepository implements AuthRepository {
   AuthUser? _user;
+  int? _selectedChildId;
   final AuthUser? loginResult;
 
   _FakeAuthRepository({AuthUser? cached, this.loginResult}) : _user = cached;
@@ -33,6 +35,35 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   AuthUser? get currentUser => _user;
+
+  /// Same resolution order as the real repository: the pick, then the token's
+  /// own student, then the first.
+  @override
+  ChildAccount? get activeChild {
+    final children = _user?.children ?? const <ChildAccount>[];
+    if (children.isEmpty) return null;
+    for (final child in children) {
+      if (_selectedChildId != null && child.childId == _selectedChildId) {
+        return child;
+      }
+    }
+    for (final child in children) {
+      if (child.childId == _user?.id) return child;
+    }
+    return children.first;
+  }
+
+  @override
+  int? get activeStudentId => activeChild?.childId ?? _user?.id;
+
+  @override
+  int? get activeClassId => activeChild?.classId ?? _user?.classId;
+
+  @override
+  Future<Either<Failure, Unit>> selectChild(int childId) async {
+    _selectedChildId = childId;
+    return const Right(unit);
+  }
 
   @override
   Future<Either<Failure, AuthSession>> login({

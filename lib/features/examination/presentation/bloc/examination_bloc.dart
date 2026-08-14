@@ -17,6 +17,9 @@ class ExaminationBloc extends Bloc<ExaminationEvent, ExaminationState> {
     on<ExaminationFetched>(_onFetched);
     on<ExaminationRefreshed>(_onFetched);
     on<ExaminationSubjectSelected>(_onSubjectSelected);
+    on<ExaminationGroupSelected>(_onGroupSelected);
+    on<ExaminationExamSelected>(_onExamSelected);
+    on<ExaminationFiltersCleared>(_onFiltersCleared);
   }
 
   Future<void> _onFetched(
@@ -40,6 +43,8 @@ class ExaminationBloc extends Bloc<ExaminationEvent, ExaminationState> {
         status: ExaminationStatus.loaded,
         studentId: content.studentId,
         groups: content.groups,
+        examGroup: state.examGroup,
+        exam: state.exam,
         subject: state.subject,
       )),
     );
@@ -50,5 +55,44 @@ class ExaminationBloc extends Bloc<ExaminationEvent, ExaminationState> {
     Emitter<ExaminationState> emit,
   ) {
     emit(state.copyWith(subject: event.subject));
+  }
+
+  void _onGroupSelected(
+    ExaminationGroupSelected event,
+    Emitter<ExaminationState> emit,
+  ) {
+    emit(_pruned(state.copyWith(examGroup: event.examGroup)));
+  }
+
+  void _onExamSelected(
+    ExaminationExamSelected event,
+    Emitter<ExaminationState> emit,
+  ) {
+    emit(_pruned(state.copyWith(exam: event.exam)));
+  }
+
+  void _onFiltersCleared(
+    ExaminationFiltersCleared event,
+    Emitter<ExaminationState> emit,
+  ) {
+    emit(state.copyWith(
+      examGroup: ExaminationState.any,
+      exam: ExaminationState.any,
+      subject: ExaminationState.any,
+    ));
+  }
+
+  /// The exam and subject chips are scoped to the filters above them, so
+  /// narrowing an outer filter can strand an inner one on a value that no
+  /// longer exists — drop those back to "Hamısı" instead of showing nothing.
+  ExaminationState _pruned(ExaminationState next) {
+    var pruned = next;
+    if (!pruned.examOptions.contains(pruned.exam)) {
+      pruned = pruned.copyWith(exam: ExaminationState.any);
+    }
+    if (!pruned.subjects.contains(pruned.subject)) {
+      pruned = pruned.copyWith(subject: ExaminationState.any);
+    }
+    return pruned;
   }
 }

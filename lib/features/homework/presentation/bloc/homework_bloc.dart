@@ -15,6 +15,7 @@ class HomeworkBloc extends Bloc<HomeworkEvent, HomeworkState> {
     on<HomeworkFetched>(_onFetched);
     on<HomeworkRefreshed>(_onFetched);
     on<HomeworkSubjectSelected>(_onSubjectSelected);
+    on<HomeworkTabSelected>(_onTabSelected);
   }
 
   Future<void> _onFetched(
@@ -40,6 +41,7 @@ class HomeworkBloc extends Bloc<HomeworkEvent, HomeworkState> {
         className: content.className,
         homeworks: content.homeworks,
         subject: state.subject,
+        tab: state.tab,
       )),
     );
   }
@@ -49,5 +51,17 @@ class HomeworkBloc extends Bloc<HomeworkEvent, HomeworkState> {
     Emitter<HomeworkState> emit,
   ) {
     emit(state.copyWith(subject: event.subject));
+  }
+
+  void _onTabSelected(
+    HomeworkTabSelected event,
+    Emitter<HomeworkState> emit,
+  ) {
+    final next = state.copyWith(tab: event.tab);
+    // The pills are per tab, so a filter the new tab has no subject for would
+    // leave nothing selected — fall back to "all".
+    emit(next.subjects.contains(next.subject)
+        ? next
+        : next.copyWith(subject: HomeworkState.allSubjects));
   }
 }

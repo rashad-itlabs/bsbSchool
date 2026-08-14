@@ -6,7 +6,6 @@ import '../../core/di/injection_container.dart';
 import '../../core/utils/html_text.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_week_overview.dart';
-import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/events/presentation/bloc/events_bloc.dart';
 import '../../features/events/presentation/widgets/events_calendar_card.dart';
@@ -14,6 +13,7 @@ import '../../features/news/domain/entities/news_item.dart';
 import '../../features/news/presentation/bloc/news_bloc.dart';
 import '../../features/news/presentation/widgets/news_image.dart';
 import '../theme/dr_colors.dart';
+import '../widgets/child_switcher.dart';
 import '../widgets/dr_widgets.dart';
 import 'attendance_screen.dart';
 import 'examinations_screen.dart';
@@ -77,58 +77,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final name = context.select<AuthBloc, String>(
           (bloc) => bloc.state.user?.name ?? '',
     );
+    // The student every screen below is scoped to — the parent's pick in the
+    // switcher, not necessarily the one the token belongs to.
     final childName = context.select<AuthBloc, String>(
-      (bloc) => bloc.state.user?.childName ?? '',
+      (bloc) => bloc.state.activeChildName,
     );
+    final className = context.select<AuthBloc, String>(
+      (bloc) => bloc.state.activeChild?.className ?? '',
+    );
+    final canSwitch =
+        context.select<AuthBloc, bool>((bloc) => bloc.state.canSwitchChild);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('$name 👋',
-                style: const TextStyle(
-                    fontSize: 20, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            Text(childName == '' ? '$name' : '$childName',
-                style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
-          ],
-        ),
-        /// bu hissede instagram terzi profil deyisdirme olacaq.
-        ///
-        ///
-        ///
-        ///
-        /// 
-        Container(
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: DrColors.accentGreen,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: DrColors.accentGreen.withValues(alpha: 0.25),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$name 👋',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              Text(
+                [
+                  if (childName.isNotEmpty) childName else name,
+                  if (className.isNotEmpty) className,
+                ].join(' • '),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: context.dr.textMuted),
               ),
             ],
           ),
-          child: Container(
-            width: 34,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-                color: Colors.black, shape: BoxShape.circle),
-            child: Text(AuthUser.initialsOf(childName),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700)),
-          ),
         ),
+        const SizedBox(width: 12),
+        ChildSwitcher(name: childName, enabled: canSwitch),
       ],
     );
   }
@@ -265,7 +251,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _actionsGrid() {
     return Row(
       children: [
-        _action('Library', Icons.account_balance_outlined, true,
+        _action('Library', Icons.account_balance_outlined, false,
             () => _push(const LibraryScreen())),
         _action('Homework', Icons.menu_book_outlined, false,
             () => _push(const HomeworkScreen())),

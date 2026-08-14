@@ -2,6 +2,9 @@ part of 'homework_bloc.dart';
 
 enum HomeworkStatus { initial, loading, loaded, error }
 
+/// Which half of the list the tabs show: deadlines still ahead, or behind.
+enum HomeworkTab { active, past }
+
 class HomeworkState extends Equatable {
   /// Sentinel for "no subject filter" — also the label of the first pill.
   static const String allSubjects = 'Hamısı';
@@ -16,6 +19,9 @@ class HomeworkState extends Equatable {
 
   final String subject;
 
+  /// Selected tab — the screen opens on [HomeworkTab.active].
+  final HomeworkTab tab;
+
   final String? errorMessage;
 
   const HomeworkState({
@@ -24,6 +30,7 @@ class HomeworkState extends Equatable {
     this.classId,
     this.className,
     this.subject = allSubjects,
+    this.tab = HomeworkTab.active,
     this.errorMessage,
   });
 
@@ -32,19 +39,33 @@ class HomeworkState extends Equatable {
   /// The student has no class session, so there is nothing to show.
   bool get hasNoClass => status == HomeworkStatus.loaded && classId == null;
 
-  /// Pill labels: "Hamısı" plus every subject present in [homeworks].
+  /// Homeworks of the selected [tab]. A missing deadline counts as active —
+  /// nothing has expired yet.
+  List<Homework> get tabHomeworks {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return homeworks.where((hw) {
+      final date = hw.submitDate;
+      if (date == null) return tab == HomeworkTab.active;
+      final due = DateTime(date.year, date.month, date.day);
+      final expired = due.isBefore(today);
+      return tab == HomeworkTab.active ? !expired : expired;
+    }).toList();
+  }
+
+  /// Pill labels: "Hamısı" plus every subject present in the selected tab.
   List<String> get subjects {
     final unique = <String>{
-      for (final hw in homeworks)
+      for (final hw in tabHomeworks)
         if (hw.subject != null) hw.subject!,
     }.toList()..sort();
     return [allSubjects, ...unique];
   }
 
-  /// What the list renders: [homeworks] narrowed by [subject].
+  /// What the list renders: [tabHomeworks] narrowed by [subject].
   List<Homework> get visibleHomeworks {
-    if (subject == allSubjects) return homeworks;
-    return homeworks.where((hw) => hw.subject == subject).toList();
+    if (subject == allSubjects) return tabHomeworks;
+    return tabHomeworks.where((hw) => hw.subject == subject).toList();
   }
 
   HomeworkState copyWith({
@@ -53,6 +74,7 @@ class HomeworkState extends Equatable {
     int? classId,
     String? className,
     String? subject,
+    HomeworkTab? tab,
     String? errorMessage,
   }) {
     return HomeworkState(
@@ -61,6 +83,7 @@ class HomeworkState extends Equatable {
       classId: classId ?? this.classId,
       className: className ?? this.className,
       subject: subject ?? this.subject,
+      tab: tab ?? this.tab,
       // Intentionally not carried over: only the state that failed shows it.
       errorMessage: errorMessage,
     );
@@ -68,5 +91,5 @@ class HomeworkState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [status, homeworks, classId, className, subject, errorMessage];
+      [status, homeworks, classId, className, subject, tab, errorMessage];
 }

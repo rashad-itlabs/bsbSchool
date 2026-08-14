@@ -5,16 +5,43 @@ import '../widgets/dr_widgets.dart';
 
 /// Port of `topup.html` — amount entry + payment card form.
 class TopUpScreen extends StatefulWidget {
-  const TopUpScreen({super.key});
+  /// Amount to open with — the sum the parent picked on the tuition sheet.
+  /// Null keeps the default quick amount.
+  final double? initialAmount;
+
+  const TopUpScreen({super.key, this.initialAmount});
 
   @override
   State<TopUpScreen> createState() => _TopUpScreenState();
 }
 
 class _TopUpScreenState extends State<TopUpScreen> {
-  final _amount = TextEditingController(text: '50');
-  int _quick = 1;
+  late final TextEditingController _amount;
+
+  /// Index of the highlighted quick button, or -1 when the amount came from
+  /// somewhere else and matches none of them.
+  late int _quick;
+
   static const _quickValues = [10, 50, 100, 200];
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialAmount;
+    _amount = TextEditingController(
+      text: initial == null ? '50' : _plain(initial),
+    );
+    _quick = initial == null
+        ? 1
+        : _quickValues.indexWhere((v) => v == initial);
+  }
+
+  /// Drops the decimals when there are none to show: `15678.00` reads better
+  /// as `15678` in a 56pt field.
+  static String _plain(double value) {
+    final text = value.toStringAsFixed(2);
+    return text.endsWith('.00') ? text.substring(0, text.length - 3) : text;
+  }
 
   @override
   void dispose() {

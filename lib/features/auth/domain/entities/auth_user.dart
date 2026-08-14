@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'child_account.dart';
+
 /// The authenticated user returned by the login endpoint.
 class AuthUser extends Equatable {
   /// The student tied to this account (`user_id` in the login response).
@@ -22,6 +24,11 @@ class AuthUser extends Equatable {
   final int? classId;
   final String? className;
 
+  /// Every student linked to this account (the login response's `info`), each
+  /// with the credentials the school issued for them. Empty for a teacher or a
+  /// student account — only a parent login carries it.
+  final List<ChildAccount> children;
+
   const AuthUser({
     this.id,
     required this.name,
@@ -30,7 +37,7 @@ class AuthUser extends Equatable {
     required this.email,
     this.classId,
     this.className,
-
+    this.children = const [],
   });
 
   /// First letter of the first two words — e.g. "Samir Aliyev" -> "SA".
@@ -57,5 +64,5 @@ class AuthUser extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, name, childName, role, email, classId, className];
+      [id, name, childName, role, email, classId, className, children];
 }

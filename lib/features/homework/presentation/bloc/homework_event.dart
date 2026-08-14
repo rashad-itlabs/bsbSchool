@@ -26,3 +26,13 @@ class HomeworkSubjectSelected extends HomeworkEvent {
   @override
   List<Object?> get props => [subject];
 }
+
+/// User switched between the "Aktiv" and "Deaktiv" tabs.
+class HomeworkTabSelected extends HomeworkEvent {
+  final HomeworkTab tab;
+
+  const HomeworkTabSelected(this.tab);
+
+  @override
+  List<Object?> get props => [tab];
+}

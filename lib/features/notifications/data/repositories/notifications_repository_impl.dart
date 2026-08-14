@@ -10,7 +10,7 @@ import '../services/notifications_service.dart';
 class NotificationsRepositoryImpl implements NotificationsRepository {
   final NotificationsService service;
 
-  /// Source of the logged-in student's `class_id` (from the login response).
+  /// Source of the `class_id` — the child the parent has switched to.
   final AuthRepository authRepository;
 
   const NotificationsRepositoryImpl({
@@ -26,7 +26,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   Future<Either<Failure, NotificationsContent>> getNotifications() async {
     try {
       final content = await service.getNotifications(
-        classId: authRepository.currentUser?.classId,
+        classId: authRepository.activeClassId,
       );
       return Right(content);
     } on ServerException catch (e) {

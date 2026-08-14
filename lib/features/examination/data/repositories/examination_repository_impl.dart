@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/examination_content.dart';
 import '../../domain/repositories/examination_repository.dart';
 import '../services/examination_service.dart';
@@ -9,7 +10,13 @@ import '../services/examination_service.dart';
 class ExaminationRepositoryImpl implements ExaminationRepository {
   final ExaminationService service;
 
-  const ExaminationRepositoryImpl({required this.service});
+  /// Source of the `student_id` — the child the parent has switched to.
+  final AuthRepository authRepository;
+
+  const ExaminationRepositoryImpl({
+    required this.service,
+    required this.authRepository,
+  });
 
   /// No `NetworkInfo` pre-flight here on purpose: that check pings a third
   /// party, so an unreachable probe would hide a perfectly reachable API.
@@ -18,7 +25,9 @@ class ExaminationRepositoryImpl implements ExaminationRepository {
   @override
   Future<Either<Failure, ExaminationContent>> getExaminations() async {
     try {
-      final content = await service.getExaminations();
+      final content = await service.getExaminations(
+        studentId: authRepository.activeStudentId,
+      );
       return Right(content);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

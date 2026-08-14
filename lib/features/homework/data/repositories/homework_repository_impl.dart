@@ -10,7 +10,7 @@ import '../services/homework_service.dart';
 class HomeworkRepositoryImpl implements HomeworkRepository {
   final HomeworkService service;
 
-  /// Source of the logged-in student's `class_id` (from the login response).
+  /// Source of the `class_id` — the child the parent has switched to.
   final AuthRepository authRepository;
 
   const HomeworkRepositoryImpl({
@@ -26,7 +26,7 @@ class HomeworkRepositoryImpl implements HomeworkRepository {
   Future<Either<Failure, HomeworkContent>> getHomeworks() async {
     try {
       final content = await service.getHomeworks(
-        classId: authRepository.currentUser?.classId,
+        classId: authRepository.activeClassId,
       );
       return Right(content);
     } on ServerException catch (e) {

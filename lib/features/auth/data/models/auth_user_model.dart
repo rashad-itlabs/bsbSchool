@@ -1,4 +1,5 @@
 import '../../domain/entities/auth_user.dart';
+import 'child_account_model.dart';
 
 class AuthUserModel extends AuthUser {
   const AuthUserModel({
@@ -9,6 +10,7 @@ class AuthUserModel extends AuthUser {
     required super.email,
     super.classId,
     super.className,
+    super.children,
   });
 
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,9 @@ class AuthUserModel extends AuthUser {
       email: json['email'] as String? ?? '',
       classId: _asInt(json['class_id']),
       className: _asNullableString(json['className'] ?? json['class_name']),
+      // `info` — the students linked to a parent account, with the login the
+      // school issued for each. Absent for teacher / student logins.
+      children: _asChildren(json['info']),
     );
   }
 
@@ -36,7 +41,17 @@ class AuthUserModel extends AuthUser {
         'email': email,
         'class_id': classId,
         'className': className,
+        'info':
+            children.map((c) => ChildAccountModel.from(c).toJson()).toList(),
       };
+
+  static List<ChildAccountModel> _asChildren(dynamic value) {
+    if (value is! List) return const [];
+    return value
+        .whereType<Map>()
+        .map((e) => ChildAccountModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
 
   static int? _asInt(dynamic value) {
     if (value is num) return value.toInt();

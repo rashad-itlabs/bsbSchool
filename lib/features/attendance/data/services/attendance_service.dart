@@ -7,7 +7,9 @@ import '../models/attendance_content_model.dart';
 /// and bearer token come from the interceptor). Throws typed exceptions so the
 /// repository can map them to [Failure]s.
 abstract class AttendanceService {
-  Future<AttendanceContentModel> getAttendance();
+  /// [studentId] scopes the request to one of a parent's students. Omitted the
+  /// endpoint falls back to the student the token belongs to.
+  Future<AttendanceContentModel> getAttendance({int? studentId});
 }
 
 class AttendanceServiceImpl implements AttendanceService {
@@ -15,9 +17,12 @@ class AttendanceServiceImpl implements AttendanceService {
   const AttendanceServiceImpl(this.dio);
 
   @override
-  Future<AttendanceContentModel> getAttendance() async {
+  Future<AttendanceContentModel> getAttendance({int? studentId}) async {
     try {
-      final response = await dio.get('/attendance');
+      final response = await dio.get(
+        '/attendance',
+        queryParameters: {'student_id': ?studentId},
+      );
 
       final status = response.statusCode ?? 0;
       final data = response.data;

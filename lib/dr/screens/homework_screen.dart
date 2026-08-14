@@ -43,6 +43,11 @@ class _HomeworkView extends StatelessWidget {
                       ? 'Tapşırıqlar'
                       : 'Tapşırıqlar',
                 ),
+                _StatusTabs(
+                  tab: state.tab,
+                  onSelected: (tab) => bloc.add(HomeworkTabSelected(tab)),
+                ),
+                const SizedBox(height: 20),
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
                     labels: state.subjects,
@@ -58,6 +63,78 @@ class _HomeworkView extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Two-segment switch between homeworks whose deadline is still ahead and
+/// those that have passed.
+class _StatusTabs extends StatelessWidget {
+  final HomeworkTab tab;
+  final ValueChanged<HomeworkTab> onSelected;
+  const _StatusTabs({required this.tab, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.dr.bgSurface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.dr.border),
+      ),
+      child: Row(
+        children: [
+          _Segment(
+            label: 'Aktiv',
+            active: tab == HomeworkTab.active,
+            onTap: () => onSelected(HomeworkTab.active),
+          ),
+          _Segment(
+            label: 'Deaktiv',
+            active: tab == HomeworkTab.past,
+            onTap: () => onSelected(HomeworkTab.past),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Segment extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  const _Segment({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: active ? DrColors.accentGreen : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+              color: active ? Colors.black : context.dr.textMuted,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -90,7 +167,11 @@ class _Body extends StatelessWidget {
 
     final items = state.visibleHomeworks;
     if (items.isEmpty) {
-      return const _Message(text: 'Tapşırıq tapılmadı');
+      return _Message(
+        text: state.tab == HomeworkTab.active
+            ? 'Aktiv tapşırıq yoxdur'
+            : 'Deaktiv tapşırıq yoxdur',
+      );
     }
 
     return Column(

@@ -30,6 +30,42 @@ const _unlinkedParentBody = '''
 }
 ''';
 
+/// A parent with two students linked — the `info` array carries the login the
+/// school issued for each child.
+const _parentWithChildrenBody = '''
+{
+  "name": "Ceyhun Alizade",
+  "child_name": "Fakhraddin Alizade",
+  "role": "parent",
+  "user_id": 2570,
+  "class_id": 97,
+  "class_name": "Class Group 10",
+  "token": "73|Pvmlhi3UjprCQufyD6OZkE7xxR0DMBpNJVS7kzdof6175acf",
+  "info": [
+    {
+      "child_id": 3139,
+      "class_id": 94,
+      "class_name": "Class Group 7",
+      "child_name": "Rashad",
+      "child_surname": "Ali",
+      "email": "std_3139@bsb.edu.az",
+      "password": "7QXVi9ir",
+      "payment_id": "RA3139"
+    },
+    {
+      "child_id": 2570,
+      "class_id": 97,
+      "class_name": "Class Group 10",
+      "child_name": "Fakhraddin",
+      "child_surname": "Alizade",
+      "email": "std_3140@bsb.edu.az",
+      "password": "UXns5B6a",
+      "payment_id": "FA2570"
+    }
+  ]
+}
+''';
+
 void main() {
   test('login response exposes user_id, class_id and className', () {
     final session = AuthSessionModel.fromJson(
@@ -106,6 +142,43 @@ void main() {
           reason: role,
         );
       }
+    });
+  });
+
+  group('the students linked to a parent (`info`)', () {
+    AuthUserModel parent() => AuthSessionModel.fromJson(
+          jsonDecode(_parentWithChildrenBody) as Map<String, dynamic>,
+        ).user as AuthUserModel;
+
+    test('parses every child with its own credentials', () {
+      final children = parent().children;
+
+      expect(children, hasLength(2));
+      expect(children.first.childId, 3139);
+      expect(children.first.fullName, 'Rashad Ali');
+      expect(children.first.className, 'Class Group 7');
+      expect(children.first.email, 'std_3139@bsb.edu.az');
+      expect(children.first.password, '7QXVi9ir');
+      expect(children.first.paymentId, 'RA3139');
+      expect(children.last.fullName, 'Fakhraddin Alizade');
+    });
+
+    // PassScreen reads them off the cached user, so they have to outlive a
+    // relaunch just like the name and role do.
+    test('survives the toJson/fromJson round trip', () {
+      final restored = AuthUserModel.fromJson(
+        jsonDecode(jsonEncode(parent().toJson())) as Map<String, dynamic>,
+      );
+
+      expect(restored.children, parent().children);
+    });
+
+    test('is empty when the response carries no `info`', () {
+      final session = AuthSessionModel.fromJson(
+        jsonDecode(_loginBody) as Map<String, dynamic>,
+      );
+
+      expect(session.user.children, isEmpty);
     });
   });
 

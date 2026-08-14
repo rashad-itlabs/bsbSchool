@@ -10,7 +10,7 @@ import '../services/timetable_service.dart';
 class TimetableRepositoryImpl implements TimetableRepository {
   final TimetableService service;
 
-  /// Source of the logged-in student's `class_id` (from the login response).
+  /// Source of the `class_id` — the child the parent has switched to.
   final AuthRepository authRepository;
 
   const TimetableRepositoryImpl({
@@ -26,7 +26,7 @@ class TimetableRepositoryImpl implements TimetableRepository {
   Future<Either<Failure, TimetableContent>> getTimetable() async {
     try {
       final content = await service.getTimetable(
-        classId: authRepository.currentUser?.classId,
+        classId: authRepository.activeClassId,
       );
       return Right(content);
     } on ServerException catch (e) {

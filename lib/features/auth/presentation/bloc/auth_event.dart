@@ -23,6 +23,18 @@ class AuthLoginRequested extends AuthEvent {
   List<Object?> get props => [email, password];
 }
 
+/// Parent picked another student in the dashboard switcher. Everything the app
+/// fetches is scoped to [AuthState.activeChild], so this re-points the whole
+/// session at that student.
+class AuthChildSelected extends AuthEvent {
+  final int childId;
+
+  const AuthChildSelected(this.childId);
+
+  @override
+  List<Object?> get props => [childId];
+}
+
 /// User tapped "log out".
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();

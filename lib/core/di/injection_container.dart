@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/api_client.dart';
 import '../network/network_info.dart';
+import '../storage/selected_child_storage.dart';
 import '../storage/token_storage.dart';
 import '../storage/user_storage.dart';
 
@@ -38,6 +39,13 @@ import '../../features/attendance/data/services/attendance_service.dart';
 import '../../features/attendance/domain/repositories/attendance_repository.dart';
 import '../../features/attendance/domain/usecases/get_attendance.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
+
+// Tuition
+import '../../features/tuition/data/repositories/tuition_repository_impl.dart';
+import '../../features/tuition/data/services/tuition_service.dart';
+import '../../features/tuition/domain/repositories/tuition_repository.dart';
+import '../../features/tuition/domain/usecases/get_tuition.dart';
+import '../../features/tuition/presentation/bloc/tuition_bloc.dart';
 
 // Timetable
 import '../../features/timetable/data/repositories/timetable_repository_impl.dart';
@@ -120,6 +128,8 @@ Future<void> initDependencies() async {
   // ---- Core ----
   sl.registerLazySingleton<TokenStorage>(() => TokenStorageImpl(sl()));
   sl.registerLazySingleton<UserStorage>(() => UserStorageImpl(sl()));
+  sl.registerLazySingleton<SelectedChildStorage>(
+      () => SelectedChildStorageImpl(sl()));
   // The single configured Dio (base URL + token interceptor) is shared by
   // every service in the app.
   sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));
@@ -132,6 +142,7 @@ Future<void> initDependencies() async {
   _initBalance();
   _initHomework();
   _initAttendance();
+  _initTuition();
   _initTimetable();
   _initLibrary();
   _initExamination();
@@ -232,6 +243,7 @@ void _initAuth() {
         service: sl(),
         tokenStorage: sl(),
         userStorage: sl(),
+        selectedChildStorage: sl(),
         networkInfo: sl(),
       ));
 
@@ -276,11 +288,32 @@ void _initAttendance() {
 
   // Repository
   sl.registerLazySingleton<AttendanceRepository>(
-      () => AttendanceRepositoryImpl(service: sl()));
+      () => AttendanceRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
 
   // Service
   sl.registerLazySingleton<AttendanceService>(
       () => AttendanceServiceImpl(sl()));
+}
+
+void _initTuition() {
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => TuitionBloc(getTuition: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetTuition(sl()));
+
+  // Repository
+  sl.registerLazySingleton<TuitionRepository>(
+      () => TuitionRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
+
+  // Service
+  sl.registerLazySingleton<TuitionService>(() => TuitionServiceImpl(sl()));
 }
 
 void _initTimetable() {
@@ -327,7 +360,10 @@ void _initExamination() {
 
   // Repository
   sl.registerLazySingleton<ExaminationRepository>(
-      () => ExaminationRepositoryImpl(service: sl()));
+      () => ExaminationRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
 
   // Service
   sl.registerLazySingleton<ExaminationService>(
@@ -364,7 +400,10 @@ void _initBuffet() {
 
   // Repository
   sl.registerLazySingleton<BuffetCardRepository>(
-      () => BuffetCardRepositoryImpl(service: sl()));
+      () => BuffetCardRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
 
   // Service
   sl.registerLazySingleton<BuffetCardService>(

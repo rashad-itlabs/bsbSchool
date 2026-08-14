@@ -10,7 +10,7 @@ import '../services/library_service.dart';
 class LibraryRepositoryImpl implements LibraryRepository {
   final LibraryService service;
 
-  /// Source of the logged-in student's `class_id` (from the login response).
+  /// Source of the `class_id` — the child the parent has switched to.
   final AuthRepository authRepository;
 
   const LibraryRepositoryImpl({
@@ -26,7 +26,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
   Future<Either<Failure, LibraryContent>> getLibrary() async {
     try {
       final content = await service.getLibrary(
-        classId: authRepository.currentUser?.classId,
+        classId: authRepository.activeClassId,
       );
       return Right(content);
     } on ServerException catch (e) {

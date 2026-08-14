@@ -7,9 +7,10 @@ import '../models/examination_content_model.dart';
 /// and bearer token come from the interceptor). Throws typed exceptions so the
 /// repository can map them to [Failure]s.
 abstract class ExaminationService {
-  /// The endpoint resolves the student from the session token and echoes the
-  /// `student_id` back in the body, so no parameters are needed here.
-  Future<ExaminationContentModel> getExaminations();
+  /// [studentId] scopes the request to one of a parent's students; omitted,
+  /// the endpoint resolves the student from the session token. Either way it
+  /// echoes the `student_id` it used back in the body.
+  Future<ExaminationContentModel> getExaminations({int? studentId});
 }
 
 class ExaminationServiceImpl implements ExaminationService {
@@ -17,9 +18,12 @@ class ExaminationServiceImpl implements ExaminationService {
   const ExaminationServiceImpl(this.dio);
 
   @override
-  Future<ExaminationContentModel> getExaminations() async {
+  Future<ExaminationContentModel> getExaminations({int? studentId}) async {
     try {
-      final response = await dio.get('/examinations');
+      final response = await dio.get(
+        '/examinations',
+        queryParameters: {'student_id': ?studentId},
+      );
 
       final status = response.statusCode ?? 0;
       final data = response.data;

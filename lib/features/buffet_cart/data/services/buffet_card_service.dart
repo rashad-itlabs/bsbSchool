@@ -7,7 +7,9 @@ import '../models/buffet_card_content_model.dart';
 /// and bearer token come from the interceptor). Throws typed exceptions so the
 /// repository can map them to [Failure]s.
 abstract class BuffetCardService {
-  Future<BuffetCardContentModel> getBuffetCard();
+  /// [studentId] scopes the card to one of a parent's students. Omitted the
+  /// endpoint falls back to the student the token belongs to.
+  Future<BuffetCardContentModel> getBuffetCard({int? studentId});
 }
 
 class BuffetCardServiceImpl implements BuffetCardService {
@@ -15,9 +17,12 @@ class BuffetCardServiceImpl implements BuffetCardService {
   const BuffetCardServiceImpl(this.dio);
 
   @override
-  Future<BuffetCardContentModel> getBuffetCard() async {
+  Future<BuffetCardContentModel> getBuffetCard({int? studentId}) async {
     try {
-      final response = await dio.get('/getBuffetCart');
+      final response = await dio.get(
+        '/getBuffetCart',
+        queryParameters: {'student_id': ?studentId},
+      );
 
       final status = response.statusCode ?? 0;
       final data = response.data;
