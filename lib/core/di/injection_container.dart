@@ -47,6 +47,13 @@ import '../../features/tuition/domain/repositories/tuition_repository.dart';
 import '../../features/tuition/domain/usecases/get_tuition.dart';
 import '../../features/tuition/presentation/bloc/tuition_bloc.dart';
 
+// Extra fees
+import '../../features/extra_fees/data/repositories/extra_fees_repository_impl.dart';
+import '../../features/extra_fees/data/services/extra_fees_service.dart';
+import '../../features/extra_fees/domain/repositories/extra_fees_repository.dart';
+import '../../features/extra_fees/domain/usecases/get_extra_fees.dart';
+import '../../features/extra_fees/presentation/bloc/extra_fees_bloc.dart';
+
 // Timetable
 import '../../features/timetable/data/repositories/timetable_repository_impl.dart';
 import '../../features/timetable/data/services/timetable_service.dart';
@@ -114,6 +121,7 @@ import '../../features/payment/data/repositories/payment_repository_impl.dart';
 import '../../features/payment/data/services/payment_service.dart';
 import '../../features/payment/domain/repositories/payment_repository.dart';
 import '../../features/payment/domain/usecases/get_payment_status.dart';
+import '../../features/payment/domain/usecases/start_fee_payment.dart';
 import '../../features/payment/domain/usecases/start_top_up.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
 
@@ -143,6 +151,7 @@ Future<void> initDependencies() async {
   _initHomework();
   _initAttendance();
   _initTuition();
+  _initExtraFees();
   _initTimetable();
   _initLibrary();
   _initExamination();
@@ -173,11 +182,13 @@ void _initPayment() {
   // Cubit — new instance per screen mount.
   sl.registerFactory(() => PaymentCubit(
         startTopUp: sl(),
+        startFeePayment: sl(),
         getPaymentStatus: sl(),
       ));
 
   // Use cases
   sl.registerLazySingleton(() => StartTopUp(sl()));
+  sl.registerLazySingleton(() => StartFeePayment(sl()));
   sl.registerLazySingleton(() => GetPaymentStatus(sl()));
 
   // Repository
@@ -314,6 +325,25 @@ void _initTuition() {
 
   // Service
   sl.registerLazySingleton<TuitionService>(() => TuitionServiceImpl(sl()));
+}
+
+void _initExtraFees() {
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => ExtraFeesBloc(getExtraFees: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetExtraFees(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ExtraFeesRepository>(
+      () => ExtraFeesRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
+
+  // Service
+  sl.registerLazySingleton<ExtraFeesService>(
+      () => ExtraFeesServiceImpl(sl()));
 }
 
 void _initTimetable() {

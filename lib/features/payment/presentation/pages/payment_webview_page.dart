@@ -4,6 +4,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../domain/entities/payment_session.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// How the bank page ended, from the app's point of view. It is a *signal*
 /// only — the caller still has to ask `/payment/status` for the truth.
@@ -79,7 +80,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
             // main frame is worth showing.
             final mainFrame = error.isForMainFrame ?? true;
             if (!mainFrame || error.errorCode == -999 || !mounted) return;
-            setState(() => _loadError = 'Səhifə yüklənmədi');
+            setState(() => _loadError = context.l10n.webviewLoadFailed);
           },
         ),
       )
@@ -144,19 +145,19 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
     final leave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Ödənişi dayandırmaq'),
-        content: const Text(
-          'Ödəniş tamamlanmayıb. Səhifəni bağlamaq istəyirsiniz?',
+        title: Text(context.l10n.webviewStopTitle),
+        content: Text(
+          context.l10n.webviewStopText,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Davam et'),
+            child: Text(context.l10n.commonContinue),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Bağla',
+            child: Text(
+              context.l10n.commonClose,
               style: TextStyle(color: DrColors.redStrong),
             ),
           ),
@@ -182,7 +183,7 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
           backgroundColor: context.dr.bgDark,
           foregroundColor: context.dr.textMain,
           elevation: 0,
-          title: const Text('Ödəniş', style: TextStyle(fontSize: 17)),
+          title: Text(context.l10n.webviewTitle, style: TextStyle(fontSize: 17)),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: _confirmClose,
@@ -246,7 +247,7 @@ class _ErrorView extends StatelessWidget {
             style: TextStyle(fontSize: 14, color: context.dr.textMuted),
           ),
           const SizedBox(height: 16),
-          TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+          TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
         ],
       ),
     );

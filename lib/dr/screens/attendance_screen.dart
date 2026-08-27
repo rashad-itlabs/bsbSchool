@@ -8,6 +8,7 @@ import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_month_calendar.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `attendance.html`, backed by `GET /attendance` — summary stat cards
 /// and the recent session log for the logged-in student.
@@ -38,7 +39,7 @@ class _AttendanceView extends StatelessWidget {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                const DrBackHeader(title: 'Davamiyyət'),
+                DrBackHeader(title: context.l10n.attendanceTitle),
                 _Body(state: state),
                 const SizedBox(height: 20),
               ],
@@ -65,7 +66,7 @@ class _Body extends StatelessWidget {
 
     if (state.status == AttendanceStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () =>
             context.read<AttendanceBloc>().add(const AttendanceRefreshed()),
       );
@@ -80,13 +81,13 @@ class _Body extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _stat(context, '${summary.attendanceRate}%', 'İştirak',
+              child: _stat(context, '${summary.attendanceRate}%', context.l10n.attendanceRate,
                   context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
               child: _stat(
-                  context, '${summary.absent}', 'Qayıb', DrColors.red),
+                  context, '${summary.absent}', context.l10n.attendanceAbsent, DrColors.red),
             ),
           ],
         ),
@@ -94,22 +95,22 @@ class _Body extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _stat(context, '${summary.present}', 'Gəlib',
+              child: _stat(context, '${summary.present}', context.l10n.attendancePresent,
                   context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
               child:
-                  _stat(context, '${summary.late}', 'Gecikmə', DrColors.teal),
+                  _stat(context, '${summary.late}', context.l10n.attendanceLate, DrColors.teal),
             ),
           ],
         ),
         const SizedBox(height: 30),
         AttendanceMonthCalendar(records: records),
         const SizedBox(height: 30),
-        const DrSectionHeader(title: 'Son qeydlər'),
+        DrSectionHeader(title: context.l10n.attendanceRecent),
         if (records.isEmpty)
-          const _Message(text: 'Qeyd tapılmadı')
+          _Message(text: context.l10n.attendanceEmpty)
         else
           DrListCard(
             children: [
@@ -139,7 +140,7 @@ class _Body extends StatelessWidget {
   Widget _log(BuildContext context, AttendanceRecord record,
       {bool divider = true}) {
     final tag = _statusTag(context, record);
-    final title = record.section ?? record.subject ?? 'Dərs';
+    final title = record.section ?? record.subject ?? context.l10n.attendanceLesson;
     final subtitle = [
       if (record.date != null) DateFormat('dd MMM yyyy').format(record.date!),
       if (record.teacher != null) record.teacher!,
@@ -176,7 +177,7 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),
@@ -194,8 +195,8 @@ class _StatusTag {
 /// Takes a [context] because the "present" tag paints the brand accent as a dot
 /// and as text, both of which need the light theme's darker variant.
 _StatusTag _statusTag(BuildContext context, AttendanceRecord record) {
-  if (record.isAbsent) return const _StatusTag('Qayıb', DrColors.red);
-  if (record.isLate) return const _StatusTag('Gecikib', DrColors.teal);
-  if (record.isPresent) return _StatusTag('Gəlib', context.dr.accent);
+  if (record.isAbsent) return _StatusTag(context.l10n.attendanceAbsent, DrColors.red);
+  if (record.isLate) return _StatusTag(context.l10n.attendanceLateTag, DrColors.teal);
+  if (record.isPresent) return _StatusTag(context.l10n.attendancePresent, context.dr.accent);
   return _StatusTag(record.status, context.dr.accent);
 }

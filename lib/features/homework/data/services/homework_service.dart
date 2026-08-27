@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../models/homework_content_model.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Talks to the homework endpoint over the shared [Dio] instance (base URL and
 /// bearer token come from the interceptor). Throws typed exceptions so the
@@ -32,7 +33,7 @@ class HomeworkServiceImpl implements HomeworkService {
       }
 
       if (status == 401) {
-        throw const ServerException('Sessiya bitib, yenidən daxil olun');
+        throw ServerException(L.s.errSessionExpired);
       }
 
       throw ServerException(_messageFrom(data));
@@ -45,14 +46,14 @@ class HomeworkServiceImpl implements HomeworkService {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    return 'Tapşırıqlar yüklənmədi';
+    return L.s.errHomeworkLoad;
   }
 
   String _dioMessage(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return 'Serverə qoşulmaq mümkün olmadı';
+      return L.s.errNoConnection;
     }
     return _messageFrom(e.response?.data);
   }

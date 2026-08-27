@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bsbschool/core/l10n/l10n.dart';
 
 /// Stands in for the network: [cached] is the restored session (null = logged
 /// out) and [loginResult] is who the login endpoint hands back.
@@ -103,23 +104,32 @@ Widget _gate(_FakeAuthRepository repository) {
       logoutUser: LogoutUser(repository),
       repository: repository,
     )..add(const AuthCheckRequested()),
-    child: MaterialApp(theme: DrTheme.dark, home: const AuthGate()),
+    child: MaterialApp(
+      theme: DrTheme.dark,
+      locale: const Locale('az'),
+      supportedLocales: AppL10n.supportedLocales,
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      home: const AuthGate(),
+    ),
   );
 }
 
 /// The teacher portal is on screen: its own nav, and its own pages.
 void _expectTeacherPortal() {
+  final l10n = lookupAppL10n(const Locale('az'));
+
   expect(find.byType(TeacherShell), findsOneWidget);
 
-  // The teacher's bottom nav, not the student's.
-  expect(find.text('TIMETABLE'), findsOneWidget);
-  expect(find.text('ATTENDANCE'), findsOneWidget);
-  expect(find.text('FOOD CARD'), findsNothing);
-  expect(find.text('TUITION'), findsNothing);
+  // The teacher's bottom nav, not the student's. Labels come from the same
+  // translations the bar renders, so the test does not pin one language.
+  expect(find.text(l10n.navTimetable.toUpperCase()), findsOneWidget);
+  expect(find.text(l10n.navAttendance.toUpperCase()), findsOneWidget);
+  expect(find.text(l10n.navFoodCard.toUpperCase()), findsNothing);
+  expect(find.text(l10n.navTuition.toUpperCase()), findsNothing);
 
   // The teacher's dashboard, not the student's.
-  expect(find.text('Welcome back,'), findsOneWidget);
-  expect(find.text('Task Management'), findsOneWidget);
+  expect(find.text(l10n.tWelcomeBack), findsOneWidget);
+  expect(find.text(l10n.tTaskManagement), findsOneWidget);
   expect(find.text('Good morning,'), findsNothing);
 }
 
@@ -175,13 +185,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (final (label, heading) in const [
-      ('TIMETABLE', 'Weekly Timetable'),
-      ('ATTENDANCE', 'Student Attendance'),
-      ('HOMEWORK', 'Assign Homework'),
-      ('SETTINGS', 'Settings'),
+    final l10n = lookupAppL10n(const Locale('az'));
+
+    for (final (label, heading) in [
+      (l10n.navTimetable, l10n.tWeeklyTimetable),
+      (l10n.navAttendance, l10n.tStudentAttendance),
+      (l10n.navHomework, l10n.tAssignHomework),
+      (l10n.navSettings, l10n.navSettings),
     ]) {
-      await tester.tap(find.text(label));
+      await tester.tap(find.text(label.toUpperCase()));
       await tester.pumpAndSettle();
       expect(find.text(heading), findsWidgets, reason: heading);
     }

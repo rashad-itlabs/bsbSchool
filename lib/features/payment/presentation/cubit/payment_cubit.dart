@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/payment_result.dart';
 import '../../domain/entities/payment_session.dart';
 import '../../domain/usecases/get_payment_status.dart';
+import '../../domain/usecases/start_fee_payment.dart';
 import '../../domain/usecases/start_top_up.dart';
 
 part 'payment_state.dart';
@@ -17,10 +18,14 @@ part 'payment_state.dart';
 /// first answer.
 class PaymentCubit extends Cubit<PaymentState> {
   final StartTopUp startTopUp;
+  final StartFeePayment startFeePayment;
   final GetPaymentStatus getPaymentStatus;
 
-  PaymentCubit({required this.startTopUp, required this.getPaymentStatus})
-      : super(const PaymentState());
+  PaymentCubit({
+    required this.startTopUp,
+    required this.startFeePayment,
+    required this.getPaymentStatus,
+  }) : super(const PaymentState());
 
   /// How long to keep asking while the gateway still says `pending`.
   static const _pollDelay = Duration(seconds: 2);
@@ -33,6 +38,30 @@ class PaymentCubit extends Cubit<PaymentState> {
     emit(const PaymentState(stage: PaymentStage.starting));
 
     final result = await startTopUp(amount);
+
+    return result.fold(
+      (failure) {
+        emit(PaymentState(errorMessage: failure.message));
+        return null;
+      },
+      (session) {
+        emit(PaymentState(stage: PaymentStage.atBank, session: session));
+        return session;
+      },
+    );
+  }
+
+  /// Same as [start], for one extra fee rather than the buffet wallet: the
+  /// server mints the link against the fee row itself (`POST /pay/{id}`).
+  Future<PaymentSession?> startFees({
+    required int feeId,
+    required double amount,
+  }) async {
+    emit(const PaymentState(stage: PaymentStage.starting));
+
+    final result = await startFeePayment(
+      FeePaymentParams(feeId: feeId, amount: amount),
+    );
 
     return result.fold(
       (failure) {

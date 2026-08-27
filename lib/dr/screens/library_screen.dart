@@ -7,6 +7,7 @@ import '../../features/library/presentation/bloc/library_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import 'book_reader_screen.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `library.html`, backed by `GET /library` — search, subject pills,
 /// book grid for the student's class.
@@ -39,8 +40,8 @@ class _LibraryView extends StatelessWidget {
               children: [
                 DrBackHeader(
                   title: state.className == null
-                      ? 'Kitabxana'
-                      : 'Kitabxana • ${state.className}',
+                      ? context.l10n.libraryTitle
+                      : context.l10n.libraryTitleWithClass(state.className!),
                 ),
                 _SearchField(
                   onChanged: (value) => bloc.add(LibrarySearchChanged(value)),
@@ -50,7 +51,10 @@ class _LibraryView extends StatelessWidget {
                 const SizedBox(height: 20),
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
-                    labels: state.subjects,
+                    labels: [
+                      for (final subject in state.subjects)
+                        context.filterLabel(subject),
+                    ],
                     selectedIndex: state.subjects.indexOf(state.subject),
                     onSelected: (i) =>
                         bloc.add(LibrarySubjectSelected(state.subjects[i])),
@@ -83,18 +87,18 @@ class _Body extends StatelessWidget {
 
     if (state.status == LibraryStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () => context.read<LibraryBloc>().add(const LibraryRefreshed()),
       );
     }
 
     if (state.hasNoClass) {
-      return const _Message(text: 'Sinif təyin edilməyib');
+      return _Message(text: context.l10n.homeworkNoClass);
     }
 
     final books = state.visibleBooks;
     if (books.isEmpty) {
-      return const _Message(text: 'Kitab tapılmadı');
+      return _Message(text: context.l10n.libraryEmpty);
     }
 
     return Column(
@@ -139,7 +143,7 @@ class _SearchField extends StatelessWidget {
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
-                hintText: 'Axtarış...',
+                hintText: context.l10n.librarySearch,
                 hintStyle: TextStyle(color: context.dr.textMuted),
               ),
             ),
@@ -169,7 +173,7 @@ class _PaidNote extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              '£19.99 məktəb tərəfindən ödənilib',
+              context.l10n.librarySchoolPaid,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -266,7 +270,7 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),

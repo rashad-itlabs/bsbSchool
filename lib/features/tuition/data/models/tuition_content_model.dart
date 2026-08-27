@@ -1,7 +1,7 @@
+import '../../../../core/utils/json_coerce.dart';
 import '../../domain/entities/tuition_content.dart';
 import 'tuition_charge_model.dart';
 import 'tuition_child_model.dart';
-import 'tuition_json.dart';
 import 'tuition_payment_model.dart';
 import 'tuition_summary_model.dart';
 

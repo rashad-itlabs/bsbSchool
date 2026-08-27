@@ -1,33 +1,33 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/l10n/l10n.dart';
 
-/// One switchable notification kind, with the copy shown next to its switch.
+/// One switchable notification kind.
+///
+/// The copy beside each switch is looked up on read rather than stored on the
+/// enum: a const field would freeze whichever language was loaded first and
+/// never follow a language switch.
 enum NotificationKind {
-  attendance(
-    'notify_attendance',
-    '🏫',
-    'Davamiyyət',
-    'Uşağın məktəbə gəlişi və dərsdən çıxışı barədə bildirişlər.',
-  ),
-  cafeteria(
-    'notify_cafeteria',
-    '☕',
-    'Bufet',
-    'Uşağın bufetdə nəyə xərclədiyi barədə bildirişlər.',
-  ),
-  exam(
-    'notify_exam',
-    '📚',
-    'İmtahanlar',
-    'Uşağın imtahan nəticələri və imtahana girilməsi barədə bildirişlər.',
-  );
+  attendance('notify_attendance', '🏫'),
+  cafeteria('notify_cafeteria', '☕'),
+  exam('notify_exam', '📚');
 
-  const NotificationKind(this.prefsKey, this.emoji, this.title, this.subtitle);
+  const NotificationKind(this.prefsKey, this.emoji);
 
   final String prefsKey;
   final String emoji;
-  final String title;
-  final String subtitle;
+
+  String get title => switch (this) {
+    NotificationKind.attendance => L.s.notifPrefAttendance,
+    NotificationKind.cafeteria => L.s.notifPrefBuffet,
+    NotificationKind.exam => L.s.notifPrefExams,
+  };
+
+  String get subtitle => switch (this) {
+    NotificationKind.attendance => L.s.notifPrefAttendanceText,
+    NotificationKind.cafeteria => L.s.notifPrefBuffetText,
+    NotificationKind.exam => L.s.notifPrefExamsText,
+  };
 }
 
 /// Global, persisted delivery preferences for notifications.

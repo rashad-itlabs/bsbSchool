@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
 import '../../domain/entities/attendance_record.dart';
+import '../../../../core/l10n/app_dates.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The "current month overview" card: one dot per weekday of the current week,
 /// coloured by the attendance logged that day. Shared by the dashboard and the
@@ -12,11 +14,6 @@ class AttendanceWeekOverview extends StatelessWidget {
   const AttendanceWeekOverview({super.key, required this.records});
 
   static const _labels = ['Be', 'Ça', 'Ç', 'Ca', 'C', 'Ş', 'B'];
-  static const _azMonths = [
-    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-    'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
-  ];
-
   @override
   Widget build(BuildContext context) {
     // Mon..Sun of the current week: green present, teal late, red absent,
@@ -29,7 +26,7 @@ class AttendanceWeekOverview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${_azMonths[now.month - 1]} ayı üzrə icmal',
+          Text(context.l10n.attendanceMonthOverview(AppDates.month(context, now.month)),
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           const SizedBox(height: 20),

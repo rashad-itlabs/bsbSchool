@@ -9,6 +9,7 @@ import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'grades_screen.dart';
 import 'reports_screen.dart';
+import '../../../core/l10n/l10n.dart';
 
 /// Port of `teacher_theme/index.html` — the teacher home dashboard.
 class TeacherDashboardScreen extends StatelessWidget {
@@ -27,12 +28,12 @@ class TeacherDashboardScreen extends StatelessWidget {
           const SizedBox(height: 30),
           _overview(context),
           const SizedBox(height: 30),
-          const DrSectionHeader(title: 'Task Management', fontSize: 16),
+          DrSectionHeader(title: context.l10n.tTaskManagement, fontSize: 16),
           _actionsGrid(context),
           const SizedBox(height: 30),
           DrSectionHeader(
-            title: 'Next Lesson',
-            action: 'See all',
+            title: context.l10n.tNextLesson,
+            action: context.l10n.tSeeAll,
             fontSize: 16,
             onAction: () => onNavigate(1),
           ),
@@ -63,7 +64,7 @@ class TeacherDashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome back,',
+                context.l10n.tWelcomeBack,
                 style: TextStyle(fontSize: 13, color: context.dr.textMuted),
               ),
               const SizedBox(height: 4),
@@ -102,7 +103,7 @@ class TeacherDashboardScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                'Active Day',
+                context.l10n.tActiveDay,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -114,15 +115,15 @@ class TeacherDashboardScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             children: [
-              _stat(context, 0.96, '96%', 'Attendance', context.dr.accent),
+              _stat(context, 0.96, '96%', context.l10n.navAttendance, context.dr.accent),
               _stat(
                 context,
                 0.40,
                 '40%',
-                'KSQ Grades',
+                context.l10n.tKsqGrades,
                 context.dr.accent.withValues(alpha: 0.6),
               ),
-              _stat(context, 0.50, '50%', 'Reports', DrColors.orange),
+              _stat(context, 0.50, '50%', context.l10n.tReports, DrColors.orange),
             ],
           ),
         ],
@@ -174,17 +175,17 @@ class TeacherDashboardScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            _action(context, '📅', 'Attendance', () => onNavigate(2)),
-            _action(context, '📊', 'Grades', () => _push(context, const TeacherGradesScreen())),
-            _action(context, '📚', 'Homework', () => onNavigate(3)),
+            _action(context, '📅', context.l10n.navAttendance, () => onNavigate(2)),
+            _action(context, '📊', context.l10n.tGrades, () => _push(context, const TeacherGradesScreen())),
+            _action(context, '📚', context.l10n.navHomework, () => onNavigate(3)),
           ],
         ),
         const SizedBox(height: 15),
         Row(
           children: [
-            _action(context, '📄', 'Reports', () => _push(context, const TeacherReportsScreen())),
-            _action(context, '🕒', 'Timetable', () => onNavigate(1)),
-            _action(context, '⚙️', 'Settings', () => onNavigate(4)),
+            _action(context, '📄', context.l10n.tReports, () => _push(context, const TeacherReportsScreen())),
+            _action(context, '🕒', context.l10n.navTimetable, () => onNavigate(1)),
+            _action(context, '⚙️', context.l10n.navSettings, () => onNavigate(4)),
           ],
         ),
       ],

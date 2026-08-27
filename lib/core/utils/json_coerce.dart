@@ -1,4 +1,4 @@
-/// Coercions shared by the tuition models.
+/// Coercions shared by the tuition and extra-fee models.
 ///
 /// The API is loose about types — an amount can arrive as `1600`, `1600.00` or
 /// `"1600.00"`, and any field can be null. Every helper degrades to a neutral

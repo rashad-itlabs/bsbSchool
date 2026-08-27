@@ -7,6 +7,7 @@ import '../../features/examination/domain/entities/exam_result.dart';
 import '../../features/examination/presentation/bloc/examination_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `examinations.html`, backed by `GET /examinations` — the student's
 /// exam results grouped by exam group, with a subject filter.
@@ -37,7 +38,7 @@ class _ExaminationsView extends StatelessWidget {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                const DrBackHeader(title: 'İmtahan nəticələri'),
+                DrBackHeader(title: context.l10n.examTitle),
                 _FilterBar(state: state),
                 const SizedBox(height: 24),
                 _Body(state: state),
@@ -76,7 +77,7 @@ class _FilterBar extends StatelessWidget {
                 ? Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Bütün nəticələr',
+                      context.l10n.examAllResults,
                       style:
                           TextStyle(fontSize: 13, color: context.dr.textMuted),
                     ),
@@ -146,7 +147,7 @@ class _FilterButton extends StatelessWidget {
                 size: 18, color: on ? context.dr.accent : context.dr.textMain),
             const SizedBox(width: 8),
             Text(
-              'Filtr',
+              context.l10n.commonFilter,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -261,7 +262,7 @@ class _FilterSheet extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Filtrlər',
+                    context.l10n.examFilters,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -274,7 +275,7 @@ class _FilterSheet extends StatelessWidget {
                       onTap: () =>
                           bloc.add(const ExaminationFiltersCleared()),
                       child: Text(
-                        'Sıfırla',
+                        context.l10n.examReset,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -291,20 +292,20 @@ class _FilterSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _FilterSection(
-                        title: 'İmtahan qrupu',
+                        title: context.l10n.examGroup,
                         options: state.examGroupOptions,
                         selected: state.examGroup,
                         onSelected: (v) =>
                             bloc.add(ExaminationGroupSelected(v)),
                       ),
                       _FilterSection(
-                        title: 'İmtahan',
+                        title: context.l10n.examExam,
                         options: state.examOptions,
                         selected: state.exam,
                         onSelected: (v) => bloc.add(ExaminationExamSelected(v)),
                       ),
                       _FilterSection(
-                        title: 'Fənn',
+                        title: context.l10n.hwSubject,
                         options: state.subjects,
                         selected: state.subject,
                         onSelected: (v) =>
@@ -316,7 +317,7 @@ class _FilterSheet extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               DrPrimaryButton(
-                label: 'Nəticələri göstər (${state.visibleResultCount})',
+                label: context.l10n.examShowResults(state.visibleResultCount),
                 onTap: () => Navigator.of(context).pop(),
               ),
             ],
@@ -366,7 +367,9 @@ class _FilterSection extends StatelessWidget {
             children: [
               for (final option in options)
                 _OptionChip(
-                  label: option,
+                  // The "all" entry is a sentinel; only its wording is
+                  // translated, never the value compared against.
+                  label: context.filterLabel(option),
                   active: option == selected,
                   onTap: () => onSelected(option),
                 ),
@@ -432,14 +435,14 @@ class _Body extends StatelessWidget {
 
     if (state.status == ExaminationStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () =>
             context.read<ExaminationBloc>().add(const ExaminationRefreshed()),
       );
     }
 
     if (state.hasNoStudent) {
-      return const _Message(text: 'Şagird təyin edilməyib');
+      return _Message(text: context.l10n.examNoStudent);
     }
 
     final groups = state.visibleGroups;
@@ -447,14 +450,14 @@ class _Body extends StatelessWidget {
       // With filters on, the list is empty because of them — offer the way out.
       if (state.activeFilterCount > 0) {
         return _Message(
-          text: 'Seçilmiş filtrlərə uyğun nəticə yoxdur',
-          actionLabel: 'Filtrləri sıfırla',
+          text: context.l10n.examNoMatch,
+          actionLabel: context.l10n.examResetFilters,
           onAction: () => context
               .read<ExaminationBloc>()
               .add(const ExaminationFiltersCleared()),
         );
       }
-      return const _Message(text: 'İmtahan nəticəsi tapılmadı');
+      return _Message(text: context.l10n.examEmpty);
     }
 
     return Column(
@@ -481,7 +484,7 @@ class _GroupSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DrSectionHeader(title: group.name ?? 'Nəticələr'),
+        DrSectionHeader(title: group.name ?? context.l10n.examResults),
         DrListCard(
           children: [
             for (var i = 0; i < results.length; i++)
@@ -503,7 +506,7 @@ class _ResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subject = result.subject ?? 'Fənn';
+    final subject = result.subject ?? context.l10n.hwSubject;
     final subtitle = [
       if (result.exam != null) result.exam!,
       if (result.className != null) result.className!,
@@ -531,12 +534,12 @@ class _Mark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (result.absent) {
-      return _Badge(label: 'Qayıb', color: DrColors.red);
+      return _Badge(label: context.l10n.attendanceAbsent, color: DrColors.red);
     }
 
     if (!result.isGraded) {
       return Text(
-        'Qiymətləndirilməyib',
+        context.l10n.examNotGraded,
         style: TextStyle(fontSize: 11, color: context.dr.textMuted),
       );
     }
@@ -554,14 +557,14 @@ class _Mark extends StatelessWidget {
         ),
         if (result.grade != null)
           Text(
-            'Grade: ${result.grade}',
+            context.l10n.examGradeLabel(result.grade!),
             style: TextStyle(fontSize: 11, color: context.dr.textMuted),
           ),
         if (result.behaviour != null || result.effort != null)
           Text(
             [
-              if (result.behaviour != null) 'Davranış: ${result.behaviour}',
-              if (result.effort != null) 'Səy: ${result.effort}',
+              if (result.behaviour != null) context.l10n.examBehaviourLabel(result.behaviour!),
+              if (result.effort != null) context.l10n.examEffortLabel(result.effort!),
             ].join(' • '),
             style: TextStyle(fontSize: 11, color: context.dr.textMuted),
           ),
@@ -609,13 +612,14 @@ class _Message extends StatelessWidget {
   final VoidCallback? onRetry;
 
   /// An alternative to [onRetry] for messages that offer something other than
-  /// a retry (clearing the filters, say).
-  final String actionLabel;
+  /// a retry (clearing the filters, say). Null falls back to the retry wording,
+  /// resolved at build time rather than as a default value.
+  final String? actionLabel;
   final VoidCallback? onAction;
   const _Message({
     required this.text,
     this.onRetry,
-    this.actionLabel = 'Yenidən cəhd et',
+    this.actionLabel,
     this.onAction,
   });
 
@@ -632,7 +636,11 @@ class _Message extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: onRetry ?? onAction,
-              child: Text(onRetry != null ? 'Yenidən cəhd et' : actionLabel),
+              child: Text(
+                onRetry != null
+                    ? context.l10n.commonRetry
+                    : actionLabel ?? context.l10n.commonRetry,
+              ),
             ),
           ],
         ],

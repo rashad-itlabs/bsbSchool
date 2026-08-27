@@ -1,5 +1,5 @@
+import '../../../../core/utils/json_coerce.dart';
 import '../../domain/entities/tuition_child.dart';
-import 'tuition_json.dart';
 
 class TuitionChildModel extends TuitionChild {
   const TuitionChildModel({

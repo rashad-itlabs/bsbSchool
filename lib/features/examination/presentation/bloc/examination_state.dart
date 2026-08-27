@@ -4,7 +4,7 @@ enum ExaminationStatus { initial, loading, loaded, error }
 
 class ExaminationState extends Equatable {
   /// Sentinel for "this filter is off" — also the label of its first chip.
-  static const String any = 'Hamısı';
+  static const String any = kAllFilterSentinel;
 
   /// Kept as the subject filter's own name for readability at call sites.
   static const String allSubjects = any;

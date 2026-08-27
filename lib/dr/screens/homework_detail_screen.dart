@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../features/homework/domain/entities/homework.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Full view of a single homework, reached by tapping a card on the list.
 /// Shows the whole (HTML-stripped) description, the key dates, and — when the
@@ -21,7 +22,7 @@ class HomeworkDetailScreen extends StatelessWidget {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Tapşırıq'),
+          DrBackHeader(title: context.l10n.hwDetailTitle),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -60,7 +61,7 @@ class HomeworkDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           if (desc.isNotEmpty) ...[
-            const DrSectionHeader(title: 'Təsvir'),
+            DrSectionHeader(title: context.l10n.hwDetailDescription),
             DrCard(
               radius: 20,
               child: Text(
@@ -74,22 +75,22 @@ class HomeworkDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
           ],
-          const DrSectionHeader(title: 'Məlumat'),
+          DrSectionHeader(title: context.l10n.hwDetailInfo),
           DrCard(
             radius: 20,
             child: Column(
               children: [
-                _InfoRow(label: 'Fənn', value: homework.subject),
-                _InfoRow(label: 'Bölmə', value: homework.section),
-                _InfoRow(label: 'Müəllim', value: homework.teacher),
+                _InfoRow(label: context.l10n.hwSubject, value: homework.subject),
+                _InfoRow(label: context.l10n.hwSection, value: homework.section),
+                _InfoRow(label: context.l10n.hwTeacher, value: homework.teacher),
                 _InfoRow(
-                    label: 'Verilmə tarixi',
+                    label: context.l10n.hwGivenDate,
                     value: _formatDate(homework.homeworkDate)),
                 _InfoRow(
-                    label: 'Son tarix',
+                    label: context.l10n.hwDueDate,
                     value: _formatDate(homework.submitDate)),
                 _InfoRow(
-                    label: 'Qiymətləndirmə',
+                    label: context.l10n.hwGrading,
                     value: _formatDate(homework.evaluationDate),
                     last: true),
               ],
@@ -160,7 +161,7 @@ class _DownloadButton extends StatelessWidget {
 
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Fayl açıla bilmədi')),
+        SnackBar(content: Text(context.l10n.fileCouldNotOpen)),
       );
     }
   }
@@ -168,7 +169,7 @@ class _DownloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DrPrimaryButton(
-      label: 'Faylı yüklə',
+      label: context.l10n.fileDownload,
       trailingIcon: Icons.download_rounded,
       onTap: () => _open(context),
     );

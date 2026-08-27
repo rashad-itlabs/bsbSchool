@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/dr_colors.dart';
+import '../../core/l10n/app_dates.dart';
 
 /// `.profile-btn` — green circle wrapping a black disc with the user's initials.
 class TeacherAvatar extends StatelessWidget {
@@ -247,14 +248,10 @@ class TeacherDatePicker extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const _months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-
-  /// `toLocaleDateString('en-US', {day, month, year})` — e.g. `16 July 2026`.
-  static String format(DateTime d) =>
-      '${d.day} ${_months[d.month - 1]} ${d.year}';
+  /// e.g. `16 July 2026`, in the app's language. Takes the context because
+  /// the month name does.
+  static String format(BuildContext context, DateTime d) =>
+      AppDates.full(context, d);
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +277,7 @@ class TeacherDatePicker extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                format(value),
+                format(context, value),
                 style: TextStyle(fontSize: 15, color: context.dr.textMain),
               ),
             ),

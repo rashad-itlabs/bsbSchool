@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Puts a finished download where the student can find it with the phone's own
 /// file browser instead of only inside the app:
@@ -14,7 +15,7 @@ class PublicDownloads {
   static const _channel = MethodChannel('bsbschool/public_downloads');
 
   /// Name of the destination as the student sees it, for messages.
-  static String get locationName => Platform.isIOS ? 'Fayllar' : 'Yükləmələr';
+  static String get locationName => Platform.isIOS ? L.s.downloadsFiles : L.s.downloadsFolder;
 
   /// Copies [source] out under [fileName], replacing an earlier copy of the
   /// same name. Throws if the copy cannot be written.

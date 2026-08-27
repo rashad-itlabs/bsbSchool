@@ -7,6 +7,7 @@ import '../../theme/dr_colors.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'teacher_data.dart';
+import '../../../core/l10n/l10n.dart';
 
 enum _Att { p, a, l }
 
@@ -62,7 +63,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Student Attendance',
+            title: context.l10n.tStudentAttendance,
             initials: AuthUser.initialsOf(name),
             showBack: false,
           ),
@@ -71,7 +72,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             child: Column(
               children: [
                 TeacherField(
-                  label: 'Class Group',
+                  label: context.l10n.tClassGroup,
                   child: TeacherDropdown<TeacherClassGroup>(
                     value: _group,
                     items: teacherClassGroups,
@@ -85,7 +86,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
                 ),
                 const SizedBox(height: 12),
                 TeacherField(
-                  label: 'Date',
+                  label: context.l10n.tDate,
                   child: TeacherDatePicker(
                     value: _date,
                     onChanged: (d) => setState(() {
@@ -104,12 +105,12 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Student List',
+                Text(
+                  context.l10n.tStudentList,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  'Present: $present | Absent: $absent | Late: $late',
+                  context.l10n.tAttendanceCounts(present, absent, late),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -162,15 +163,15 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
           const SizedBox(height: 30),
           DrPrimaryButton(
             label: _saved
-                ? 'Edit Attendance Records'
-                : 'Save Attendance Records',
+                ? context.l10n.tEditAttendance
+                : context.l10n.tSaveAttendance,
             onTap: () {
               setState(() => _saved = !_saved);
               showTeacherToast(
                 context,
                 _saved
-                    ? 'Attendance saved successfully!'
-                    : 'Editing mode active.',
+                    ? context.l10n.tAttendanceSaved
+                    : context.l10n.tEditingMode,
               );
             },
           ),

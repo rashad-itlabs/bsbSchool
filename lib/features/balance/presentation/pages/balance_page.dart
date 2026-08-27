@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../cubit/balance_cubit.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Expects a [BalanceCubit] to be provided above it in the tree
 /// (see HomePage / injection_container).
@@ -16,7 +17,7 @@ class BalancePage extends StatelessWidget {
     final controller = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Balans')),
+      appBar: AppBar(title: Text(context.l10n.balanceLabel)),
       body: BlocConsumer<BalanceCubit, BalanceState>(
         listenWhen: (p, c) => c.message != null && c.message != p.message,
         listener: (context, state) {
@@ -30,7 +31,7 @@ class BalancePage extends StatelessWidget {
             children: [
               _BalanceCard(amount: state.amount),
               const SizedBox(height: 24),
-              const Text('Sürətli artırma',
+              Text(context.l10n.balanceQuickTopUp,
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Wrap(
@@ -45,17 +46,17 @@ class BalancePage extends StatelessWidget {
                     .toList(),
               ),
               const SizedBox(height: 24),
-              const Text('Xüsusi məbləğ',
+              Text(context.l10n.balanceCustomAmount,
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               TextField(
                 controller: controller,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   prefixIcon: Icon(Icons.attach_money),
                   border: OutlineInputBorder(),
-                  hintText: 'Məbləğ (AZN)',
+                  hintText: context.l10n.balanceAmountField,
                 ),
               ),
               const SizedBox(height: 16),
@@ -65,7 +66,7 @@ class BalancePage extends StatelessWidget {
                       controller.text.trim().replaceAll(',', '.'));
                   if (value == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Düzgün məbləğ daxil edin')),
+                      SnackBar(content: Text(context.l10n.balanceInvalidAmount)),
                     );
                     return;
                   }
@@ -73,7 +74,7 @@ class BalancePage extends StatelessWidget {
                   controller.clear();
                 },
                 icon: const Icon(Icons.add_card),
-                label: const Text('Balansı artır'),
+                label: Text(context.l10n.balanceTopUp),
               ),
             ],
           );
@@ -100,7 +101,7 @@ class _BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Mövcud balans',
+          Text(context.l10n.balanceCurrent,
               style: TextStyle(color: Colors.white70)),
           const SizedBox(height: 8),
           Text(

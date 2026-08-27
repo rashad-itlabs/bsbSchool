@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 class ChildAccount extends Equatable {
   final int? childId;
   final int? classId;
+  final String username;
   final String className;
   final String childName;
   final String childSurname;
@@ -20,6 +21,7 @@ class ChildAccount extends Equatable {
   const ChildAccount({
     this.childId,
     this.classId,
+    this.username = '',
     this.className = '',
     this.childName = '',
     this.childSurname = '',
@@ -36,6 +38,7 @@ class ChildAccount extends Equatable {
   List<Object?> get props => [
         childId,
         classId,
+        username,
         className,
         childName,
         childSurname,

@@ -216,6 +216,31 @@ void main() {
     expect(state.recentPayments.map((p) => p.id), [30, 23, 20, 16]);
   });
 
+  test('keeps non-tuition charges out of the tuition schedule', () {
+    final state = _stateOf(_parse('''
+{
+    "success": true,
+    "currency": "AZN",
+    "charges": [
+        {"id": 60, "due_date": "2026-09-10", "type": "book",
+         "type_label": "Books", "amount": 85, "status": "open",
+         "status_label": "Unpaid", "is_overdue": false},
+        {"id": 42, "due_date": "2026-09-05", "type": "tuition",
+         "type_label": "Tuition", "amount": 1600, "status": "open",
+         "status_label": "Unpaid", "is_overdue": false},
+        {"id": 61, "due_date": "2026-10-01", "type": null,
+         "type_label": null, "amount": 40, "status": "paid",
+         "status_label": "Paid", "is_overdue": false}
+    ]
+}
+'''));
+
+    // The typed charge is billed on the extra-fees endpoint instead; an
+    // untyped one stays with tuition. Order is by due date.
+    expect(state.tuitionSchedule.map((c) => c.id), [42, 61]);
+    expect(state.tuitionSchedule.any((c) => c.id == 60), isFalse);
+  });
+
   test('survives a payload with nothing in it', () {
     final content = _parse('{"success": true}');
     final state = _stateOf(content);

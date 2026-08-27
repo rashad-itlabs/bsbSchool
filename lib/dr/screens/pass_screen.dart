@@ -6,6 +6,8 @@ import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/domain/entities/child_account.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/notifications/presentation/widgets/notification_settings_card.dart';
+import '../../core/l10n/l10n.dart';
+import '../../core/l10n/locale_controller.dart';
 import '../theme/dr_colors.dart';
 import '../theme/theme_controller.dart';
 import '../widgets/dr_widgets.dart';
@@ -20,7 +22,6 @@ class PassScreen extends StatefulWidget {
 
 class _PassScreenState extends State<PassScreen> {
   bool _freeze = false;
-  String _lang = 'AZ';
 
   void _changePin() {
     showModalBottomSheet(
@@ -60,7 +61,7 @@ class _PassScreenState extends State<PassScreen> {
                   textAlign: TextAlign.center),
               const SizedBox(height: 20),
               DrPrimaryButton(
-                  label: 'Təsdiqlə',
+                  label: context.l10n.commonConfirm,
                   onTap: () => Navigator.of(context).pop()),
               const SizedBox(height: 12),
             ],
@@ -75,17 +76,17 @@ class _PassScreenState extends State<PassScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: context.dr.bgSurface,
-        title: const Text('Çıxış'),
-        content: const Text('Hesabdan çıxmaq istədiyinizə əminsiniz?'),
+        title: Text(context.l10n.settingsLogout),
+        content: Text(context.l10n.settingsLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('Ləğv et',
+            child: Text(context.l10n.commonCancel,
                 style: TextStyle(color: context.dr.textMuted)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Çıxış',
+            child: Text(context.l10n.settingsLogout,
                 style: TextStyle(color: dialogContext.dr.accent)),
           ),
         ],
@@ -122,7 +123,7 @@ class _PassScreenState extends State<PassScreen> {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Tənzimləmələr', showBack: false),
+          DrBackHeader(title: context.l10n.settingsTitle, showBack: false),
           const SizedBox(height: 8),
           Center(
             child: Column(
@@ -160,14 +161,13 @@ class _PassScreenState extends State<PassScreen> {
             const SizedBox(height: 24),
             DrSectionHeader(
               title: children.length > 1
-                  ? 'Övladlarım (${children.length})'
-                  : 'Övladımın məlumatları',
+                  ? context.l10n.settingsMyChildren(children.length)
+                  : context.l10n.settingsMyChild,
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Text(
-                'Bu e-mail və şifrə ilə övladınız tətbiqə öz hesabı ilə '
-                'daxil ola bilər. Kopyalayıb ona göndərə bilərsiniz.',
+                context.l10n.settingsChildCredentials,
                 style: TextStyle(
                     fontSize: 12.5,
                     height: 1.4,
@@ -205,8 +205,8 @@ class _PassScreenState extends State<PassScreen> {
               DrSettingItem(
                 icon: Icons.light_mode_outlined,
                 iconColor: DrColors.orange,
-                title: 'Gündüz rejimi',
-                subtitle: 'Açıq rəngli interfeys',
+                title: context.l10n.settingsLightMode,
+                subtitle: context.l10n.settingsLightModeSubtitle,
                 trailing: DrSwitch(
                     value: Theme.of(context).brightness == Brightness.light,
                     onChanged: (v) => ThemeController.instance
@@ -215,15 +215,15 @@ class _PassScreenState extends State<PassScreen> {
               DrSettingItem(
                 icon: Icons.language,
                 iconColor: const Color(0xFFA8A8A8),
-                title: 'Dil / Language',
-                subtitle: 'Azərbaycan, English, Русский',
+                title: context.l10n.settingsLanguage,
+                subtitle: _languageSubtitle(context),
                 divider: false,
                 trailing: _langDropdown(),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          const DrSectionHeader(title: 'Bildiriş parametrləri'),
+          DrSectionHeader(title: context.l10n.settingsNotifications),
           // Same switches as the notifications tab, driven by the shared
           // NotificationPrefs, so both places stay in agreement.
           const NotificationSettingsCard(),
@@ -233,9 +233,9 @@ class _PassScreenState extends State<PassScreen> {
               DrSettingItem(
                 icon: Icons.logout,
                 iconColor: DrColors.redStrong,
-                title: 'Çıxış',
+                title: context.l10n.settingsLogout,
                 titleColor: DrColors.redStrong,
-                subtitle: 'Tətbiqdən çıxın',
+                subtitle: context.l10n.settingsLogoutSubtitle,
                 divider: false,
                 onTap: _logout,
                 trailing: Icon(Icons.chevron_right,
@@ -249,27 +249,52 @@ class _PassScreenState extends State<PassScreen> {
     );
   }
 
+  /// Names the language actually in use, so "Sistem dili" still tells the
+  /// parent which one that turned out to be.
+  String _languageSubtitle(BuildContext context) {
+    final l10n = context.l10n;
+    final name = switch (Localizations.localeOf(context).languageCode) {
+      'en' => l10n.languageEn,
+      'ru' => l10n.languageRu,
+      _ => l10n.languageAz,
+    };
+    return LocaleController.instance.isSystem
+        ? '${l10n.languageSystem} · $name'
+        : name;
+  }
+
   Widget _langDropdown() {
+    // The controller stores null for "follow the device"; the dropdown needs a
+    // value it can compare, hence the sentinel.
+    const system = 'system';
+    final current = LocaleController.instance.locale?.languageCode ?? system;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: context.dr.bgSurfaceLight,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: context.dr.border),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _lang,
+          value: current,
           isDense: true,
           dropdownColor: context.dr.bgSurfaceLight,
           style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: context.dr.textMain),
-          items: const ['AZ', 'EN', 'RU']
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (v) => setState(() => _lang = v ?? 'AZ'),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: context.dr.textMain,
+          ),
+          items: const [
+            DropdownMenuItem(value: system, child: Text('Auto')),
+            DropdownMenuItem(value: 'az', child: Text('AZ')),
+            DropdownMenuItem(value: 'en', child: Text('EN')),
+            DropdownMenuItem(value: 'ru', child: Text('RU')),
+          ],
+          onChanged: (value) => LocaleController.instance.setLocale(
+            value == null || value == system ? null : Locale(value),
+          ),
         ),
       ),
     );
@@ -309,7 +334,7 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('$label kopyalandı'),
+          content: Text(context.l10n.copiedToClipboard(label)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -400,21 +425,29 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
           if (child.email.isNotEmpty)
             _CredentialRow(
               icon: Icons.alternate_email,
-              label: 'E-mail',
+              label: context.l10n.loginEmail,
               value: child.email,
-              onCopy: () => _copy(child.email, 'E-mail'),
+              onCopy: () => _copy(child.email, context.l10n.loginEmail),
+            ),
+          const SizedBox(height: 14),
+          if (child.username.isNotEmpty)
+            _CredentialRow(
+              icon: Icons.alternate_email,
+              label: context.l10n.credentialUsername,
+              value: child.username,
+              onCopy: () => _copy(child.username, context.l10n.credentialUsername),
             ),
           if (child.email.isNotEmpty && child.password.isNotEmpty)
             const SizedBox(height: 10),
           if (child.password.isNotEmpty)
             _CredentialRow(
               icon: Icons.lock_outline,
-              label: 'Şifrə',
+              label: context.l10n.loginPassword,
               value: child.password,
               obscured: !_showPassword,
               onToggleVisibility: () =>
                   setState(() => _showPassword = !_showPassword),
-              onCopy: () => _copy(child.password, 'Şifrə'),
+              onCopy: () => _copy(child.password, context.l10n.loginPassword),
             ),
         ],
       ),
@@ -429,7 +462,7 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        'Aktiv',
+        context.l10n.credentialActive,
         style: TextStyle(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
@@ -470,7 +503,7 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
                   size: 16, color: context.dr.accent),
             const SizedBox(width: 8),
             Text(
-              switching ? 'Dəyişdirilir…' : 'Bu şagirdə keç',
+              switching ? context.l10n.credentialSwitching : context.l10n.credentialSwitchTo,
               style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -486,7 +519,7 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
   /// sits as a tappable badge rather than a full credential row.
   Widget _paymentBadge(String paymentId) {
     return GestureDetector(
-      onTap: () => _copy(paymentId, 'Ödəniş ID'),
+      onTap: () => _copy(paymentId, context.l10n.credentialPaymentId),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
@@ -574,7 +607,7 @@ class _CredentialRow extends StatelessWidget {
             IconButton(
               onPressed: onToggleVisibility,
               visualDensity: VisualDensity.compact,
-              tooltip: obscured ? 'Göstər' : 'Gizlət',
+              tooltip: obscured ? context.l10n.commonShow : context.l10n.commonHide,
               icon: Icon(
                 obscured
                     ? Icons.visibility_outlined
@@ -586,7 +619,7 @@ class _CredentialRow extends StatelessWidget {
           IconButton(
             onPressed: onCopy,
             visualDensity: VisualDensity.compact,
-            tooltip: 'Kopyala',
+            tooltip: context.l10n.commonCopy,
             icon: Icon(Icons.copy_rounded, size: 18, color: context.dr.accent),
           ),
         ],

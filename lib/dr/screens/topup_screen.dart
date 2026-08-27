@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `topup.html` — amount entry + payment card form.
 class TopUpScreen extends StatefulWidget {
@@ -54,7 +55,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Balansı artır'),
+          DrBackHeader(title: context.l10n.balanceTopUp),
           const SizedBox(height: 20),
           // Amount input
           Padding(
@@ -103,7 +104,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Ödəniş kartı',
+                    Text(context.l10n.topUpCardSection,
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     Row(
@@ -121,16 +122,16 @@ class _TopUpScreenState extends State<TopUpScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const DrTextField(
-                    label: 'Kartın nömrəsi',
+                DrTextField(
+                    label: context.l10n.cardNumberField,
                     hint: '0000 0000 0000 0000',
                     icon: Icons.credit_card,
                     keyboardType: TextInputType.number),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 Row(
-                  children: const [
+                  children: [
                     Expanded(
-                        child: DrTextField(label: 'Müddət', hint: 'AA/İİ')),
+                        child: DrTextField(label: context.l10n.cardExpiry, hint: 'AA/İİ')),
                     SizedBox(width: 16),
                     Expanded(
                         child: DrTextField(
@@ -138,14 +139,14 @@ class _TopUpScreenState extends State<TopUpScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const DrTextField(
-                    label: 'Kart Sahibinin Adı', hint: 'AD VƏ SOYAD'),
+                DrTextField(
+                    label: context.l10n.cardHolder, hint: context.l10n.cardHolderHint),
               ],
             ),
           ),
           const SizedBox(height: 30),
           DrPrimaryButton(
-            label: 'Ödəniş et',
+            label: context.l10n.payNow,
             trailingIcon: Icons.arrow_forward,
             onTap: () => Navigator.of(context).maybePop(),
           ),

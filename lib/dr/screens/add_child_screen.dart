@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Shown instead of the dashboard when a parent logs in successfully but the
 /// response carries `user_id: null` — the school hasn't linked a student to the
@@ -36,7 +37,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
     FocusScope.of(context).unfocus();
     final admissionNo = _admissionController.text.trim();
     if (admissionNo.isEmpty) {
-      setState(() => _error = 'Qəbul nömrəsini daxil edin');
+      setState(() => _error = context.l10n.addChildEnterNumber);
       return;
     }
 
@@ -56,7 +57,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(content: Text('Şagird hesabınıza əlavə edildi')),
+        SnackBar(content: Text(context.l10n.addChildAdded)),
       );
   }
 
@@ -68,17 +69,17 @@ class _AddChildScreenState extends State<AddChildScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: context.dr.bgSurface,
-        title: const Text('Çıxış'),
-        content: const Text('Hesabdan çıxmaq istədiyinizə əminsiniz?'),
+        title: Text(context.l10n.settingsLogout),
+        content: Text(context.l10n.settingsLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child:
-                Text('Ləğv et', style: TextStyle(color: context.dr.textMuted)),
+                Text(context.l10n.commonCancel, style: TextStyle(color: context.dr.textMuted)),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('Çıxış',
+            child: Text(context.l10n.settingsLogout,
                 style: TextStyle(color: dialogContext.dr.accent)),
           ),
         ],
@@ -134,7 +135,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
                 ),
                 Center(
                   child: Text(
-                    'Şagirdinizi əlavə edin',
+                    context.l10n.addChildTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 24,
@@ -147,11 +148,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
                 Center(
                   child: Text(
                     parentName.isEmpty
-                        ? 'Hesabınıza hələ şagird bağlanmayıb. Davam etmək '
-                            'üçün övladınızın qəbul nömrəsini daxil edin.'
-                        : '$parentName, hesabınıza hələ şagird bağlanmayıb. '
-                            'Davam etmək üçün övladınızın qəbul nömrəsini '
-                            'daxil edin.',
+                        ? context.l10n.addChildText
+                        : context.l10n.addChildTextNamed(parentName),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -166,8 +164,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       DrTextField(
-                        label: 'Qəbul nömrəsi',
-                        hint: 'Övladınızın qəbul nömrəsi',
+                        label: context.l10n.addChildField,
+                        hint: context.l10n.addChildHint,
                         icon: Icons.badge_outlined,
                         controller: _admissionController,
                         enabled: !_submitting,
@@ -203,7 +201,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
                       ],
                       const SizedBox(height: 20),
                       DrPrimaryButton(
-                        label: 'Əlavə et',
+                        label: context.l10n.addChildSubmit,
                         trailingIcon: Icons.arrow_forward_rounded,
                         loading: _submitting,
                         onTap: _submit,
@@ -223,8 +221,8 @@ class _AddChildScreenState extends State<AddChildScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       foregroundColor: context.dr.textMuted,
                     ),
-                    child: const Text(
-                      'Başqa hesabla daxil ol',
+                    child: Text(
+                      context.l10n.addChildOtherAccount,
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -253,9 +251,9 @@ class _WhereToFindCard extends StatelessWidget {
             children: [
               Icon(Icons.help_outline_rounded,
                   size: 18, color: context.dr.accent),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
-                'Qəbul nömrəsi haradadır?',
+                context.l10n.addChildWhereTitle,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -264,11 +262,11 @@ class _WhereToFindCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          for (final line in const [
-            'Şagird vəsiqəsinin üzərində',
-            'Məktəbin verdiyi qəbul sənədində',
-            'Məktəbin katibliyindən soruşa bilərsiniz',
+          SizedBox(height: 12),
+          for (final line in [
+            context.l10n.addChildWhere1,
+            context.l10n.addChildWhere2,
+            context.l10n.addChildWhere3,
           ])
             Padding(
               padding: const EdgeInsets.only(bottom: 8),

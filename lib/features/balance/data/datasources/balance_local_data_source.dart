@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Balance is persisted locally so it survives app restarts and is shared
 /// (single source of truth) between the Balance and Buffet features.
@@ -26,7 +27,7 @@ class BalanceLocalDataSourceImpl implements BalanceLocalDataSource {
   Future<double> addBalance(double amount) async {
     final next = (await getBalance()) + amount;
     final ok = await prefs.setDouble(_key, next);
-    if (!ok) throw const CacheException('Balans yenilənmədi');
+    if (!ok) throw CacheException(L.s.errBalanceUpdate);
     return next;
   }
 
@@ -34,11 +35,11 @@ class BalanceLocalDataSourceImpl implements BalanceLocalDataSource {
   Future<double> deduct(double amount) async {
     final current = await getBalance();
     if (amount > current) {
-      throw const ValidationException('Balans kifayət etmir');
+      throw ValidationException(L.s.errInsufficientBalance);
     }
     final next = current - amount;
     final ok = await prefs.setDouble(_key, next);
-    if (!ok) throw const CacheException('Balans yenilənmədi');
+    if (!ok) throw CacheException(L.s.errBalanceUpdate);
     return next;
   }
 }

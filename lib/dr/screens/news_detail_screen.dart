@@ -6,6 +6,7 @@ import '../../features/news/domain/entities/news_item.dart';
 import '../../features/news/presentation/widgets/news_image.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Full view of one news entry, reached by tapping a slide on the dashboard.
 /// The slider only has room for two lines of each field; here the image, the
@@ -22,7 +23,7 @@ class NewsDetailScreen extends StatelessWidget {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Xəbər'),
+          DrBackHeader(title: context.l10n.newsTitle),
           ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: AspectRatio(
@@ -80,7 +81,7 @@ class NewsDetailScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Bu xəbər üçün əlavə mətn yoxdur',
+                    context.l10n.newsNoBody,
                     style:
                         TextStyle(fontSize: 13, color: context.dr.textMuted),
                   ),

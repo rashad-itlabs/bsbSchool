@@ -32,18 +32,24 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
   static const _allTabs = <_Tab>[
-    _Tab(DrNavDestination(Icons.home_rounded, 'Home'), DashboardScreen()),
-    _Tab(DrNavDestination(Icons.badge_outlined, 'Food Card'), FoodCardScreen()),
+    _Tab(DrNavDestination(Icons.home_rounded, DrNavLabel.home), DashboardScreen()),
     _Tab(
-      DrNavDestination(Icons.receipt_long_outlined, 'Tuition'),
+      DrNavDestination(Icons.badge_outlined, DrNavLabel.foodCard),
+      FoodCardScreen(),
+    ),
+    _Tab(
+      DrNavDestination(Icons.receipt_long_outlined, DrNavLabel.tuition),
       TuitionScreen(),
       parentOnly: true,
     ),
     _Tab(
-      DrNavDestination(Icons.notifications_none_rounded, 'Notifs'),
+      DrNavDestination(Icons.notifications_none_rounded, DrNavLabel.notifications),
       NotificationsScreen(),
     ),
-    _Tab(DrNavDestination(Icons.person_outline_rounded, 'Prof'), PassScreen()),
+    _Tab(
+      DrNavDestination(Icons.person_outline_rounded, DrNavLabel.profile),
+      PassScreen(),
+    ),
   ];
 
   @override

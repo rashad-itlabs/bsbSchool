@@ -7,6 +7,7 @@ import '../../theme/dr_colors.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'teacher_data.dart';
+import '../../../core/l10n/l10n.dart';
 
 class _Report {
   final String type;
@@ -53,7 +54,7 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
     ),
   ];
 
-  List<TeacherStudent> get _students => teacherStudents[_group.id] ?? const [];
+  List<TeacherStudent> get _students => teacherStudents[_group.id] ?? [];
 
   @override
   void dispose() {
@@ -64,7 +65,7 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
 
   void _submit() {
     if (_title.text.trim().isEmpty) {
-      showTeacherToast(context, 'Please enter report title!');
+      showTeacherToast(context, context.l10n.tEnterReportTitle);
       return;
     }
 
@@ -75,13 +76,13 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
         _Report(
           perStudent ? 'student' : 'weekly',
           perStudent
-              ? 'Student report for ${_student.name}'
+              ? context.l10n.tStudentReportFor(_student.name)
               : _title.text.trim(),
-          TeacherDatePicker.format(DateTime.now()),
+          TeacherDatePicker.format(context, DateTime.now()),
           perStudent
               ? '[${_group.label}] ${_title.text.trim()}. ${_comments.text}'
               : (_comments.text.trim().isEmpty
-                  ? 'Report document uploaded successfully.'
+                  ? context.l10n.tDocUploaded
                   : _comments.text.trim()),
           _file,
         ),
@@ -91,7 +92,7 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
       _file = null;
     });
 
-    showTeacherToast(context, 'Report submitted successfully!');
+    showTeacherToast(context, context.l10n.tReportSubmitted);
   }
 
   @override
@@ -104,11 +105,11 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Upload Reports',
+            title: context.l10n.tUploadReports,
             initials: AuthUser.initialsOf(name),
           ),
           TeacherSegmented(
-            labels: const ['Weekly Reports', 'Student Reports'],
+            labels: [context.l10n.tWeeklyReports, context.l10n.tStudentReports],
             selectedIndex: _tab,
             onSelected: (i) => setState(() => _tab = i),
           ),
@@ -118,7 +119,7 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
             child: Column(
               children: [
                 TeacherField(
-                  label: 'Class Group',
+                  label: context.l10n.tClassGroup,
                   child: TeacherDropdown<TeacherClassGroup>(
                     value: _group,
                     items: teacherClassGroups,
@@ -133,7 +134,7 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
                 if (_tab == 1) ...[
                   const SizedBox(height: 20),
                   TeacherField(
-                    label: 'Target Student',
+                    label: context.l10n.tTargetStudent,
                     child: TeacherDropdown<TeacherStudent>(
                       value: _student,
                       items: _students,
@@ -144,39 +145,39 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
                 ],
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Report Title',
+                  label: context.l10n.tReportTitle,
                   child: TeacherInput(
                     controller: _title,
                     hint: _tab == 1
-                        ? 'e.g. Samir Aliyev behavior & work feedback'
-                        : 'e.g. Week 14 Mathematics Progress',
+                        ? context.l10n.tReportHintStudent
+                        : context.l10n.tReportHintWeekly,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Comments / Observations',
+                  label: context.l10n.tComments,
                   child: TeacherInput(
                     controller: _comments,
-                    hint: 'Provide notes or additional information...',
+                    hint: context.l10n.tCommentsHint,
                     minLines: 4,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Report Document',
+                  label: context.l10n.tReportDocument,
                   child: TeacherUploadZone(
                     emoji: '📄',
-                    hint: 'Click to attach document (PDF / XLS)',
+                    hint: context.l10n.tAttachDoc,
                     fileName: _file,
                     onTap: () {
                       // No file picker wired up yet — stands in for the upload.
                       setState(() => _file = 'report_doc.pdf');
-                      showTeacherToast(context, 'Document attached successfully!');
+                      showTeacherToast(context, context.l10n.tDocAttached);
                     },
                   ),
                 ),
                 const SizedBox(height: 20),
-                DrPrimaryButton(label: 'Submit Report Form', onTap: _submit),
+                DrPrimaryButton(label: context.l10n.tSubmitReport, onTap: _submit),
               ],
             ),
           ),
@@ -186,12 +187,12 @@ class _TeacherReportsScreenState extends State<TeacherReportsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Submission History',
+                Text(
+                  context.l10n.tSubmissionHistory,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  'Recent uploads',
+                  context.l10n.tRecentUploads,
                   style: TextStyle(fontSize: 13, color: context.dr.textMuted),
                 ),
               ],

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/di/injection_container.dart';
+import 'core/l10n/l10n.dart';
+import 'core/l10n/locale_controller.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/notifications/presentation/notification_prefs.dart';
 import 'dr/screens/add_child_screen.dart';
@@ -13,8 +16,11 @@ import 'dr/theme/theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Month and weekday names for every language the app ships.
+  await initializeDateFormatting();
   await initDependencies();
   await ThemeController.instance.load();
+  await LocaleController.instance.load();
   await NotificationPrefs.instance.load();
   runApp(const BsbSchoolApp());
 }
@@ -27,19 +33,44 @@ class BsbSchoolApp extends StatelessWidget {
     return BlocProvider<AuthBloc>(
       create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
       child: AnimatedBuilder(
-        animation: ThemeController.instance,
+        animation: Listenable.merge([
+          ThemeController.instance,
+          LocaleController.instance,
+        ]),
         builder: (context, _) {
           return MaterialApp(
-            title: 'BSB School',
+            onGenerateTitle: (context) => context.l10n.appTitle,
             debugShowCheckedModeBanner: false,
             theme: DrTheme.light,
             darkTheme: DrTheme.dark,
             themeMode: ThemeController.instance.mode,
-            home: const AuthGate(),
+            // null hands the choice to the device; `localeResolutionCallback`
+            // then closes the list with Azerbaijani rather than English.
+            locale: LocaleController.instance.locale,
+            supportedLocales: AppL10n.supportedLocales,
+            localizationsDelegates: AppL10n.localizationsDelegates,
+            localeResolutionCallback: (device, supported) {
+              return LocaleController.instance.resolve([?device]);
+            },
+            home: const _L10nBridge(child: AuthGate()),
           );
         },
       ),
     );
+  }
+}
+
+/// Keeps [L] pointed at the translations now on screen, so services and
+/// repositories can word their errors in the language the parent chose.
+class _L10nBridge extends StatelessWidget {
+  final Widget child;
+
+  const _L10nBridge({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    L.current = AppL10n.of(context);
+    return child;
   }
 }
 

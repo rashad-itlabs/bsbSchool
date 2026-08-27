@@ -7,6 +7,8 @@ import '../../theme/dr_colors.dart';
 import '../../theme/theme_controller.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
+import '../../../core/l10n/l10n.dart';
+import '../../../core/l10n/locale_controller.dart';
 
 /// Port of `teacher_theme/settings.html` — profile, account and preferences.
 class TeacherSettingsScreen extends StatefulWidget {
@@ -18,7 +20,6 @@ class TeacherSettingsScreen extends StatefulWidget {
 
 class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
   bool _notifications = true;
-  String _language = 'English';
 
   @override
   Widget build(BuildContext context) {
@@ -32,49 +33,49 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Settings',
+            title: context.l10n.navSettings,
             initials: AuthUser.initialsOf(name),
             showBack: false,
           ),
           _profile(context, name, user),
           const SizedBox(height: 25),
-          _groupTitle('Account Settings'),
+          _groupTitle(context.l10n.tAccountSettings),
           DrListCard(
             children: [
               DrSettingItem(
                 icon: Icons.lock_outline_rounded,
                 iconColor: context.dr.accent,
-                title: 'Change PIN Code',
-                subtitle: 'Turnstile and gate access security PIN',
+                title: context.l10n.tChangePin,
+                subtitle: context.l10n.tPinSubtitle,
                 trailing: _chevron(context),
                 onTap: () =>
-                    showTeacherToast(context, 'PIN change screen loading...'),
+                    showTeacherToast(context, context.l10n.tPinLoading),
               ),
               DrSettingItem(
                 icon: Icons.notifications_none_rounded,
                 iconColor: DrColors.orange,
-                title: 'Push Notifications',
-                subtitle: 'Grade alerts, schedule updates',
+                title: context.l10n.tPushNotifications,
+                subtitle: context.l10n.tPushSubtitle,
                 divider: false,
                 trailing: DrSwitch(
                   value: _notifications,
                   onChanged: (v) {
                     setState(() => _notifications = v);
-                    showTeacherToast(context, 'Notification settings updated');
+                    showTeacherToast(context, context.l10n.tNotifUpdated);
                   },
                 ),
               ),
             ],
           ),
           const SizedBox(height: 25),
-          _groupTitle('Preferences'),
+          _groupTitle(context.l10n.tPreferences),
           DrListCard(
             children: [
               DrSettingItem(
                 icon: Icons.light_mode_outlined,
                 iconColor: DrColors.orange,
-                title: 'Light Theme',
-                subtitle: 'Açıq rəngli interfeys',
+                title: context.l10n.tLightTheme,
+                subtitle: context.l10n.settingsLightModeSubtitle,
                 trailing: DrSwitch(
                   value: isLight,
                   onChanged: (_) => ThemeController.instance.toggle(
@@ -85,16 +86,16 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
               DrSettingItem(
                 icon: Icons.language_rounded,
                 iconColor: DrColors.purple,
-                title: 'Language Selection',
-                subtitle: 'App interface language option',
+                title: context.l10n.tLanguageSelection,
+                subtitle: context.l10n.tLanguageSubtitle,
                 trailing: _languagePicker(context),
               ),
               DrSettingItem(
                 icon: Icons.logout_rounded,
                 iconColor: DrColors.red,
-                title: 'Logout',
+                title: context.l10n.settingsLogout,
                 titleColor: DrColors.red,
-                subtitle: 'Exit the session securely',
+                subtitle: context.l10n.tLogoutSubtitle,
                 divider: false,
                 trailing: _chevron(context),
                 onTap: () => _confirmLogout(context),
@@ -179,6 +180,10 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
     );
   }
 
+  /// The controller stores null for "follow the device"; the dropdown needs a
+  /// value it can compare, hence the sentinel.
+  static const _system = 'system';
+
   Widget _languagePicker(BuildContext context) {
     return Container(
       height: 32,
@@ -190,7 +195,7 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _language,
+          value: LocaleController.instance.locale?.languageCode ?? _system,
           isDense: true,
           borderRadius: BorderRadius.circular(8),
           dropdownColor: context.dr.bgSurfaceLight,
@@ -204,13 +209,21 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
             fontWeight: FontWeight.w600,
             color: context.dr.textMain,
           ),
-          items: const ['English', 'Azerbaijan', 'Russian']
-              .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-              .toList(),
-          onChanged: (v) {
-            if (v == null) return;
-            setState(() => _language = v);
-            showTeacherToast(context, 'Language updated');
+          items: [
+            DropdownMenuItem(
+              value: _system,
+              child: Text(context.l10n.languageSystem),
+            ),
+            DropdownMenuItem(value: 'az', child: Text(context.l10n.languageAz)),
+            DropdownMenuItem(value: 'en', child: Text(context.l10n.languageEn)),
+            DropdownMenuItem(value: 'ru', child: Text(context.l10n.languageRu)),
+          ],
+          onChanged: (value) {
+            if (value == null) return;
+            LocaleController.instance.setLocale(
+              value == _system ? null : Locale(value),
+            );
+            showTeacherToast(context, context.l10n.tLanguageUpdated);
           },
         ),
       ),
@@ -223,20 +236,20 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: dialogContext.dr.bgSurface,
-        title: const Text('Logout'),
-        content: const Text('Exit the session securely?'),
+        title: Text(context.l10n.settingsLogout),
+        content: Text(context.l10n.tLogoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(
-              'Cancel',
+              context.l10n.commonCancel,
               style: TextStyle(color: dialogContext.dr.textMuted),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Logout',
+            child: Text(
+              context.l10n.settingsLogout,
               style: TextStyle(color: DrColors.red),
             ),
           ),

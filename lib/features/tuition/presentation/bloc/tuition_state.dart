@@ -50,6 +50,11 @@ class TuitionState extends Equatable {
     return sorted;
   }
 
+  /// Tuition instalments only. Anything else the endpoint bills lives on its
+  /// own `/extra_fees` tab, so it must not be counted twice here.
+  List<TuitionCharge> get tuitionSchedule =>
+      schedule.where((c) => c.isTuition).toList();
+
   int get paidCount => charges.where((c) => c.isPaid).length;
 
   int get totalCharges => charges.length;

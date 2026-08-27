@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bsbschool/dr/theme/dr_colors.dart';
+import 'package:bsbschool/core/l10n/l10n.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 /// A slice of the real `GET /getEvent` payload.
 const _payload = [
@@ -64,10 +67,26 @@ Widget _host(Widget child) => MaterialApp(
       theme: ThemeData.dark().copyWith(
         extensions: const [DrPalette.dark],
       ),
+      // The widgets under test read their copy from AppL10n, so the delegates
+      // have to be in the tree the same way the real app installs them.
+      locale: const Locale('az'),
+      supportedLocales: AppL10n.supportedLocales,
+      localizationsDelegates: AppL10n.localizationsDelegates,
       home: Scaffold(body: SingleChildScrollView(child: child)),
     );
 
+/// The calendar words its months and weekday heads through `intl`, so the
+/// expectations are built the same way rather than hard-coded — otherwise the
+/// test pins one language's spelling.
+String _month(int month) =>
+    DateFormat.MMMM('az').format(DateTime(2024, month));
+String _weekdayHead(int weekday) =>
+    DateFormat.E('az').format(DateTime(2024, 1, weekday));
+String _dayMonth(DateTime date) => DateFormat.MMMMd('az').format(date);
+
 void main() {
+  setUpAll(initializeDateFormatting);
+
   final events = _payload
       .map((e) => SchoolEventModel.fromJson(Map<String, dynamic>.from(e)))
       .toList();
@@ -135,16 +154,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // Weekday header.
-    expect(find.text('Be'), findsOneWidget);
-    expect(find.text('B'), findsOneWidget);
+    expect(find.text(_weekdayHead(DateTime.monday)), findsOneWidget);
+    expect(find.text(_weekdayHead(DateTime.sunday)), findsOneWidget);
 
     // Opens on the current month.
     final now = DateTime.now();
-    const months = [
-      'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-      'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
-    ];
-    expect(find.text(months[now.month - 1]), findsOneWidget);
+    expect(find.text(_month(now.month)), findsOneWidget);
     expect(find.text('${now.year}'), findsOneWidget);
 
     // Every day of the month has a cell.
@@ -164,23 +179,23 @@ void main() {
     expect(forward, findsOneWidget);
 
     for (var i = 0; i < 24; i++) {
-      if (find.text('Sentyabr').evaluate().isNotEmpty &&
+      if (find.text(_month(DateTime.september)).evaluate().isNotEmpty &&
           find.text('2026').evaluate().isNotEmpty) {
         break;
       }
       await tester.tap(forward);
       await tester.pumpAndSettle();
     }
-    expect(find.text('Sentyabr'), findsOneWidget);
+    expect(find.text(_month(DateTime.september)), findsOneWidget);
 
     // Day 1 is auto-selected on a month the user navigated to.
-    expect(find.text('1 Sentyabr'), findsOneWidget);
+    expect(find.text(_dayMonth(DateTime(2026, 9, 1))), findsOneWidget);
     expect(find.text('Staff returns'), findsOneWidget);
 
     // Tapping the 8th shows both of that day's events with their descriptions.
     await tester.tap(find.text('8').first);
     await tester.pumpAndSettle();
-    expect(find.text('8 Sentyabr'), findsOneWidget);
+    expect(find.text(_dayMonth(DateTime(2026, 9, 8))), findsOneWidget);
     expect(
       find.text('Students arrive and autumn term begins'),
       findsNWidgets(2),
@@ -209,7 +224,7 @@ void main() {
     );
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Be'), findsNothing);
+    expect(find.text(_weekdayHead(DateTime.monday)), findsNothing);
 
     var retried = false;
     await tester.pumpWidget(

@@ -42,6 +42,11 @@ class TuitionCharge extends Equatable {
 
   bool get isPaid => status == TuitionChargeStatus.paid;
 
+  /// True for an instalment of the tuition schedule itself. Anything the API
+  /// tags with another [type] — books, trips, exam entries — is an extra fee.
+  /// A missing type stays with tuition: that is the schedule's own default.
+  bool get isTuition => type == null || type!.toLowerCase() == 'tuition';
+
   /// Partly paid still counts as outstanding — there is money left on it.
   bool get isOutstanding => !isPaid;
 

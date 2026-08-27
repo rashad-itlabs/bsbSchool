@@ -4,7 +4,7 @@ enum LibraryStatus { initial, loading, loaded, error }
 
 class LibraryState extends Equatable {
   /// Sentinel for "no subject filter" — also the label of the first pill.
-  static const String allSubjects = 'Hamısı';
+  static const String allSubjects = kAllFilterSentinel;
 
   final LibraryStatus status;
 

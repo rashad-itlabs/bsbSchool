@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/auth_session_model.dart';
 import '../models/auth_user_model.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Talks to the auth endpoints over the shared [Dio] instance. Throws the
 /// app's typed [ServerException] / [ValidationException] so the repository
@@ -64,7 +65,7 @@ class AuthServiceImpl implements AuthService {
       if (status == 200 && data is Map<String, dynamic>) {
         final session = AuthSessionModel.fromJson(data);
         if (session.token.isEmpty) {
-          throw const ServerException('Token cavabda tapılmadı');
+          throw ServerException(L.s.errTokenMissing);
         }
         return session;
       }
@@ -136,9 +137,9 @@ class AuthServiceImpl implements AuthService {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    if (status == 403) return 'Bu şagird sizin hesabınıza aid deyil';
-    if (status == 404 || status == 422) return 'Şagird tapılmadı';
-    return 'Şagird dəyişdirilmədi';
+    if (status == 403) return L.s.errChildNotYours;
+    if (status == 404 || status == 422) return L.s.errStudentNotFound;
+    return L.s.errChildNotSwitched;
   }
 
   @override
@@ -191,9 +192,9 @@ class AuthServiceImpl implements AuthService {
       if (data['message'] != null) return data['message'].toString();
     }
     if (status == 404 || status == 422) {
-      return 'Bu e-mail ilə istifadəçi tapılmadı';
+      return L.s.errUserNotFound;
     }
-    return 'Server xətası baş verdi';
+    return L.s.errServer;
   }
 
   String _messageFrom(dynamic data, int status) {
@@ -201,16 +202,16 @@ class AuthServiceImpl implements AuthService {
       return data['message'].toString();
     }
     if (status == 401 || status == 422) {
-      return 'E-mail və ya şifrə yanlışdır';
+      return L.s.errWrongCredentials;
     }
-    return 'Server xətası baş verdi';
+    return L.s.errServer;
   }
 
   String _dioMessage(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return 'Serverə qoşulmaq mümkün olmadı';
+      return L.s.errNoConnection;
     }
     return _messageFrom(e.response?.data, e.response?.statusCode ?? 0);
   }

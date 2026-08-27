@@ -7,6 +7,7 @@ import '../../theme/dr_colors.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'teacher_data.dart';
+import '../../../core/l10n/l10n.dart';
 
 class _Homework {
   final String group;
@@ -56,7 +57,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
 
   void _submit() {
     if (_title.text.trim().isEmpty) {
-      showTeacherToast(context, 'Please enter homework title!');
+      showTeacherToast(context, context.l10n.tEnterHomeworkTitle);
       return;
     }
 
@@ -66,7 +67,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
         _Homework(
           _group.label,
           _title.text.trim(),
-          TeacherDatePicker.format(_due),
+          TeacherDatePicker.format(context, _due),
           _attachment,
         ),
       );
@@ -75,7 +76,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
       _attachment = null;
     });
 
-    showTeacherToast(context, 'Homework assigned successfully!');
+    showTeacherToast(context, context.l10n.tHomeworkAssigned);
   }
 
   @override
@@ -88,7 +89,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Assign Homework',
+            title: context.l10n.tAssignHomework,
             initials: AuthUser.initialsOf(name),
             showBack: false,
           ),
@@ -97,7 +98,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
             child: Column(
               children: [
                 TeacherField(
-                  label: 'Class Group',
+                  label: context.l10n.tClassGroup,
                   child: TeacherDropdown<TeacherClassGroup>(
                     value: _group,
                     items: teacherClassGroups,
@@ -107,15 +108,15 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Homework Title',
+                  label: context.l10n.tHomeworkTitle,
                   child: TeacherInput(
                     controller: _title,
-                    hint: 'e.g. Quadratic Equations Practice',
+                    hint: context.l10n.tHomeworkTitleHint,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Due Date',
+                  label: context.l10n.tDueDate,
                   child: TeacherDatePicker(
                     value: _due,
                     onChanged: (d) => setState(() => _due = d),
@@ -123,29 +124,29 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Description / Tasks',
+                  label: context.l10n.tDescriptionTasks,
                   child: TeacherInput(
                     controller: _description,
-                    hint: 'Details of the homework assignment...',
+                    hint: context.l10n.tDescriptionHint,
                     minLines: 4,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TeacherField(
-                  label: 'Attachment File',
+                  label: context.l10n.tAttachmentFile,
                   child: TeacherUploadZone(
                     emoji: '📁',
-                    hint: 'Click to choose or drop PDF / Image',
+                    hint: context.l10n.tChoosePdf,
                     fileName: _attachment,
                     onTap: () {
                       // No file picker wired up yet — stands in for the upload.
                       setState(() => _attachment = 'quadratic_practice.pdf');
-                      showTeacherToast(context, 'Mock file attached successfully!');
+                      showTeacherToast(context, context.l10n.tFileAttached);
                     },
                   ),
                 ),
                 const SizedBox(height: 20),
-                DrPrimaryButton(label: 'Assign Homework Task', onTap: _submit),
+                DrPrimaryButton(label: context.l10n.tAssignTask, onTap: _submit),
               ],
             ),
           ),
@@ -155,12 +156,12 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Active Homeworks',
+                Text(
+                  context.l10n.tActiveHomeworks,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  'Currently Assigned',
+                  context.l10n.tCurrentlyAssigned,
                   style: TextStyle(fontSize: 13, color: context.dr.textMuted),
                 ),
               ],
@@ -197,8 +198,10 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Due: ${hw.due}'
-                              '${hw.attachment != null ? ' • 📎 ${hw.attachment}' : ''}',
+                              context.l10n.tDueLabel(hw.due) +
+                                  (hw.attachment != null
+                                      ? ' • 📎 ${hw.attachment}'
+                                      : ''),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: context.dr.textMuted,
@@ -211,7 +214,7 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen> {
                       GestureDetector(
                         onTap: () {
                           setState(() => _homeworks.remove(hw));
-                          showTeacherToast(context, 'Homework deleted.');
+                          showTeacherToast(context, context.l10n.tHomeworkDeleted);
                         },
                         behavior: HitTestBehavior.opaque,
                         child: const Padding(

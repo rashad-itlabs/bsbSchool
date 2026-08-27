@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/homework.dart';
 import '../../domain/usecases/get_homeworks.dart';
+import '../../../../core/l10n/l10n.dart';
 
 part 'homework_event.dart';
 part 'homework_state.dart';

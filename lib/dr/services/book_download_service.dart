@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/library/domain/entities/book.dart';
 import 'public_downloads.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Raised when the book was downloaded but could not be copied to the phone's
 /// public Downloads / Files location. The offline [file] is usable either way,
@@ -85,7 +86,7 @@ class BookDownloadService {
   }) async {
     final url = book.fileUrl;
     if (url == null) {
-      throw StateError('Bu kitabın faylı yoxdur');
+      throw StateError(L.s.bookNoFile);
     }
     final file = await _fileFor(book);
     // Download to a `.part` file first and rename on success, so an aborted

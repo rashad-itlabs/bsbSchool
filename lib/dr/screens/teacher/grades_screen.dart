@@ -8,6 +8,7 @@ import '../../theme/dr_colors.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'teacher_data.dart';
+import '../../../core/l10n/l10n.dart';
 
 /// Port of `teacher_theme/grades.html` — score / behaviour / effort sheet.
 class TeacherGradesScreen extends StatefulWidget {
@@ -78,7 +79,7 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Post Exam Grades',
+            title: context.l10n.tPostGrades,
             initials: AuthUser.initialsOf(name),
           ),
           DrGlowCard(
@@ -86,7 +87,7 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
             child: Column(
               children: [
                 TeacherField(
-                  label: 'Class Group',
+                  label: context.l10n.tClassGroup,
                   child: TeacherDropdown<TeacherClassGroup>(
                     value: _group,
                     items: teacherClassGroups,
@@ -99,7 +100,7 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
                 ),
                 const SizedBox(height: 12),
                 TeacherField(
-                  label: 'Exam Type',
+                  label: context.l10n.tExamType,
                   child: TeacherDropdown<TeacherExamType>(
                     value: _exam,
                     items: teacherExamTypes,
@@ -116,12 +117,12 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
           const SizedBox(height: 20),
           Row(
             children: [
-              _statTile(context, '$average%', 'Average Score'),
+              _statTile(context, '$average%', context.l10n.tAverageScore),
               const SizedBox(width: 12),
               _statTile(
                 context,
                 '${scored.length}/${_entries.length}',
-                'Graded Status',
+                context.l10n.tGradedStatus,
               ),
             ],
           ),
@@ -131,12 +132,12 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Student Grades',
+                Text(
+                  context.l10n.tStudentGrades,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 Text(
-                  'Max: 100 points',
+                  context.l10n.tMaxPoints,
                   style: TextStyle(fontSize: 13, color: context.dr.textMuted),
                 ),
               ],
@@ -152,9 +153,9 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
           ),
           const SizedBox(height: 30),
           DrPrimaryButton(
-            label: 'Publish Student Grades',
+            label: context.l10n.tPublishGrades,
             onTap: () =>
-                showTeacherToast(context, 'Grades published successfully!'),
+                showTeacherToast(context, context.l10n.tGradesPublished),
           ),
           const SizedBox(height: 20),
         ],
@@ -211,17 +212,17 @@ class _TeacherGradesScreenState extends State<TeacherGradesScreen> {
       ),
       child: Row(
         children: [
-          Expanded(child: Text('STUDENT INFO', style: style)),
-          SizedBox(width: 68, child: Text('GRADE', style: style)),
+          Expanded(child: Text(context.l10n.tStudentInfo, style: style)),
+          SizedBox(width: 68, child: Text(context.l10n.tGradeShort, style: style)),
           const SizedBox(width: 12),
           SizedBox(
             width: 50,
-            child: Text('BEH.', style: style, textAlign: TextAlign.center),
+            child: Text(context.l10n.tBehaviourShort, style: style, textAlign: TextAlign.center),
           ),
           const SizedBox(width: 12),
           SizedBox(
             width: 50,
-            child: Text('EFF.', style: style, textAlign: TextAlign.center),
+            child: Text(context.l10n.tEffortShort, style: style, textAlign: TextAlign.center),
           ),
         ],
       ),

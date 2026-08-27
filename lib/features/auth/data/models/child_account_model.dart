@@ -4,6 +4,7 @@ class ChildAccountModel extends ChildAccount {
   const ChildAccountModel({
     super.childId,
     super.classId,
+    super.username,
     super.className,
     super.childName,
     super.childSurname,
@@ -17,6 +18,7 @@ class ChildAccountModel extends ChildAccount {
     return ChildAccountModel(
       childId: child.childId,
       classId: child.classId,
+      username: child.username,
       className: child.className,
       childName: child.childName,
       childSurname: child.childSurname,
@@ -30,6 +32,7 @@ class ChildAccountModel extends ChildAccount {
     return ChildAccountModel(
       childId: _asInt(json['child_id']),
       classId: _asInt(json['class_id']),
+      username: _asString(json['username']),
       className: _asString(json['class_name']),
       childName: _asString(json['child_name']),
       childSurname: _asString(json['child_surname']),
@@ -42,6 +45,7 @@ class ChildAccountModel extends ChildAccount {
   Map<String, dynamic> toJson() => {
         'child_id': childId,
         'class_id': classId,
+        'username': username,
         'class_name': className,
         'child_name': childName,
         'child_surname': childSurname,

@@ -9,6 +9,7 @@ import '../../../examination/presentation/pages/examination_page.dart';
 import '../../../homework/presentation/pages/homework_page.dart';
 import '../../../library/presentation/pages/library_page.dart';
 import '../../../weekly_plan/presentation/pages/weekly_plan_page.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -16,16 +17,16 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final features = <_Feature>[
-      _Feature('Ev tapşırığı', Icons.assignment, AppColors.primary,
+      _Feature(context.l10n.featureHomework, Icons.assignment, AppColors.primary,
           const HomeworkPage()),
-      _Feature('Kitabxana', Icons.local_library, Colors.teal,
+      _Feature(context.l10n.featureLibrary, Icons.local_library, Colors.teal,
           const LibraryPage()),
-      _Feature('İmtahanlar', Icons.school, Colors.deepPurple,
+      _Feature(context.l10n.notifPrefExams, Icons.school, Colors.deepPurple,
           const ExaminationPage()),
-      _Feature('Həftəlik plan', Icons.calendar_month, Colors.orange,
+      _Feature(context.l10n.featureWeeklyPlan, Icons.calendar_month, Colors.orange,
           const WeeklyPlanPage()),
-      _Feature('Bufet', Icons.fastfood, Colors.redAccent, const BuffetPage()),
-      _Feature('Balans', Icons.account_balance_wallet, Colors.green,
+      _Feature(context.l10n.featureBuffet, Icons.fastfood, Colors.redAccent, const BuffetPage()),
+      _Feature(context.l10n.balanceLabel, Icons.account_balance_wallet, Colors.green,
           const BalancePage()),
     ];
 
@@ -43,7 +44,7 @@ class HomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Text('Bölmələr',
+          Text(context.l10n.homeSections,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           GridView.count(
@@ -137,7 +138,7 @@ class _BalanceBanner extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Balans',
+                Text(context.l10n.balanceLabel,
                     style: TextStyle(color: Colors.white70)),
                 BlocBuilder<BalanceCubit, BalanceState>(
                   builder: (context, state) => Text(

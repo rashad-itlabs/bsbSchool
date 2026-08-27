@@ -8,6 +8,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `login.html`, wired to [AuthBloc].
 class LoginScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
-      _showSnack('E-mail və şifrəni daxil edin');
+      _showSnack(context.l10n.loginEnterCredentials);
       return;
     }
     context
@@ -65,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Carry the address over so only the new password has to be typed.
     _emailController.text = resetEmail;
     _passwordController.clear();
-    _showSnack('Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.');
+    _showSnack(context.l10n.loginPasswordUpdated);
   }
 
   void _showSupportSheet() {
@@ -158,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     Center(
                       child: Text(
-                        'Xoş gəlmisiniz',
+                        context.l10n.loginWelcome,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
@@ -169,14 +170,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     Center(
                       child: Text(
-                        'Davam etmək üçün daxil olun',
+                        context.l10n.loginSubtitle,
                         style:
                             TextStyle(fontSize: 14, color: context.dr.textMuted),
                       ),
                     ),
                     const SizedBox(height: 40),
                     DrTextField(
-                      label: 'E-mail',
+                      label: context.l10n.loginEmail,
                       hint: 'example@bsb.edu.az',
                       icon: Icons.person_outline,
                       controller: _emailController,
@@ -185,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     DrTextField(
-                      label: 'Şifrə',
+                      label: context.l10n.loginPassword,
                       hint: '••••••••',
                       icon: Icons.lock_outline,
                       obscure: true,
@@ -199,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: GestureDetector(
                         onTap: _showForgotSheet,
                         child: Text(
-                          'Şifrəni unutmusunuz?',
+                          context.l10n.loginForgotPassword,
                           style: TextStyle(
                             color: context.dr.accent,
                             fontSize: 12,
@@ -212,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     BlocBuilder<AuthBloc, AuthState>(
                       buildWhen: (p, c) => p.isLoading != c.isLoading,
                       builder: (context, state) => DrPrimaryButton(
-                        label: 'Daxil ol',
+                        label: context.l10n.loginSubmit,
                         loading: state.isLoading,
                         onTap: _login,
                       ),
@@ -234,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   size: 16, color: context.dr.textMuted),
                               const SizedBox(width: 8),
                               Text(
-                                'Dəstək ilə əlaqə',
+                                context.l10n.loginSupport,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -292,7 +293,7 @@ class _SupportSheet extends StatelessWidget {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('Bu əməliyyat cihazda açıla bilmədi')),
+          SnackBar(content: Text(context.l10n.loginCannotOpen)),
         );
     }
   }
@@ -315,8 +316,8 @@ class _SupportSheet extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Dəstək ilə əlaqə',
+                Text(
+                  context.l10n.loginSupport,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 GestureDetector(
@@ -336,20 +337,19 @@ class _SupportSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Daxil ola bilmirsinizsə və ya sualınız varsa, bizimlə '
-              'əlaqə saxlayın.',
+              context.l10n.loginSupportText,
               style: TextStyle(fontSize: 14, color: context.dr.textMuted),
             ),
             const SizedBox(height: 20),
             _SupportOption(
               icon: Icons.call_outlined,
-              title: 'Zəng et',
+              title: context.l10n.loginCall,
               subtitle: SupportContact.phone,
               onTap: () => _open(context, SupportContact.phoneUri),
             ),
             _SupportOption(
               icon: Icons.mail_outline,
-              title: 'E-mail göndər',
+              title: context.l10n.loginSendEmail,
               subtitle: SupportContact.email,
               onTap: () => _open(context, SupportContact.emailUri),
             ),
@@ -499,8 +499,8 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Şifrənin bərpası',
+                      Text(
+                        context.l10n.forgotTitle,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w600),
                       ),
@@ -521,13 +521,12 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Qeydiyyatdan keçdiyiniz e-mail ünvanını və yeni şifrənizi '
-                    'daxil edin. E-mail doğrudursa, şifrə dərhal yenilənəcək.',
+                    context.l10n.forgotText,
                     style: TextStyle(fontSize: 14, color: context.dr.textMuted),
                   ),
                   const SizedBox(height: 20),
                   DrTextField(
-                    label: 'E-mail ünvanı',
+                    label: context.l10n.forgotEmailField,
                     hint: 'example@bsb.edu.az',
                     icon: Icons.mail_outline,
                     controller: _emailController,
@@ -536,7 +535,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   ),
                   const SizedBox(height: 16),
                   DrTextField(
-                    label: 'Yeni şifrə',
+                    label: context.l10n.forgotNewPassword,
                     hint: '••••••••',
                     icon: Icons.lock_outline,
                     obscure: true,
@@ -545,7 +544,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   ),
                   const SizedBox(height: 16),
                   DrTextField(
-                    label: 'Yeni şifrə (təkrar)',
+                    label: context.l10n.forgotRepeatPassword,
                     hint: '••••••••',
                     icon: Icons.lock_reset_outlined,
                     obscure: true,
@@ -555,8 +554,9 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Şifrə ən azı ${ForgotPasswordCubit.minPasswordLength} '
-                    'simvol olmalıdır.',
+                    context.l10n.forgotMinLength(
+                      ForgotPasswordCubit.minPasswordLength,
+                    ),
                     style: TextStyle(fontSize: 12, color: context.dr.textMuted),
                   ),
                   if (error != null) ...[
@@ -579,7 +579,7 @@ class _ForgotPasswordSheetState extends State<_ForgotPasswordSheet> {
                   ],
                   const SizedBox(height: 20),
                   DrPrimaryButton(
-                    label: 'Şifrəni yenilə',
+                    label: context.l10n.forgotSubmit,
                     loading: state.isLoading,
                     onTap: _submit,
                   ),

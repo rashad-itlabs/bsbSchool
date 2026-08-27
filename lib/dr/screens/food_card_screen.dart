@@ -9,9 +9,11 @@ import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
 import '../../features/payment/domain/entities/payment_result.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
 import '../../features/payment/presentation/pages/payment_webview_page.dart';
+import '../../features/payment/presentation/widgets/payment_result_sheet.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import 'cafeteria_screen.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `idcard.html`, backed by `GET /getBuffetCart` — the daily-limit
 /// card, the barcode card slider and the recent buffet purchases.
@@ -73,7 +75,7 @@ class _FoodCardViewState extends State<_FoodCardView> {
     if (!mounted) return;
 
     if (session == null) {
-      _toast(payment.state.errorMessage ?? 'Ödəniş başladıla bilmədi');
+      _toast(payment.state.errorMessage ?? context.l10n.paymentCouldNotStart);
       payment.reset();
       return;
     }
@@ -91,7 +93,7 @@ class _FoodCardViewState extends State<_FoodCardView> {
     if (!mounted) return;
 
     if (result == null) {
-      _toast(payment.state.errorMessage ?? 'Ödənişin statusu alınmadı');
+      _toast(payment.state.errorMessage ?? context.l10n.paymentStatusUnavailable);
       payment.reset();
       return;
     }
@@ -114,7 +116,7 @@ class _FoodCardViewState extends State<_FoodCardView> {
       context: context,
       backgroundColor: Colors.transparent,
       isDismissible: !result.isPending,
-      builder: (_) => _PaymentResultSheet(result: result),
+      builder: (_) => PaymentResultSheet(result: result),
     );
   }
 
@@ -135,7 +137,7 @@ class _FoodCardViewState extends State<_FoodCardView> {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                const DrBackHeader(title: 'Bufet Kartım', showBack: false),
+                DrBackHeader(title: context.l10n.foodCardTitle, showBack: false),
                 ..._body(context, state),
                 const SizedBox(height: 20),
               ],
@@ -161,15 +163,15 @@ class _FoodCardViewState extends State<_FoodCardView> {
     if (card == null && state.status == BuffetCardStatus.error) {
       return [
         _Message(
-          text: state.errorMessage ?? 'Xəta baş verdi',
+          text: state.errorMessage ?? context.l10n.commonError,
           onRetry: () =>
-              context.read<BuffetCardBloc>().add(const BuffetCardRefreshed()),
+              context.read<BuffetCardBloc>().add(BuffetCardRefreshed()),
         ),
       ];
     }
 
     if (card == null) {
-      return const [_Message(text: 'Bufet kartı tapılmadı')];
+      return [_Message(text: context.l10n.foodCardEmpty)];
     }
 
     final transactions = state.recentTransactions;
@@ -217,8 +219,8 @@ class _FoodCardViewState extends State<_FoodCardView> {
       BlocBuilder<PaymentCubit, PaymentState>(
         builder: (context, payment) => DrPrimaryButton(
           label: payment.stage == PaymentStage.checking
-              ? 'Ödəniş yoxlanılır'
-              : 'Balansı artır',
+              ? context.l10n.paymentChecking
+              : context.l10n.balanceTopUp,
           trailingIcon: Icons.add_card_outlined,
           loading: payment.isBusy,
           onTap: _addBalance,
@@ -226,14 +228,14 @@ class _FoodCardViewState extends State<_FoodCardView> {
       ),
       const SizedBox(height: 28),
       DrSectionHeader(
-        title: 'Son əməliyyatlar',
+        title: context.l10n.recentTransactions,
         // action: 'Hamısı',
         onAction: () => Navigator.of(
           context,
         ).push(MaterialPageRoute(builder: (_) => const CafeteriaScreen())),
       ),
       if (transactions.isEmpty)
-        const _Message(text: 'Hələ əməliyyat yoxdur')
+        _Message(text: context.l10n.noTransactions)
       else
         DrListCard(
           children: [
@@ -282,13 +284,16 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
         double.tryParse(_amount.text.trim().replaceAll(',', '.'));
 
     if (value == null || value <= 0) {
-      setState(() => _error = 'Məbləği düzgün yazın');
+      setState(() => _error = context.l10n.amountEnterValid);
       return;
     }
 
     if (value < _min || value > _max) {
       setState(() => _error =
-          'Məbləğ ${_min.toStringAsFixed(0)}–${_max.toStringAsFixed(0)} ₼ aralığında olmalıdır');
+          context.l10n.amountRange(
+        _min.toStringAsFixed(0),
+        _max.toStringAsFixed(0),
+      ));
       return;
     }
 
@@ -316,8 +321,8 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Balansı artır',
+                  Text(
+                    context.l10n.balanceTopUp,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   GestureDetector(
@@ -328,7 +333,7 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Ödəniş bank səhifəsində tamamlanır.',
+                context.l10n.payAtBankPage,
                 style: TextStyle(fontSize: 13, color: context.dr.textMuted),
               ),
               const SizedBox(height: 20),
@@ -386,84 +391,13 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
               ],
               const SizedBox(height: 24),
               DrPrimaryButton(
-                label: 'Təsdiqlə',
+                label: context.l10n.commonConfirm,
                 trailingIcon: Icons.arrow_forward,
                 onTap: _submit,
               ),
               const SizedBox(height: 12),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// What `/payment/status` came back with, in the app's own words. The message
-/// is the API's — it already knows whether the balance was credited.
-class _PaymentResultSheet extends StatelessWidget {
-  final PaymentResult result;
-
-  const _PaymentResultSheet({required this.result});
-
-  @override
-  Widget build(BuildContext context) {
-    final (icon, color) = switch (result.status) {
-      PaymentStatus.success => (Icons.check_rounded, DrColors.green),
-      PaymentStatus.failed => (Icons.close_rounded, DrColors.redStrong),
-      PaymentStatus.pending => (Icons.hourglass_empty_rounded, DrColors.orange),
-    };
-
-    final balance = result.balance;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
-      decoration: BoxDecoration(
-        color: context.dr.bgSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 34),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _money(result.amount),
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              result.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: context.dr.textMuted),
-            ),
-            if (balance != null) ...[
-              const SizedBox(height: 16),
-              Text(
-                'Cari balans: ${_money(balance)}',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            DrPrimaryButton(
-              label: 'Bağla',
-              onTap: () => Navigator.of(context).pop(),
-            ),
-            const SizedBox(height: 12),
-          ],
         ),
       ),
     );
@@ -485,7 +419,7 @@ class _TransactionTile extends StatelessWidget {
 
     return DrTransactionTile(
       leading: const DrEmojiBadge(emoji: '🍽️', color: DrColors.orange),
-      title: transaction.title ?? 'Alış',
+      title: transaction.title ?? context.l10n.purchaseLabel,
       subtitle: subtitle,
       trailing: _Amount(amount == null ? '—' : '- ${_money(amount)}'),
     );
@@ -512,13 +446,13 @@ class _LimitCard extends StatelessWidget {
     // show the remaining daily allowance instead.
     final money = card.moneyBalance;
     final (balanceLabel, balanceValue) = money != null
-        ? ('Balans', _money(money))
-        : ('Qalıq', '${card.balance ?? 0} ₼');
+        ? (context.l10n.balanceLabel, _money(money))
+        : (context.l10n.extraFeeRemaining, '${card.balance ?? 0} ₼');
 
     final usage = card.usage;
     final fixedUsage = card.fixedUsage;
     final usageText = (usage != null && fixedUsage != null)
-        ? 'Günlük: $usage/$fixedUsage'
+        ? context.l10n.dailyUsage('$usage', '$fixedUsage')
         : null;
 
     return DrGlowCard(
@@ -575,7 +509,7 @@ class _LimitCard extends StatelessWidget {
             children: [
               _amountColumn(
                 context,
-                'Kart nömrəsi',
+                context.l10n.cardNumberLabel,
                 card.cardId1 ?? '—',
                 context.dr.accent,
               ),
@@ -758,7 +692,7 @@ class _Message extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton(
               onPressed: onRetry,
-              child: const Text('Yenidən cəhd et'),
+              child: Text(context.l10n.commonRetry),
             ),
           ],
         ],

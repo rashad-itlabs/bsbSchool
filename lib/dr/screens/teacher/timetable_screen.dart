@@ -7,6 +7,7 @@ import '../../theme/dr_colors.dart';
 import '../../widgets/dr_widgets.dart';
 import '../../widgets/teacher_widgets.dart';
 import 'teacher_data.dart';
+import '../../../core/l10n/l10n.dart';
 
 /// Port of `teacher_theme/timetable.html` — weekly schedule behind day tabs.
 class TeacherTimetableScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _TeacherTimetableScreenState extends State<TeacherTimetableScreen> {
       child: ListView(
         children: [
           TeacherPageHeader(
-            title: 'Weekly Timetable',
+            title: context.l10n.tWeeklyTimetable,
             initials: AuthUser.initialsOf(name),
             showBack: false,
           ),
@@ -73,7 +74,7 @@ class _TeacherTimetableScreenState extends State<TeacherTimetableScreen> {
           const Text('☕', style: TextStyle(fontSize: 32)),
           const SizedBox(height: 10),
           Text(
-            'No lessons scheduled for today.',
+            context.l10n.tNoLessonsToday,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

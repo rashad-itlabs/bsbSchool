@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
 import '../../domain/entities/attendance_record.dart';
+import '../../../../core/l10n/app_dates.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The month overview as a real calendar grid: one cell per day of the shown
 /// month, tinted by the attendance logged that day, with arrows to walk back
@@ -17,12 +19,6 @@ class AttendanceMonthCalendar extends StatefulWidget {
 }
 
 class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
-  static const _labels = ['Be', 'Ça', 'Ç', 'Ca', 'C', 'Ş', 'B'];
-  static const _azMonths = [
-    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-    'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
-  ];
-
   /// Null until the user taps an arrow, i.e. "the month today falls in".
   DateTime? _month;
 
@@ -82,7 +78,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
                   canGoBack ? () => _shift(-1) : null),
               Expanded(
                 child: Text(
-                  '${_azMonths[month.month - 1]} ${month.year}',
+                  AppDates.monthYear(context, month),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w600),
@@ -95,10 +91,10 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           const SizedBox(height: 16),
           Row(
             children: [
-              for (final label in _labels)
+              for (var weekday = 1; weekday <= 7; weekday++)
                 Expanded(
                   child: Text(
-                    label,
+                    AppDates.weekdayShort(context, weekday),
                     textAlign: TextAlign.center,
                     style:
                         TextStyle(fontSize: 10, color: context.dr.textMuted),
@@ -204,9 +200,9 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _legendItem(context, _DayStatus.present, 'Gəlib', present),
-        _legendItem(context, _DayStatus.late, 'Gecikib', late),
-        _legendItem(context, _DayStatus.absent, 'Qayıb', absent),
+        _legendItem(context, _DayStatus.present, context.l10n.attendancePresent, present),
+        _legendItem(context, _DayStatus.late, context.l10n.attendanceLateTag, late),
+        _legendItem(context, _DayStatus.absent, context.l10n.attendanceAbsent, absent),
       ],
     );
   }

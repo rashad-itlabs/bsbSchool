@@ -1,0 +1,711 @@
+{
+  "@@locale": "az",
+  "addChildAdded": "Şagird hesabınıza əlavə edildi",
+  "addChildEnterNumber": "Qəbul nömrəsini daxil edin",
+  "addChildField": "Qəbul nömrəsi",
+  "addChildHint": "Övladınızın qəbul nömrəsi",
+  "addChildOtherAccount": "Başqa hesabla daxil ol",
+  "addChildSubmit": "Əlavə et",
+  "addChildText": "Hesabınıza hələ şagird bağlanmayıb. Davam etmək üçün övladınızın qəbul nömrəsini daxil edin.",
+  "addChildTextNamed": "{name}, hesabınıza hələ şagird bağlanmayıb. Davam etmək üçün övladınızın qəbul nömrəsini daxil edin.",
+  "addChildTitle": "Şagirdinizi əlavə edin",
+  "addChildWhere1": "Şagird vəsiqəsinin üzərində",
+  "addChildWhere2": "Məktəbin verdiyi qəbul sənədində",
+  "addChildWhere3": "Məktəbin katibliyindən soruşa bilərsiniz",
+  "addChildWhereTitle": "Qəbul nömrəsi haradadır?",
+  "amountEnterValid": "Məbləği düzgün yazın",
+  "amountRange": "Məbləğ {min}–{max} ₼ aralığında olmalıdır",
+  "appTitle": "BSB School",
+  "attendanceAbsent": "Qayıb",
+  "attendanceEmpty": "Qeyd tapılmadı",
+  "attendanceLate": "Gecikmə",
+  "attendanceLateTag": "Gecikib",
+  "attendanceLesson": "Dərs",
+  "attendanceMonthOverview": "{month} ayı üzrə icmal",
+  "attendancePresent": "Gəlib",
+  "attendanceRate": "İştirak",
+  "attendanceRecent": "Son qeydlər",
+  "attendanceTitle": "Davamiyyət",
+  "balanceAmountField": "Məbləğ (AZN)",
+  "balanceCurrent": "Mövcud balans",
+  "balanceCustomAmount": "Xüsusi məbləğ",
+  "balanceInvalidAmount": "Düzgün məbləğ daxil edin",
+  "balanceLabel": "Balans",
+  "balanceQuickTopUp": "Sürətli artırma",
+  "balanceTopUp": "Balansı artır",
+  "bookDeleteText": "Kitab telefondan və \"{location}\" bölməsindən silinəcək. İnternet olduqda yenidən oxuya bilərsiniz.",
+  "bookDeleteTitle": "Yüklənmiş faylı sil?",
+  "bookDeleted": "Yüklənmiş fayl silindi",
+  "bookDownloadFailed": "Yükləmə alınmadı",
+  "bookDownloaded": "Kitab \"{location}\" bölməsinə yükləndi",
+  "bookDownloadedPartial": "Kitab yükləndi, ancaq \"{location}\" bölməsinə yazıla bilmədi",
+  "bookNoFile": "Bu kitabın faylı yoxdur",
+  "bookOpenFailed": "Kitab açılmadı: {reason}",
+  "buffetOrder": "Sifariş et",
+  "buffetProductCount": "{count} məhsul",
+  "cafeteriaDailyLimit": "Günlük limit",
+  "cafeteriaSpent": "Xərclənib",
+  "cardExpiry": "Müddət",
+  "cardHolder": "Kart Sahibinin Adı",
+  "cardHolderHint": "AD VƏ SOYAD",
+  "cardNumberField": "Kartın nömrəsi",
+  "cardNumberLabel": "Kart nömrəsi",
+  "commonAll": "Hamısı",
+  "commonCancel": "Ləğv et",
+  "commonClose": "Bağla",
+  "commonConfirm": "Təsdiqlə",
+  "commonContinue": "Davam et",
+  "commonCopy": "Kopyala",
+  "commonDelete": "Sil",
+  "commonError": "Xəta baş verdi",
+  "commonErrorShort": "Xəta",
+  "commonFilter": "Filtr",
+  "commonHide": "Gizlət",
+  "commonNo": "Xeyr",
+  "commonNoData": "Məlumat tapılmadı",
+  "commonRetry": "Yenidən cəhd et",
+  "commonSave": "Yadda saxla",
+  "commonSearch": "Axtar",
+  "commonSelectStudent": "Şagird seç",
+  "commonShow": "Göstər",
+  "commonYes": "Bəli",
+  "copiedToClipboard": "{label} kopyalandı",
+  "credentialActive": "Aktiv",
+  "credentialPaymentId": "Ödəniş ID",
+  "credentialSwitchTo": "Bu şagirdə keç",
+  "credentialSwitching": "Dəyişdirilir…",
+  "credentialUsername": "Username",
+  "dailyUsage": "Günlük: {used}/{limit}",
+  "dashGreeting": "{name} 👋",
+  "dashNewsFailed": "Xəbərlər yüklənmədi",
+  "dashSeeAll": "Hamısına bax",
+  "downloadsFiles": "Fayllar",
+  "downloadsFolder": "Yükləmələr",
+  "dueDateLabel": "Son tarix: {date}",
+  "dueDateOverdueLabel": "Son tarix: {date} · gecikib",
+  "errAttendanceLoad": "Davamiyyət yüklənmədi",
+  "errBalanceUpdate": "Balans yenilənmədi",
+  "errBuffetCardLoad": "Bufet kartı yüklənmədi",
+  "errCache": "Keş xətası baş verdi",
+  "errChildNotSwitched": "Şagird dəyişdirilmədi",
+  "errChildNotYours": "Bu şagird sizin hesabınıza aid deyil",
+  "errChildNotYoursShort": "Bu şagird hesabınıza aid deyil",
+  "errEventsLoad": "Tədbirlər yüklənmədi",
+  "errExamLoad": "İmtahan nəticələri yüklənmədi",
+  "errExtraFeesLoad": "Əlavə ödənişlər yüklənmədi",
+  "errHomeworkLoad": "Tapşırıqlar yüklənmədi",
+  "errInsufficientBalance": "Balans kifayət etmir",
+  "errInvalid": "Yanlış əməliyyat",
+  "errLibraryLoad": "Kitabxana məlumatları yüklənmədi",
+  "errNewsLoad": "Xəbərlər yüklənmədi",
+  "errNoConnection": "Serverə qoşulmaq mümkün olmadı",
+  "errNoInternet": "İnternet bağlantısı yoxdur",
+  "errNotificationsLoad": "Bildirişlər yüklənmədi",
+  "errOrderFailed": "Sifariş göndərilə bilmədi",
+  "errPaymentGateway": "Ödəniş sistemi ilə əlaqə qurulmadı",
+  "errPaymentLink": "Ödəniş linki alınmadı",
+  "errServer": "Server xətası baş verdi",
+  "errSessionExpired": "Sessiya bitib, yenidən daxil olun",
+  "errStudentNotFound": "Şagird tapılmadı",
+  "errTimetableLoad": "Dərs cədvəli yüklənmədi",
+  "errTokenMissing": "Token cavabda tapılmadı",
+  "errTuitionLoad": "Ödəniş məlumatları yüklənmədi",
+  "errUserNotFound": "Bu e-mail ilə istifadəçi tapılmadı",
+  "errWrongCredentials": "E-mail və ya şifrə yanlışdır",
+  "eventsMore": "və daha {count} tədbir",
+  "eventsNoneToday": "Bu gün üçün tədbir yoxdur",
+  "examAllResults": "Bütün nəticələr",
+  "examBehaviourLabel": "Davranış: {value}",
+  "examEffortLabel": "Səy: {value}",
+  "examEmpty": "İmtahan nəticəsi tapılmadı",
+  "examExam": "İmtahan",
+  "examFilters": "Filtrlər",
+  "examGradeLabel": "Grade: {value}",
+  "examGroup": "İmtahan qrupu",
+  "examNoMatch": "Seçilmiş filtrlərə uyğun nəticə yoxdur",
+  "examNoStudent": "Şagird təyin edilməyib",
+  "examNotGraded": "Qiymətləndirilməyib",
+  "examReset": "Sıfırla",
+  "examResetFilters": "Filtrləri sıfırla",
+  "examResults": "Nəticələr",
+  "examShowResults": "Nəticələri göstər ({count})",
+  "examTitle": "İmtahan nəticələri",
+  "extraFeeAmount": "Məbləğ",
+  "extraFeeFallbackTitle": "Əlavə ödəniş",
+  "extraFeeNoDueDate": "Son tarix yoxdur",
+  "extraFeePaid": "Ödənilmiş",
+  "extraFeeRemaining": "Qalıq",
+  "extraFeesAllDone": "Bütün əlavə ödənişlər tamamlanıb.",
+  "extraFeesAllPaid": "Hamısı ödənilib",
+  "extraFeesCountLabel": "{count} əlavə ödəniş",
+  "extraFeesEmpty": "Əlavə ödəniş yoxdur",
+  "extraFeesListTitle": "Əlavə ödənişlər",
+  "extraFeesNoPayment": "Ödəniş yoxdur",
+  "extraFeesOutstanding": "Qalıq borc",
+  "extraFeesOverdueCount": "Gecikmiş ödəniş",
+  "extraFeesOverdueDebt": "Gecikmiş ödəniş var — {amount} borc qalıb.",
+  "extraFeesOverdueHint": "Vaxtı keçib",
+  "extraFeesPaidAmount": "Ödənilmiş məbləğ",
+  "extraFeesPayEachSeparately": "Hər ödəniş ayrıca aparılır — aşağıdakı siyahıdan seçin.",
+  "extraFeesPayableAmount": "Ödənilməli məbləğ: {amount}",
+  "extraFeesPendingCount": "{count} ödəniş gözləyir",
+  "extraFeesProgressDone": "{percent}% tamamlanıb",
+  "extraFeesTotal": "Ümumi məbləğ",
+  "featureAttendance": "Davamiyyət",
+  "featureBuffet": "Bufet",
+  "featureCalendar": "Təqvim",
+  "featureExaminations": "İmtahanlar",
+  "featureHomework": "Ev tapşırığı",
+  "featureLibrary": "Kitabxana",
+  "featureLiveLessons": "Onlayn dərslər",
+  "featureTimetable": "Dərs cədvəli",
+  "featureWeeklyPlan": "Həftəlik plan",
+  "fileCouldNotOpen": "Fayl açıla bilmədi",
+  "fileDownload": "Faylı yüklə",
+  "foodCardEmpty": "Bufet kartı tapılmadı",
+  "foodCardTitle": "Bufet Kartım",
+  "forgotDone": "Şifrəniz yeniləndi. Yeni şifrə ilə daxil ola bilərsiniz.",
+  "forgotEmailField": "E-mail ünvanı",
+  "forgotEmailInvalid": "E-mail ünvanı düzgün deyil",
+  "forgotEmailRequired": "E-mail ünvanını daxil edin",
+  "forgotMinLength": "Şifrə ən azı {count} simvol olmalıdır.",
+  "forgotNewPassword": "Yeni şifrə",
+  "forgotPasswordMismatch": "Şifrələr eyni deyil",
+  "forgotPasswordRequired": "Yeni şifrəni daxil edin",
+  "forgotPasswordShort": "Şifrə ən azı {count} simvol olmalıdır",
+  "forgotRepeatPassword": "Yeni şifrə (təkrar)",
+  "forgotSubmit": "Şifrəni yenilə",
+  "forgotText": "Qeydiyyatdan keçdiyiniz e-mail ünvanını və yeni şifrənizi daxil edin. E-mail doğrudursa, şifrə dərhal yenilənəcək.",
+  "forgotTitle": "Şifrənin bərpası",
+  "historyCanteen": "Yeməkxana",
+  "historyIncome": "Mədaxil",
+  "historyOther": "Digər",
+  "historyTitle": "Tarixçə",
+  "historyTuition": "Təhsil",
+  "homeSections": "Bölmələr",
+  "homeworkActive": "Aktiv",
+  "homeworkDaysLeft": "{days} gün qalıb",
+  "homeworkDuePrefix": "Son tarix: ",
+  "homeworkInactive": "Deaktiv",
+  "homeworkNoActive": "Aktiv tapşırıq yoxdur",
+  "homeworkNoClass": "Sinif təyin edilməyib",
+  "homeworkNoInactive": "Deaktiv tapşırıq yoxdur",
+  "homeworkOverdue": "Gecikmiş",
+  "homeworkTitle": "Tapşırıqlar",
+  "homeworkToday": "Bu gün",
+  "homeworkTomorrow": "Sabah",
+  "hwDetailDescription": "Təsvir",
+  "hwDetailInfo": "Məlumat",
+  "hwDetailTitle": "Tapşırıq",
+  "hwDueDate": "Son tarix",
+  "hwGivenDate": "Verilmə tarixi",
+  "hwGrading": "Qiymətləndirmə",
+  "hwSection": "Bölmə",
+  "hwSubject": "Fənn",
+  "hwTeacher": "Müəllim",
+  "languageAz": "Azərbaycan dili",
+  "languageEn": "İngilis dili",
+  "languageRu": "Rus dili",
+  "languageSystem": "Sistem dili",
+  "lastPaymentLabel": "Son ödəniş: {date}",
+  "libraryEmpty": "Kitab tapılmadı",
+  "librarySchoolPaid": "£19.99 məktəb tərəfindən ödənilib",
+  "librarySearch": "Axtarış...",
+  "libraryTitle": "Kitabxana",
+  "libraryTitleWithClass": "Kitabxana • {className}",
+  "liveBadge": "Canlı",
+  "liveJoin": "Dərsə qoşul",
+  "liveLessonsTitle": "Canlı Dərslər",
+  "liveRoomClosed": "Otaq hələ açılmayıb",
+  "liveStartingNow": "İndi başlayır",
+  "liveUpcoming": "Gözlənilən dərslər",
+  "loginCall": "Zəng et",
+  "loginCannotOpen": "Bu əməliyyat cihazda açıla bilmədi",
+  "loginEmail": "E-mail",
+  "loginEnterCredentials": "E-mail və şifrəni daxil edin",
+  "loginForgotPassword": "Şifrəni unutmusunuz?",
+  "loginPassword": "Şifrə",
+  "loginPasswordUpdated": "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.",
+  "loginSendEmail": "E-mail göndər",
+  "loginSubmit": "Daxil ol",
+  "loginSubtitle": "Davam etmək üçün daxil olun",
+  "loginSupport": "Dəstək ilə əlaqə",
+  "loginSupportText": "Daxil ola bilmirsinizsə və ya sualınız varsa, bizimlə əlaqə saxlayın.",
+  "loginWelcome": "Xoş gəlmisiniz",
+  "navAttendance": "Davamiyyət",
+  "navFoodCard": "Yemək kartı",
+  "navHome": "Ana səhifə",
+  "navHomework": "Ev tapşırığı",
+  "navNotifications": "Bildirişlər",
+  "navProfile": "Profil",
+  "navSettings": "Tənzimləmələr",
+  "navTimetable": "Dərs cədvəli",
+  "navTuition": "Ödənişlər",
+  "newsNoBody": "Bu xəbər üçün əlavə mətn yoxdur",
+  "newsTitle": "Xəbər",
+  "noTransactions": "Hələ əməliyyat yoxdur",
+  "notifPrefAttendance": "Davamiyyət",
+  "notifPrefAttendanceText": "Uşağın məktəbə gəlişi və dərsdən çıxışı barədə bildirişlər.",
+  "notifPrefBuffet": "Bufet",
+  "notifPrefBuffetText": "Uşağın bufetdə nəyə xərclədiyi barədə bildirişlər.",
+  "notifPrefExams": "İmtahanlar",
+  "notifPrefExamsText": "Uşağın imtahan nəticələri və imtahana girilməsi barədə bildirişlər.",
+  "notificationFallback": "Bildiriş",
+  "notificationsEmpty": "Hələ bildiriş yoxdur.",
+  "notificationsTitle": "Bildirişlər",
+  "overdueWithDate": "Gecikib · {date}",
+  "payAtBankPage": "Ödəniş bank səhifəsində tamamlanır.",
+  "payNow": "Ödəniş et",
+  "payWithAmount": "Ödə · {amount}",
+  "paymentChecking": "Ödəniş yoxlanılır",
+  "paymentCouldNotStart": "Ödəniş başladıla bilmədi",
+  "paymentCurrentBalance": "Cari balans",
+  "paymentStatusUnavailable": "Ödənişin statusu alınmadı",
+  "paymentUnconfirmed": "Bank ödənişi qəbul etdi, lakin statusu təsdiqlənmədi. Məbləğ bir neçə dəqiqə ərzində hesabınıza işlənəcək — siyahını yeniləyib yoxlayın.",
+  "purchaseLabel": "Alış",
+  "recentTransactions": "Son əməliyyatlar",
+  "settingsChildCredentials": "Bu e-mail və şifrə ilə övladınız tətbiqə öz hesabı ilə daxil ola bilər. Kopyalayıb ona göndərə bilərsiniz.",
+  "settingsLanguage": "Dil",
+  "settingsLanguageSubtitle": "Tətbiqin dili",
+  "settingsLightMode": "Gündüz rejimi",
+  "settingsLightModeSubtitle": "Açıq rəngli interfeys",
+  "settingsLogout": "Çıxış",
+  "settingsLogoutConfirm": "Hesabdan çıxmaq istədiyinizə əminsiniz?",
+  "settingsLogoutSubtitle": "Tətbiqdən çıxın",
+  "settingsMyChild": "Övladımın məlumatları",
+  "settingsMyChildren": "Övladlarım ({count})",
+  "settingsNotifications": "Bildiriş parametrləri",
+  "settingsTitle": "Tənzimləmələr",
+  "statusOverdue": "Gecikib",
+  "statusOverdueSuffix": "{status} · gecikib",
+  "statusPaid": "Ödənilib",
+  "statusPartial": "Qismən",
+  "statusUnpaid": "Ödənilməyib",
+  "supportEmailSubject": "BSB tətbiqi — dəstək sorğusu",
+  "tAccountSettings": "Hesab tənzimləmələri",
+  "tActiveDay": "Aktiv gün",
+  "tActiveHomeworks": "Aktiv tapşırıqlar",
+  "tAssignHomework": "Tapşırıq təyin et",
+  "tAssignTask": "Tapşırığı təyin et",
+  "tAttachDoc": "Sənəd əlavə etmək üçün toxunun (PDF / XLS)",
+  "tAttachmentFile": "Əlavə fayl",
+  "tAttendanceCounts": "Gəlib: {present} | Qayıb: {absent} | Gecikib: {late}",
+  "tAttendanceSaved": "Davamiyyət yadda saxlanıldı!",
+  "tAverageScore": "Orta bal",
+  "tBehaviourShort": "DAV.",
+  "tChangePin": "PIN kodu dəyiş",
+  "tChoosePdf": "PDF / şəkil seçmək üçün toxunun",
+  "tClassGroup": "Sinif qrupu",
+  "tComments": "Şərhlər / Müşahidələr",
+  "tCommentsHint": "Qeyd və ya əlavə məlumat yazın...",
+  "tCurrentlyAssigned": "Hazırda təyin olunmuş",
+  "tDate": "Tarix",
+  "tDescriptionHint": "Tapşırığın təfərrüatları...",
+  "tDescriptionTasks": "Təsvir / Tapşırıqlar",
+  "tDocAttached": "Sənəd əlavə edildi!",
+  "tDocUploaded": "Hesabat sənədi yükləndi.",
+  "tDueDate": "Son tarix",
+  "tDueLabel": "Son tarix: {date}",
+  "tEditAttendance": "Davamiyyəti redaktə et",
+  "tEditingMode": "Redaktə rejimi aktivdir.",
+  "tEffortShort": "SƏY",
+  "tEnterHomeworkTitle": "Tapşırığın adını yazın!",
+  "tEnterReportTitle": "Hesabatın adını yazın!",
+  "tExamType": "İmtahan növü",
+  "tFileAttached": "Fayl əlavə edildi!",
+  "tGradeShort": "QİY.",
+  "tGradedStatus": "Qiymətləndirmə vəziyyəti",
+  "tGrades": "Qiymətlər",
+  "tGradesPublished": "Qiymətlər dərc olundu!",
+  "tHomeworkAssigned": "Tapşırıq təyin edildi!",
+  "tHomeworkDeleted": "Tapşırıq silindi.",
+  "tHomeworkTitle": "Tapşırığın adı",
+  "tHomeworkTitleHint": "məs. Kvadrat tənliklər üzrə çalışmalar",
+  "tKsqGrades": "KSQ qiymətləri",
+  "tLanguageSelection": "Dil seçimi",
+  "tLanguageSubtitle": "Tətbiq interfeysinin dili",
+  "tLanguageUpdated": "Dil dəyişdirildi",
+  "tLightTheme": "Açıq tema",
+  "tLogoutConfirm": "Sessiyadan çıxmaq istəyirsiniz?",
+  "tLogoutSubtitle": "Sessiyadan təhlükəsiz çıxın",
+  "tMaxPoints": "Maksimum: 100 bal",
+  "tNextLesson": "Növbəti dərs",
+  "tNoLessonsToday": "Bu gün üçün dərs planlanmayıb.",
+  "tNotifUpdated": "Bildiriş parametrləri yeniləndi",
+  "tPinLoading": "PIN dəyişmə ekranı açılır...",
+  "tPinSubtitle": "Turniket və giriş üçün təhlükəsizlik PIN-i",
+  "tPostGrades": "İmtahan qiymətlərini yerləşdir",
+  "tPreferences": "Tərcihlər",
+  "tPublishGrades": "Qiymətləri dərc et",
+  "tPushNotifications": "Push bildirişlər",
+  "tPushSubtitle": "Qiymət xəbərdarlıqları, cədvəl yenilikləri",
+  "tRecentUploads": "Son yükləmələr",
+  "tReportDocument": "Hesabat sənədi",
+  "tReportHintStudent": "məs. Samir Əliyev — davranış və iş rəyi",
+  "tReportHintWeekly": "məs. 14-cü həftə riyaziyyat üzrə irəliləyiş",
+  "tReportSubmitted": "Hesabat göndərildi!",
+  "tReportTitle": "Hesabatın adı",
+  "tReports": "Hesabatlar",
+  "tSaveAttendance": "Davamiyyəti yadda saxla",
+  "tSeeAll": "Hamısına bax",
+  "tStudentAttendance": "Şagird davamiyyəti",
+  "tStudentGrades": "Şagird qiymətləri",
+  "tStudentInfo": "ŞAGİRD",
+  "tStudentList": "Şagird siyahısı",
+  "tStudentReportFor": "{name} üçün şagird hesabatı",
+  "tStudentReports": "Şagird hesabatları",
+  "tSubmissionHistory": "Göndərmə tarixçəsi",
+  "tSubmitReport": "Hesabatı göndər",
+  "tTargetStudent": "Hədəf şagird",
+  "tTaskManagement": "Tapşırıq idarəetməsi",
+  "tUploadReports": "Hesabat yüklə",
+  "tWeeklyReports": "Həftəlik hesabatlar",
+  "tWeeklyTimetable": "Həftəlik dərs cədvəli",
+  "tWelcomeBack": "Xoş gəldiniz,",
+  "timetableEmpty": "Bu gün üçün dərs yoxdur",
+  "timetableGroupPrefix": "Qrup: ",
+  "timetableTeacherLabel": "Müəllim: {name}",
+  "topUpCardSection": "Ödəniş kartı",
+  "tuitionAmountInvalid": "Məbləği düzgün daxil edin",
+  "tuitionAmountOther": "Başqa məbləğ",
+  "tuitionAmountOtherHint": "İstədiyiniz məbləği yazın",
+  "tuitionAmountSheetHint": "Təklif olunan məbləği seçin və ya özünüz yazın.",
+  "tuitionAmountSheetTitle": "Ödəniş məbləği",
+  "tuitionAmountTooSmall": "Məbləğ 0-dan böyük olmalıdır",
+  "tuitionColumnAmount": "ÖDƏNİŞ MƏBLƏĞİ",
+  "tuitionColumnDate": "ÖDƏNİŞ TARİXİ",
+  "tuitionColumnStatus": "STATUS",
+  "tuitionCredit": "Artıq ödənilmiş məbləğ",
+  "tuitionCreditAmount": "Hesabda artıq: {amount}",
+  "tuitionCurrentMonth": "Cari ay üçün ödəniş",
+  "tuitionDueNowAmount": "İndi ödənilməli: {amount}",
+  "tuitionHistoryTitle": "Ödəniş tarixçəsi",
+  "tuitionInstalmentsCount": "{count} taksit üzrə",
+  "tuitionLateFee": "Gecikmə cəriməsi",
+  "tuitionLateFeeHint": "Gecikmə üzrə",
+  "tuitionNoDate": "Tarix yoxdur",
+  "tuitionNoDebt": "Borc yoxdur. Öncədən ödəniş edə bilərsiniz.",
+  "tuitionNoLateFee": "Gecikmə yoxdur",
+  "tuitionNothingDueYet": "Vaxtı çatmış borc yoxdur.",
+  "tuitionPayDueNow": "İndi ödənilməli",
+  "tuitionPayDueNowHint": "Vaxtı çatmış borc",
+  "tuitionPayFull": "Tam borc",
+  "tuitionPayFullHint": "Bütün qalıq borc",
+  "tuitionPaySection": "Ödəniş bölməsi",
+  "tuitionRingLabel": "Ödəniş",
+  "tuitionScheduleClosed": "Cədvəl bağlanıb",
+  "tuitionScheduleEmpty": "Ödəniş cədvəli tapılmadı",
+  "tuitionScheduleTitle": "Ödəniş Cədvəli",
+  "tuitionTabExtra": "Əlavə ödənişlər",
+  "tuitionTabTuition": "Təhsil haqqı",
+  "tuitionTitle": "Ödəniş cədvəli",
+  "tuitionTotalDue": "Ümumi qalıq",
+  "webviewLoadFailed": "Səhifə yüklənmədi",
+  "webviewStopText": "Ödəniş tamamlanmayıb. Səhifəni bağlamaq istəyirsiniz?",
+  "webviewStopTitle": "Ödənişi dayandırmaq",
+  "webviewTitle": "Ödəniş",
+  "weeklyLessonCount": "{count} dərs",
+  "weeklyTeacherRoom": "{teacher} • Otaq {room}",
+  "@addChildTextNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@amountRange": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendanceMonthOverview": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@bookDeleteText": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "@bookDownloaded": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "@bookDownloadedPartial": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "@bookOpenFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "@buffetProductCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@copiedToClipboard": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "@dailyUsage": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "@dashGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@dueDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@dueDateOverdueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@eventsMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@examBehaviourLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@examEffortLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@examGradeLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@examShowResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@extraFeesCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@extraFeesOverdueDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@extraFeesPayableAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@extraFeesPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@extraFeesProgressDone": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@forgotMinLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@forgotPasswordShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeworkDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@lastPaymentLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@libraryTitleWithClass": {
+    "placeholders": {
+      "className": {
+        "type": "String"
+      }
+    }
+  },
+  "@overdueWithDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@payWithAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@settingsMyChildren": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@statusOverdueSuffix": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "@tAttendanceCounts": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      },
+      "late": {
+        "type": "int"
+      }
+    }
+  },
+  "@tDueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@tStudentReportFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@timetableTeacherLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@tuitionCreditAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@tuitionDueNowAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@tuitionInstalmentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@weeklyLessonCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@weeklyTeacherRoom": {
+    "placeholders": {
+      "teacher": {
+        "type": "String"
+      },
+      "room": {
+        "type": "String"
+      }
+    }
+  }
+}

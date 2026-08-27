@@ -8,6 +8,7 @@ import '../services/book_download_service.dart';
 import '../services/public_downloads.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Reads a library book's PDF. When the student has downloaded it, the on-device
 /// copy is read so the book opens offline; otherwise it streams from the public
@@ -76,19 +77,18 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
       );
       if (!mounted) return;
       _markDownloaded(file);
-      _toast('Kitab "${PublicDownloads.locationName}" bölməsinə yükləndi');
+      _toast(context.l10n.bookDownloaded(PublicDownloads.locationName));
     } on BookExportException catch (e) {
       // The book itself is on the phone and readable; only the visible copy
       // failed, so say what is missing rather than claiming the whole
       // download failed.
       if (!mounted) return;
       _markDownloaded(e.file);
-      _toast('Kitab yükləndi, ancaq "${PublicDownloads.locationName}" '
-          'bölməsinə yazıla bilmədi');
+      _toast(context.l10n.bookDownloadedPartial(PublicDownloads.locationName));
     } catch (_) {
       if (!mounted) return;
       setState(() => _downloading = false);
-      _toast('Yükləmə alınmadı');
+      _toast(context.l10n.bookDownloadFailed);
     }
   }
 
@@ -105,19 +105,18 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.dr.bgSurface,
-        title: const Text('Yüklənmiş faylı sil?'),
+        title: Text(context.l10n.bookDeleteTitle),
         content: Text(
-          'Kitab telefondan və "${PublicDownloads.locationName}" bölməsindən '
-          'silinəcək. İnternet olduqda yenidən oxuya bilərsiniz.',
+          context.l10n.bookDeleteText(PublicDownloads.locationName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Ləğv et'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sil'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -126,7 +125,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
       await _downloads.delete(widget.book);
       if (mounted) {
         setState(() => _downloaded = false);
-        _toast('Yüklənmiş fayl silindi');
+        _toast(context.l10n.bookDeleted);
       }
     }
   }
@@ -168,7 +167,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
   }
 
   Widget _viewer(String? fileUrl) {
-    if (fileUrl == null) return _message('Bu kitabın faylı yoxdur');
+    if (fileUrl == null) return _message(context.l10n.bookNoFile);
     if (_error != null) return _message(_error!);
 
     if (_localFile != null) {
@@ -197,7 +196,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
       });
 
   void _onFailed(PdfDocumentLoadFailedDetails details) => setState(() {
-        _error = 'Kitab açılmadı: ${details.description}';
+        _error = context.l10n.bookOpenFailed(details.description);
       });
 
   void _onPageChanged(PdfPageChangedDetails details) =>

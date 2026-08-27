@@ -12,6 +12,7 @@ import '../../domain/entities/child_account.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/auth_user_model.dart';
 import '../services/auth_service.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthService service;
@@ -71,7 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
     final known = (currentUser?.children ?? const <ChildAccount>[])
         .any((c) => c.childId == childId);
     if (!known) {
-      return const Left(ValidationFailure('Bu şagird hesabınıza aid deyil'));
+      return Left(ValidationFailure(L.s.errChildNotYoursShort));
     }
 
     try {

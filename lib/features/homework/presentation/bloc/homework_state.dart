@@ -7,7 +7,7 @@ enum HomeworkTab { active, past }
 
 class HomeworkState extends Equatable {
   /// Sentinel for "no subject filter" — also the label of the first pill.
-  static const String allSubjects = 'Hamısı';
+  static const String allSubjects = kAllFilterSentinel;
 
   final HomeworkStatus status;
 

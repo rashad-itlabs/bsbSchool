@@ -6,6 +6,7 @@ import '../../../balance/domain/repositories/balance_repository.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/buffet_repository.dart';
 import '../datasources/buffet_remote_data_source.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class BuffetRepositoryImpl implements BuffetRepository {
   final BuffetRemoteDataSource remoteDataSource;
@@ -44,8 +45,8 @@ class BuffetRepositoryImpl implements BuffetRepository {
         } catch (_) {
           // Roll back the deduction if order submission fails.
           await balanceRepository.addBalance(total);
-          return const Left<Failure, double>(
-              ServerFailure('Sifariş göndərilə bilmədi'));
+          return Left<Failure, double>(
+              ServerFailure(L.s.errOrderFailed));
         }
       },
     );

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/reset_password.dart';
+import '../../../../core/l10n/l10n.dart';
 
 part 'forgot_password_state.dart';
 
@@ -51,7 +52,7 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
       )),
       (_) => emit(state.copyWith(
         status: ForgotPasswordStatus.success,
-        message: 'Şifrəniz yeniləndi. Yeni şifrə ilə daxil ola bilərsiniz.',
+        message: L.s.forgotDone,
       )),
     );
   }
@@ -61,13 +62,13 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     required String password,
     required String passwordConfirmation,
   }) {
-    if (email.isEmpty) return 'E-mail ünvanını daxil edin';
-    if (!_emailRegExp.hasMatch(email)) return 'E-mail ünvanı düzgün deyil';
-    if (password.isEmpty) return 'Yeni şifrəni daxil edin';
+    if (email.isEmpty) return L.s.forgotEmailRequired;
+    if (!_emailRegExp.hasMatch(email)) return L.s.forgotEmailInvalid;
+    if (password.isEmpty) return L.s.forgotPasswordRequired;
     if (password.length < minPasswordLength) {
       return 'Şifrə ən azı $minPasswordLength simvol olmalıdır';
     }
-    if (password != passwordConfirmation) return 'Şifrələr eyni deyil';
+    if (password != passwordConfirmation) return L.s.forgotPasswordMismatch;
     return null;
   }
 }

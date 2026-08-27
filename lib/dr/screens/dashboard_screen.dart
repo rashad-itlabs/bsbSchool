@@ -22,6 +22,7 @@ import 'library_screen.dart';
 import 'live_lessons_screen.dart';
 import 'news_detail_screen.dart';
 import 'timetable_screen.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `index.html` — the home dashboard.
 class DashboardScreen extends StatefulWidget {
@@ -65,7 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 30),
           // _monthlyOverview(),
           const SizedBox(height: 30),
-          const DrSectionHeader(title: 'Calendar'),
+          DrSectionHeader(title: context.l10n.featureCalendar),
           _calendar(),
           const SizedBox(height: 20),
         ],
@@ -203,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Icon(Icons.wifi_off_rounded, size: 24, color: context.dr.textMuted),
         const SizedBox(height: 10),
         Text(
-          message ?? 'Xəbərlər yüklənmədi',
+          message ?? context.l10n.dashNewsFailed,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 13, color: context.dr.textMuted),
         ),
@@ -214,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Text(
-              'Yenidən cəhd et',
+              context.l10n.commonRetry,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -251,11 +252,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _actionsGrid() {
     return Row(
       children: [
-        _action('Library', Icons.account_balance_outlined, false,
+        _action(context.l10n.featureLibrary, Icons.account_balance_outlined, false,
             () => _push(const LibraryScreen())),
-        _action('Homework', Icons.menu_book_outlined, false,
+        _action(context.l10n.featureHomework, Icons.menu_book_outlined, false,
             () => _push(const HomeworkScreen())),
-        _action('Examinations', Icons.description_outlined, false,
+        _action(context.l10n.featureExaminations, Icons.description_outlined, false,
             () => _push(const ExaminationsScreen())),
       ],
     );
@@ -264,11 +265,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _extraGrid() {
     return Row(
       children: [
-        _action('Attendance', Icons.how_to_reg_outlined, false,
+        _action(context.l10n.featureAttendance, Icons.how_to_reg_outlined, false,
             () => _push(const AttendanceScreen())),
-        _action('Onlayn dərslər', Icons.video_camera_front_outlined, false,
+        _action(context.l10n.featureLiveLessons, Icons.video_camera_front_outlined, false,
             () => _push(const LiveLessonsScreen())),
-        _action('Class Timetable', Icons.calendar_today_outlined, false,
+        _action(context.l10n.featureTimetable, Icons.calendar_today_outlined, false,
             () => _push(const TimetableScreen())),
       ],
     );
@@ -325,7 +326,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           border: Border.all(color: context.dr.border),
         ),
         child: Text(
-          _showExtra ? 'Bağla' : 'Hamısına bax',
+          _showExtra ? context.l10n.commonClose : context.l10n.dashSeeAll,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
@@ -402,22 +403,6 @@ class _NewsCard extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Stack(
                 children: [
-                  if (item.createdAt != null)
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: _pill(
-                        child: Text(
-                          DateFormat('dd MMM yyyy').format(item.createdAt!),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Says out loud that the slide leads somewhere; without it a
-                  // photo doesn't look tappable.
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: Column(

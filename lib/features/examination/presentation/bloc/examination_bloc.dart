@@ -5,6 +5,7 @@ import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/exam_group.dart';
 import '../../domain/entities/exam_result.dart';
 import '../../domain/usecases/get_examinations.dart';
+import '../../../../core/l10n/l10n.dart';
 
 part 'examination_event.dart';
 part 'examination_state.dart';

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/usecases/get_books.dart';
+import '../../../../core/l10n/l10n.dart';
 
 part 'library_event.dart';
 part 'library_state.dart';

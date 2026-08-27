@@ -6,6 +6,7 @@ import '../../../../core/di/injection_container.dart';
 import '../../../balance/presentation/cubit/balance_cubit.dart';
 import '../../domain/entities/product.dart';
 import '../cubit/buffet_cubit.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class BuffetPage extends StatelessWidget {
   const BuffetPage({super.key});
@@ -25,7 +26,7 @@ class _BuffetView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bufet')),
+      appBar: AppBar(title: Text(context.l10n.featureBuffet)),
       body: BlocConsumer<BuffetCubit, BuffetState>(
         listenWhen: (p, c) =>
             c.message != null && c.message != p.message,
@@ -153,7 +154,7 @@ class _CartBar extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${state.cartCount} məhsul',
+                  Text(context.l10n.buffetProductCount(state.cartCount),
                       style: const TextStyle(
                           color: AppColors.textSecondary, fontSize: 12)),
                   Text('${state.cartTotal.toStringAsFixed(2)} AZN',
@@ -174,7 +175,7 @@ class _CartBar extends StatelessWidget {
                             strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.shopping_cart_checkout),
-                label: const Text('Sifariş et'),
+                label: Text(context.l10n.buffetOrder),
               ),
             ],
           ),

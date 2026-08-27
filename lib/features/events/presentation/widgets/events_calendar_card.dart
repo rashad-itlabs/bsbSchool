@@ -1,8 +1,12 @@
+import 'package:bsbschool/dr/screens/event_detail.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
 import '../../domain/entities/school_event.dart';
+import '../../../../core/l10n/app_dates.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The dashboard's school calendar: a month grid whose days carry a coloured
 /// dot per event, plus the selected day's entries listed underneath.
@@ -32,12 +36,6 @@ class EventsCalendarCard extends StatefulWidget {
 }
 
 class _EventsCalendarCardState extends State<EventsCalendarCard> {
-  static const _weekdays = ['Be', 'Ça', 'Ç', 'Ca', 'C', 'Ş', 'B'];
-  static const _months = [
-    'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
-    'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr',
-  ];
-
   /// How many entries the inline list shows before collapsing into a "+N".
   static const _maxListedEvents = 4;
 
@@ -163,7 +161,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
             children: [
               Flexible(
                 child: Text(
-                  _months[_visibleMonth.month - 1],
+                  AppDates.month(context, _visibleMonth.month),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -208,7 +206,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
 
   Widget _weekdayRow() {
     return Row(
-      children: _weekdays
+      children: List.generate(7, (i) => AppDates.weekdayShort(context, i + 1))
           .map(
             (label) => Expanded(
               child: Text(
@@ -364,7 +362,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
         Container(height: 1, color: context.dr.border),
         const SizedBox(height: 14),
         Text(
-          '${_selectedDay.day} ${_months[_selectedDay.month - 1]}',
+          AppDates.dayMonth(context, _selectedDay),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -374,14 +372,22 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
         const SizedBox(height: 10),
         if (events.isEmpty)
           Text(
-            'Bu gün üçün tədbir yoxdur',
+            context.l10n.eventsNoneToday,
             style: TextStyle(fontSize: 12, color: context.dr.textMuted),
           )
         else ...[
           for (final event in events.take(_maxListedEvents))
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: _eventRow(event),
+              child: InkWell(
+                  onTap: (){
+                    Navigator.of(context).push(CupertinoSheetRoute(
+                        builder: (context){
+                          return EventDetailScreen(event:event);
+                        }
+                    ));
+                  },
+                  child: _eventRow(event)),
             ),
           if (events.length > _maxListedEvents)
             Text(
@@ -485,7 +491,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Text(
-                'Yenidən cəhd et',
+                context.l10n.commonRetry,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

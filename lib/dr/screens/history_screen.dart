@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `history.html` — filter chips + grouped transactions.
 class HistoryScreen extends StatefulWidget {
@@ -24,8 +25,18 @@ class _Tx {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   int _filter = 0;
-  static const _filters = ['Hamısı', 'Mədaxil', 'Yeməkxana', 'Təhsil', 'Digər'];
+  /// A method rather than a const list: the labels are translated, so they
+  /// have to be resolved against the context on every build.
+  List<String> _filterLabels(BuildContext context) => [
+    context.l10n.commonAll,
+    context.l10n.historyIncome,
+    context.l10n.historyCanteen,
+    context.l10n.historyTuition,
+    context.l10n.historyOther,
+  ];
 
+  // Placeholder rows until the endpoint lands — merchant names and times are
+  // sample data, not interface text, so they are not translated.
   static const _groups = <String, List<_Tx>>{
     'Bu gün': [
       _Tx('☕', DrColors.orange, 'Yeməkxana', '12:30 • Kartla ödəniş',
@@ -51,9 +62,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Tarixçə'),
+          DrBackHeader(title: context.l10n.historyTitle),
           DrChipBar(
-            labels: _filters,
+            labels: _filterLabels(context),
             selectedIndex: _filter,
             onSelected: (i) => setState(() => _filter = i),
           ),

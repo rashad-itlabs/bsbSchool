@@ -8,6 +8,7 @@ import '../../features/homework/presentation/bloc/homework_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import 'homework_detail_screen.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `homework.html`, backed by `GET /homework` — subject pills and
 /// homework cards for the student's class.
@@ -40,8 +41,8 @@ class _HomeworkView extends StatelessWidget {
               children: [
                 DrBackHeader(
                   title: state.className == null
-                      ? 'Tapşırıqlar'
-                      : 'Tapşırıqlar',
+                      ? context.l10n.homeworkTitle
+                      : context.l10n.homeworkTitle,
                 ),
                 _StatusTabs(
                   tab: state.tab,
@@ -50,7 +51,10 @@ class _HomeworkView extends StatelessWidget {
                 const SizedBox(height: 20),
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
-                    labels: state.subjects,
+                    labels: [
+                      for (final subject in state.subjects)
+                        context.filterLabel(subject),
+                    ],
                     selectedIndex: state.subjects.indexOf(state.subject),
                     onSelected: (i) =>
                         bloc.add(HomeworkSubjectSelected(state.subjects[i])),
@@ -87,12 +91,12 @@ class _StatusTabs extends StatelessWidget {
       child: Row(
         children: [
           _Segment(
-            label: 'Aktiv',
+            label: context.l10n.homeworkActive,
             active: tab == HomeworkTab.active,
             onTap: () => onSelected(HomeworkTab.active),
           ),
           _Segment(
-            label: 'Deaktiv',
+            label: context.l10n.homeworkInactive,
             active: tab == HomeworkTab.past,
             onTap: () => onSelected(HomeworkTab.past),
           ),
@@ -155,22 +159,22 @@ class _Body extends StatelessWidget {
 
     if (state.status == HomeworkStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () =>
             context.read<HomeworkBloc>().add(const HomeworkRefreshed()),
       );
     }
 
     if (state.hasNoClass) {
-      return const _Message(text: 'Sinif təyin edilməyib');
+      return _Message(text: context.l10n.homeworkNoClass);
     }
 
     final items = state.visibleHomeworks;
     if (items.isEmpty) {
       return _Message(
         text: state.tab == HomeworkTab.active
-            ? 'Aktiv tapşırıq yoxdur'
-            : 'Deaktiv tapşırıq yoxdur',
+            ? context.l10n.homeworkNoActive
+            : context.l10n.homeworkNoInactive,
       );
     }
 
@@ -261,7 +265,7 @@ class _HomeworkCard extends StatelessWidget {
           const SizedBox(height: 15),
           Row(
             children: [
-              Text('Son tarix: ',
+              Text(context.l10n.homeworkDuePrefix,
                   style: TextStyle(fontSize: 12, color: context.dr.textMuted)),
               Text(
                 _formatDate(homework.submitDate),
@@ -293,7 +297,7 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),
@@ -317,10 +321,10 @@ _DeadlineTag? _deadlineTag(BuildContext context, DateTime? submitDate) {
   final due = DateTime(submitDate.year, submitDate.month, submitDate.day);
   final days = due.difference(today).inDays;
 
-  if (days < 0) return const _DeadlineTag('Gecikmiş', DrColors.red);
-  if (days == 0) return const _DeadlineTag('Bu gün', DrColors.red);
-  if (days == 1) return const _DeadlineTag('Sabah', DrColors.teal);
-  return _DeadlineTag('$days gün qalıb', context.dr.accent);
+  if (days < 0) return _DeadlineTag(context.l10n.homeworkOverdue, DrColors.red);
+  if (days == 0) return _DeadlineTag(context.l10n.homeworkToday, DrColors.red);
+  if (days == 1) return _DeadlineTag(context.l10n.homeworkTomorrow, DrColors.teal);
+  return _DeadlineTag(context.l10n.homeworkDaysLeft(days), context.dr.accent);
 }
 
 String _formatDate(DateTime? date) =>

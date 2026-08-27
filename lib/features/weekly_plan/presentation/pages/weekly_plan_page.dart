@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../cubit/weekly_plan_cubit.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class WeeklyPlanPage extends StatelessWidget {
   const WeeklyPlanPage({super.key});
@@ -12,7 +13,7 @@ class WeeklyPlanPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => sl<WeeklyPlanCubit>()..loadPlan(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Həftəlik plan')),
+        appBar: AppBar(title: Text(context.l10n.featureWeeklyPlan)),
         body: BlocBuilder<WeeklyPlanCubit, WeeklyPlanState>(
           builder: (context, state) {
             if (state.status == WeeklyPlanStatus.loading ||
@@ -20,7 +21,7 @@ class WeeklyPlanPage extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (state.status == WeeklyPlanStatus.error) {
-              return Center(child: Text(state.message ?? 'Xəta'));
+              return Center(child: Text(state.message ?? context.l10n.commonErrorShort));
             }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -32,7 +33,7 @@ class WeeklyPlanPage extends StatelessWidget {
                     initiallyExpanded: i == 0,
                     title: Text(day.day,
                         style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${day.lessons.length} dərs'),
+                    subtitle: Text(context.l10n.weeklyLessonCount(day.lessons.length)),
                     children: day.lessons
                         .map((l) => ListTile(
                               dense: true,
@@ -43,7 +44,7 @@ class WeeklyPlanPage extends StatelessWidget {
                               ),
                               title: Text(l.subject),
                               subtitle:
-                                  Text('${l.teacher} • Otaq ${l.room}'),
+                                  Text(context.l10n.weeklyTeacherRoom(l.teacher, l.room)),
                               trailing: Text(l.time,
                                   style: const TextStyle(fontSize: 12)),
                             ))

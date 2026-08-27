@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../models/news_page_model.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Talks to the news endpoint over the shared [Dio] instance (base URL and
 /// bearer token come from the interceptor). Throws typed exceptions so the
@@ -31,7 +32,7 @@ class NewsServiceImpl implements NewsService {
       }
 
       if (status == 401) {
-        throw const ServerException('Sessiya bitib, yenidən daxil olun');
+        throw ServerException(L.s.errSessionExpired);
       }
 
       throw ServerException(_messageFrom(data));
@@ -44,14 +45,14 @@ class NewsServiceImpl implements NewsService {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    return 'Xəbərlər yüklənmədi';
+    return L.s.errNewsLoad;
   }
 
   String _dioMessage(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return 'Serverə qoşulmaq mümkün olmadı';
+      return L.s.errNoConnection;
     }
     return _messageFrom(e.response?.data);
   }

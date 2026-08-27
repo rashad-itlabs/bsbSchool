@@ -24,6 +24,22 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }
 
   @override
+  Future<Either<Failure, PaymentSession>> startFeePayment({
+    required int feeId,
+    required double amount,
+  }) async {
+    try {
+      return Right(
+        await service.startFeePayment(feeId: feeId, amount: amount),
+      );
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, PaymentResult>> getStatus(String reference) async {
     try {
       return Right(await service.getStatus(reference));

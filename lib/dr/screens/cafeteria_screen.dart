@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `cafeteria.html` — daily limit, weekly bar chart, recent purchases.
 class CafeteriaScreen extends StatelessWidget {
@@ -20,7 +21,7 @@ class CafeteriaScreen extends StatelessWidget {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Son əməliyyatlar'),
+          DrBackHeader(title: context.l10n.recentTransactions),
           // _limitCard(context),
           // const SizedBox(height: 30),
           // DrSectionHeader(title: 'Həftəlik statistika'),
@@ -78,7 +79,7 @@ class CafeteriaScreen extends StatelessWidget {
           //   ),
           // ),
           // const SizedBox(height: 30),
-          // DrSectionHeader(title: 'Son əməliyyatlar'),
+          // DrSectionHeader(title: context.l10n.recentTransactions),
           const DrListCard(
             children: [
               DrTransactionTile(
@@ -116,7 +117,7 @@ class CafeteriaScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Günlük limit',
+              Text(context.l10n.cafeteriaDailyLimit,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
               Container(
                 width: 32,
@@ -138,7 +139,7 @@ class CafeteriaScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Xərclənib',
+                  Text(context.l10n.cafeteriaSpent,
                       style:
                           TextStyle(fontSize: 12, color: context.dr.textMuted)),
                   const SizedBox(height: 4),
@@ -152,7 +153,7 @@ class CafeteriaScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Qalıq',
+                  Text(context.l10n.extraFeeRemaining,
                       style:
                           TextStyle(fontSize: 12, color: context.dr.textMuted)),
                   const SizedBox(height: 4),

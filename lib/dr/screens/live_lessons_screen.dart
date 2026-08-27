@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `services.html` — live + upcoming online lessons.
 class LiveLessonsScreen extends StatelessWidget {
@@ -12,8 +13,8 @@ class LiveLessonsScreen extends StatelessWidget {
     return DrScaffold(
       child: ListView(
         children: [
-          const DrBackHeader(title: 'Canlı Dərslər'),
-          DrSectionHeader(title: 'İndi başlayır', fontSize: 16),
+          DrBackHeader(title: context.l10n.liveLessonsTitle),
+          DrSectionHeader(title: context.l10n.liveStartingNow, fontSize: 16),
           _meetingCard(
             context,
             emoji: '📐',
@@ -24,7 +25,7 @@ class LiveLessonsScreen extends StatelessWidget {
             live: true,
           ),
           const SizedBox(height: 30),
-          DrSectionHeader(title: 'Gözlənilən dərslər', fontSize: 16),
+          DrSectionHeader(title: context.l10n.liveUpcoming, fontSize: 16),
           _meetingCard(
             context,
             emoji: '🇬🇧',
@@ -107,7 +108,7 @@ class LiveLessonsScreen extends StatelessWidget {
                 ),
               ),
               if (live)
-                _statusBadge('Canlı', context.dr.accent, context.dr.accentSoft,
+                _statusBadge(context.l10n.liveBadge, context.dr.accent, context.dr.accentSoft,
                     showDot: true)
               else
                 _statusBadge(badge ?? '', context.dr.textMuted,
@@ -144,15 +145,15 @@ class LiveLessonsScreen extends StatelessWidget {
                   BoxShadow(
                       color: DrColors.accentGreen.withValues(alpha: 0.3),
                       blurRadius: 20,
-                      offset: const Offset(0, 8))
+                      offset: Offset(0, 8))
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Icon(Icons.videocam, color: Colors.black, size: 20),
                   SizedBox(width: 8),
-                  Text('Dərsə qoşul',
+                  Text(context.l10n.liveJoin,
                       style: TextStyle(
                           color: Colors.black,
                           fontSize: 15,
@@ -169,7 +170,7 @@ class LiveLessonsScreen extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text('Otaq hələ açılmayıb',
+              child: Text(context.l10n.liveRoomClosed,
                   style: TextStyle(
                       color: context.dr.textMuted,
                       fontSize: 15,

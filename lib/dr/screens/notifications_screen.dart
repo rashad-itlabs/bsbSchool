@@ -7,6 +7,7 @@ import '../../features/notifications/domain/entities/notification_item.dart';
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `notifications.html`, backed by `GET /notifications` — the message
 /// feed for the logged-in student (both personal and class-wide items) plus the
@@ -40,12 +41,12 @@ class _NotificationsView extends StatelessWidget {
               children: [
                 // Header: matches the tab layout (decorative spacers + title).
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
+                  padding: EdgeInsets.only(bottom: 30),
                   child: Row(
-                    children: const [
+                    children: [
                       SizedBox(width: 44),
                       Expanded(
-                        child: Text('Bildirişlər',
+                        child: Text(context.l10n.notificationsTitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w600)),
@@ -83,7 +84,7 @@ class _Feed extends StatelessWidget {
 
     if (state.status == NotificationsStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () => context
             .read<NotificationsBloc>()
             .add(const NotificationsRefreshed()),
@@ -92,7 +93,7 @@ class _Feed extends StatelessWidget {
 
     final items = state.recentItems;
     if (items.isEmpty) {
-      return const _Message(text: 'Hələ bildiriş yoxdur.');
+      return _Message(text: context.l10n.notificationsEmpty);
     }
 
     return DrListCard(
@@ -112,7 +113,7 @@ class _Feed extends StatelessWidget {
 
     return DrTransactionTile(
       leading: DrEmojiBadge(emoji: _emojiFor(item), color: context.dr.accent),
-      title: item.title.isEmpty ? 'Bildiriş' : item.title,
+      title: item.title.isEmpty ? context.l10n.notificationFallback : item.title,
       subtitle: subtitle.isEmpty ? '—' : subtitle,
       divider: divider,
       trailing: Text(
@@ -155,7 +156,7 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),

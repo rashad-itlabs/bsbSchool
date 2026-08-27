@@ -6,6 +6,8 @@ import '../../features/timetable/domain/entities/timetable_lesson.dart';
 import '../../features/timetable/presentation/bloc/timetable_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../../core/l10n/app_dates.dart';
+import '../../core/l10n/l10n.dart';
 
 /// Port of `timetable.html`, backed by `GET /class-timetable` — a weekday tab
 /// bar (Mon–Fri) and the lesson cards for the selected day.
@@ -41,11 +43,16 @@ class _TimetableView extends StatelessWidget {
               children: [
                 DrBackHeader(
                   title: state.className == null
-                      ? 'Dərs cədvəli'
-                      : 'Dərs cədvəli',
+                      ? context.l10n.featureTimetable
+                      : context.l10n.featureTimetable,
                 ),
                 DrChipBar(
-                  labels: [for (final t in tabs) t.name],
+                  // Named from the weekday number rather than the server's
+                  // own (Azerbaijani) label, so the tabs follow the app's
+                  // language.
+                  labels: [
+                    for (final t in tabs) AppDates.weekday(context, t.dayOfWeek),
+                  ],
                   selectedIndex: selectedIndex < 0 ? 0 : selectedIndex,
                   onSelected: (i) =>
                       bloc.add(TimetableDaySelected(tabs[i].dayOfWeek)),
@@ -77,19 +84,19 @@ class _Body extends StatelessWidget {
 
     if (state.status == TimetableStatus.error) {
       return _Message(
-        text: state.errorMessage ?? 'Xəta baş verdi',
+        text: state.errorMessage ?? context.l10n.commonError,
         onRetry: () =>
             context.read<TimetableBloc>().add(const TimetableRefreshed()),
       );
     }
 
     if (state.hasNoClass) {
-      return const _Message(text: 'Sinif təyin edilməyib');
+      return _Message(text: context.l10n.homeworkNoClass);
     }
 
     final lessons = state.selectedLessons;
     if (lessons.isEmpty) {
-      return const _Message(text: 'Bu gün üçün dərs yoxdur');
+      return _Message(text: context.l10n.timetableEmpty);
     }
 
     return Column(
@@ -144,7 +151,7 @@ class _LessonCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(lesson.subject.isEmpty ? 'Dərs' : lesson.subject,
+          Text(lesson.subject.isEmpty ? context.l10n.attendanceLesson : lesson.subject,
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           if (lesson.period != null) ...[
@@ -154,7 +161,7 @@ class _LessonCard extends StatelessWidget {
           ],
           if (lesson.teacher != null) ...[
             const SizedBox(height: 4),
-            Text('Müəllim: ${lesson.teacher!}',
+            Text(context.l10n.timetableTeacherLabel(lesson.teacher!),
                 style: TextStyle(fontSize: 13, color: context.dr.textMuted)),
           ],
           if (lesson.section != null) ...[
@@ -163,7 +170,7 @@ class _LessonCard extends StatelessWidget {
             const SizedBox(height: 15),
             Row(
               children: [
-                Text('Qrup: ',
+                Text(context.l10n.timetableGroupPrefix,
                     style:
                         TextStyle(fontSize: 12, color: context.dr.textMuted)),
                 Expanded(
@@ -196,7 +203,7 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: const Text('Yenidən cəhd et')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),

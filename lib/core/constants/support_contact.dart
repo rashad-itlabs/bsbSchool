@@ -1,4 +1,6 @@
-/// Where "Dəstək ilə əlaqə" sends the user.
+import '../l10n/l10n.dart';
+
+/// Where the "contact support" action sends the user.
 ///
 /// TODO: replace the three placeholders below with the school's real support
 /// details before release — they are the only values that need changing.
@@ -14,7 +16,8 @@ class SupportContact {
   static const String whatsapp = '+994 50 000 00 00';
 
   /// Prefills the mail composer so support knows where the message came from.
-  static const String emailSubject = 'BSB tətbiqi — dəstək sorğusu';
+  /// A getter, not a field: it is translated, so it is read at send time.
+  static String get emailSubject => L.s.supportEmailSubject;
 
   /// The leading '+' is kept — dialers need it to place an international call.
   static Uri get phoneUri =>
