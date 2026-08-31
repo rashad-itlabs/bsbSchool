@@ -169,6 +169,41 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await service.registerParent(
+        name: name,
+        email: email,
+        phone: phone,
+        password: password,
+        admissionNo: admissionNo,
+        relation: relation,
+      );
+      return const Right(unit);
+    } on FieldValidationException catch (e) {
+      // Caught before ValidationException — it is a subclass, and dropping to
+      // the plain branch would throw the per-field map away.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> logout() async {
     try {
       // Best-effort revoke; ignore network/server errors on the way out.

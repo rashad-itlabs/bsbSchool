@@ -87,6 +87,17 @@ class _FakeAuthRepository implements AuthRepository {
     required String password,
   }) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  }) async =>
+      const Right(unit);
 }
 
 AuthUser _user({required String role, int? id = 4108}) => AuthUser(

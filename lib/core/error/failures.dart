@@ -49,3 +49,15 @@ class ValidationFailure extends Failure {
   @override
   String get defaultMessage => L.s.errInvalid;
 }
+
+/// A [ValidationFailure] carrying the backend's per-field messages — the
+/// domain-side counterpart of `FieldValidationException`.
+class FieldValidationFailure extends ValidationFailure {
+  /// Backend field name to its first message.
+  final Map<String, String> fieldErrors;
+
+  const FieldValidationFailure(this.fieldErrors, [super.message]);
+
+  @override
+  List<Object?> get props => [message, fieldErrors];
+}

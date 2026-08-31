@@ -6,6 +6,8 @@ import '../../core/constants/support_contact.dart';
 import '../../core/di/injection_container.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
+import '../../features/auth/presentation/bloc/register_bloc.dart';
+import 'register_screen.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import '../../core/l10n/l10n.dart';
@@ -69,6 +71,34 @@ class _LoginScreenState extends State<LoginScreen> {
     _showSnack(context.l10n.loginPasswordUpdated);
   }
 
+  Future<void> _openRegister() async {
+    FocusScope.of(context).unfocus();
+    // Returns the credentials just registered, or null if the parent backed
+    // out of the form.
+    final registered =
+        await Navigator.of(context).push<({String email, String password})>(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<RegisterBloc>(),
+          child: const RegisterScreen(),
+        ),
+      ),
+    );
+
+    if (!mounted || registered == null) return;
+
+    // `/registerParent` mints no token, so the session starts here. The fields
+    // keep the values either way — if the sign-in is rejected the parent only
+    // has to tap "Daxil ol" again.
+    _emailController.text = registered.email;
+    _passwordController.text = registered.password;
+    _showSnack(context.l10n.registerDone);
+    context.read<AuthBloc>().add(AuthLoginRequested(
+          email: registered.email,
+          password: registered.password,
+        ));
+  }
+
   void _showSupportSheet() {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
@@ -90,36 +120,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Language switcher (top-right)
-            Positioned(
-              top: 14,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                decoration: BoxDecoration(
-                  color: context.dr.bgSurface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: context.dr.border),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _lang,
-                    isDense: true,
-                    dropdownColor: context.dr.bgSurface,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: context.dr.textMain,
-                    ),
-                    items: const ['AZ', 'EN', 'RU']
-                        .map((e) =>
-                            DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (v) => setState(() => _lang = v ?? 'AZ'),
-                  ),
-                ),
-              ),
-            ),
             Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(30, 40, 30, 40),
@@ -218,7 +218,37 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: _login,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: GestureDetector(
+                        onTap: _openRegister,
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: Text.rich(
+                            TextSpan(
+                              text: '${context.l10n.loginNoAccount} ',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: context.dr.textMuted,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: context.l10n.loginRegister,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.dr.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     Center(
                       child: GestureDetector(
                         onTap: _showSupportSheet,

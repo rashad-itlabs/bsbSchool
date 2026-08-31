@@ -49,3 +49,16 @@ class ValidationException extends AppException {
   @override
   String get defaultMessage => L.s.errInvalid;
 }
+
+/// A [ValidationException] that also knows *which* inputs were rejected.
+///
+/// Laravel answers a failed `Validator` with
+/// `{"success": false, "errors": {field: [msg, ...]}}`. Keeping that map intact
+/// lets a form put every message back under the input that caused it, instead
+/// of collapsing them into one line and making the user fix them one per tap.
+class FieldValidationException extends ValidationException {
+  /// Backend field name to its first message.
+  final Map<String, String> fieldErrors;
+
+  const FieldValidationException(this.fieldErrors, [super.message]);
+}

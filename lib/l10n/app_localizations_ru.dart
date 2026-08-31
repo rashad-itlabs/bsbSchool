@@ -18,7 +18,7 @@ class AppL10nRu extends AppL10n {
   String get addChildField => 'Номер зачисления';
 
   @override
-  String get addChildHint => 'Номер зачисления вашего ребёнка';
+  String get addChildHint => 'ID вашего ребёнка';
 
   @override
   String get addChildOtherAccount => 'Войти под другой учётной записью';
@@ -744,11 +744,17 @@ class AppL10nRu extends AppL10n {
   String get loginForgotPassword => 'Забыли пароль?';
 
   @override
+  String get loginNoAccount => 'Нет аккаунта?';
+
+  @override
   String get loginPassword => 'Пароль';
 
   @override
   String get loginPasswordUpdated =>
       'Пароль обновлён. Войдите с новым паролем.';
+
+  @override
+  String get loginRegister => 'Зарегистрироваться';
 
   @override
   String get loginSendEmail => 'Отправить e-mail';
@@ -871,6 +877,76 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get recentTransactions => 'Последние операции';
+
+  @override
+  String get registerAdmissionNote =>
+      'Номер зачисления указан в ученическом билете и в документе о зачислении, выданном школой.';
+
+  @override
+  String get registerDone =>
+      'Регистрация завершена. Теперь вы можете войти в свой аккаунт.';
+
+  @override
+  String get registerHaveAccount => 'Уже есть аккаунт?';
+
+  @override
+  String get registerName => 'Имя и фамилия';
+
+  @override
+  String get registerNameHint => 'Ваши имя и фамилия';
+
+  @override
+  String get registerNameRequired => 'Введите имя и фамилию';
+
+  @override
+  String get registerNameShort => 'Укажите имя и фамилию полностью';
+
+  @override
+  String get registerPasswordHide => 'Скрыть пароль';
+
+  @override
+  String get registerPasswordRepeat => 'Пароль (повторно)';
+
+  @override
+  String get registerPasswordRequired => 'Придумайте пароль';
+
+  @override
+  String get registerPasswordShow => 'Показать пароль';
+
+  @override
+  String get registerPhone => 'Телефон';
+
+  @override
+  String get registerPhoneHint => '+994 50 123 45 67';
+
+  @override
+  String get registerPhoneInvalid => 'Номер телефона указан неверно';
+
+  @override
+  String get registerPhoneRequired => 'Введите номер телефона';
+
+  @override
+  String get registerSectionAccount => 'Данные аккаунта';
+
+  @override
+  String get registerSectionChild => 'Ваш ребёнок';
+
+  @override
+  String get registerSubmit => 'Зарегистрироваться';
+
+  @override
+  String get registerSubtitle => 'Создайте аккаунт родителя';
+
+  @override
+  String get registerTerms =>
+      'Я согласен с условиями использования и политикой конфиденциальности';
+
+  @override
+  String get registerTermsRequired =>
+      'Примите условия использования, чтобы продолжить';
+
+  @override
+  String get registerTitle => 'Регистрация';
 
   @override
   String get settingsChildCredentials =>

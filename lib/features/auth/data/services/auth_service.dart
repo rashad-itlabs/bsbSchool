@@ -30,6 +30,20 @@ abstract class AuthService {
     required String email,
     required String password,
   });
+
+  /// Creates a parent account and links it to the student whose admission
+  /// code is [admissionNo]. Issues no token — the caller signs in afterwards.
+  ///
+  /// Throws a [FieldValidationException] when the backend rejects one of the
+  /// inputs, so the form can show each message under its own field.
+  Future<void> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  });
 }
 
 class AuthServiceImpl implements AuthService {
@@ -39,6 +53,10 @@ class AuthServiceImpl implements AuthService {
 
   /// Backend route that re-points the account at another of its students.
   static const String selectChildPath = '/selectChild';
+
+  /// Backend route behind `AuthController::registerParent`. Kept here so a
+  /// rename on the Laravel side is a one-line change.
+  static const String registerParentPath = '/register';
 
   final Dio dio;
   const AuthServiceImpl(this.dio);
@@ -194,6 +212,84 @@ class AuthServiceImpl implements AuthService {
     if (status == 404 || status == 422) {
       return L.s.errUserNotFound;
     }
+    return L.s.errServer;
+  }
+
+  @override
+  Future<void> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  }) async {
+    try {
+      final response = await dio.post(
+        registerParentPath,
+        // The endpoint validates on these exact keys — it was written against
+        // the form's controller names, so they are the contract, not a typo.
+        data: {
+          '_name_nameController': name,
+          '_emailController': email,
+          '_phoneController': phone,
+          '_passwordController': password,
+          '_admissionController': admissionNo,
+          if (relation != null && relation.isNotEmpty) 'relation': relation,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      // The endpoint answers `{"success": true, "message": ...}` on 200 — trust
+      // the flag over the status code when both are present.
+      if (status == 200 || status == 201) {
+        if (data is Map && data['success'] == false) {
+          throw FieldValidationException(
+            _fieldErrorsFrom(data),
+            _registerMessageFrom(data, status),
+          );
+        }
+        return;
+      }
+
+      // 422 — a field failed, or the admission code matched no student. Both
+      // arrive together in `errors`, which is the point of the endpoint's
+      // single-basket validation.
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _registerMessageFrom(data, status),
+      );
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  /// `{"errors": {field: [msg, ...]}}` flattened to one message per field —
+  /// the form shows a single line under each input.
+  Map<String, String> _fieldErrorsFrom(dynamic data) {
+    final errors = data is Map ? data['errors'] : null;
+    if (errors is! Map) return const {};
+
+    final flattened = <String, String>{};
+    errors.forEach((key, value) {
+      if (value is List && value.isNotEmpty) {
+        flattened[key.toString()] = value.first.toString();
+      } else if (value != null) {
+        flattened[key.toString()] = value.toString();
+      }
+    });
+    return flattened;
+  }
+
+  /// Form-wide wording. The per-field messages are the specific ones, so this
+  /// only needs to cover the case where the body carries none.
+  String _registerMessageFrom(dynamic data, int status) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    if (status == 422) return L.s.errInvalid;
     return L.s.errServer;
   }
 

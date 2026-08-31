@@ -1,6 +1,7 @@
 import 'package:bsbschool/dr/screens/event_detail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
@@ -381,11 +382,57 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
                   onTap: (){
-                    Navigator.of(context).push(CupertinoSheetRoute(
+                    /// eventDetail
+                    showModalBottomSheet(
+                        context: context,
                         builder: (context){
-                          return EventDetailScreen(event:event);
+                          return Container(
+                            padding: EdgeInsets.all(15),
+                            //color: Colors.grey,
+                            width: double.infinity,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height:10),
+                                Align(
+                                  alignment: Alignment.topCenter,
+                                  child: Container(
+                                    width: 100,
+                                    height: 5,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[850],
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height:12),
+                                Text(event.title),
+                                SizedBox(height:2),
+                                Text(DateFormat('dd.MM.yyyy').format(event.date!),style: TextStyle(
+                                  fontSize: 12,
+                                ),),
+                                SizedBox(height:5),
+                                Divider(
+                                  height: 0.3,
+                                ),
+                                SizedBox(height:5),
+                                Text('Description:',style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                ),),
+                                SizedBox(height:5),
+                                Text(event.description),
+                                SizedBox(height:32),
+                              ],
+                            ),
+                          );
                         }
-                    ));
+                    );
+                    // Navigator.of(context).push(CupertinoSheetRoute(
+                    //     builder: (context){
+                    //       return EventDetailScreen(event:event);
+                    //     }
+                    // ));
                   },
                   child: _eventRow(event)),
             ),

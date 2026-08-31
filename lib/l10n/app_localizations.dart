@@ -120,7 +120,7 @@ abstract class AppL10n {
   /// No description provided for @addChildHint.
   ///
   /// In az, this message translates to:
-  /// **'Övladınızın qəbul nömrəsi'**
+  /// **'Övladınızın sistem ID-si'**
   String get addChildHint;
 
   /// No description provided for @addChildOtherAccount.
@@ -1443,6 +1443,12 @@ abstract class AppL10n {
   /// **'Şifrəni unutmusunuz?'**
   String get loginForgotPassword;
 
+  /// No description provided for @loginNoAccount.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesabınız yoxdur?'**
+  String get loginNoAccount;
+
   /// No description provided for @loginPassword.
   ///
   /// In az, this message translates to:
@@ -1454,6 +1460,12 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.'**
   String get loginPasswordUpdated;
+
+  /// No description provided for @loginRegister.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeydiyyatdan keçin'**
+  String get loginRegister;
 
   /// No description provided for @loginSendEmail.
   ///
@@ -1682,6 +1694,138 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Son əməliyyatlar'**
   String get recentTransactions;
+
+  /// No description provided for @registerAdmissionNote.
+  ///
+  /// In az, this message translates to:
+  /// **'Qəbul nömrəsi şagird vəsiqəsində və məktəbin verdiyi qəbul sənədində yazılıb.'**
+  String get registerAdmissionNote;
+
+  /// No description provided for @registerDone.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeydiyyat tamamlandı. İndi hesabınıza daxil ola bilərsiniz.'**
+  String get registerDone;
+
+  /// No description provided for @registerHaveAccount.
+  ///
+  /// In az, this message translates to:
+  /// **'Artıq hesabınız var?'**
+  String get registerHaveAccount;
+
+  /// No description provided for @registerName.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad Soyad'**
+  String get registerName;
+
+  /// No description provided for @registerNameHint.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad və soyadınız'**
+  String get registerNameHint;
+
+  /// No description provided for @registerNameRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad və soyadınızı daxil edin'**
+  String get registerNameRequired;
+
+  /// No description provided for @registerNameShort.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad və soyadı tam yazın'**
+  String get registerNameShort;
+
+  /// No description provided for @registerPasswordHide.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrəni gizlə'**
+  String get registerPasswordHide;
+
+  /// No description provided for @registerPasswordRepeat.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrə (təkrar)'**
+  String get registerPasswordRepeat;
+
+  /// No description provided for @registerPasswordRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrə təyin edin'**
+  String get registerPasswordRequired;
+
+  /// No description provided for @registerPasswordShow.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrəni göstər'**
+  String get registerPasswordShow;
+
+  /// No description provided for @registerPhone.
+  ///
+  /// In az, this message translates to:
+  /// **'Telefon'**
+  String get registerPhone;
+
+  /// No description provided for @registerPhoneHint.
+  ///
+  /// In az, this message translates to:
+  /// **'+994 50 123 45 67'**
+  String get registerPhoneHint;
+
+  /// No description provided for @registerPhoneInvalid.
+  ///
+  /// In az, this message translates to:
+  /// **'Telefon nömrəsi düzgün deyil'**
+  String get registerPhoneInvalid;
+
+  /// No description provided for @registerPhoneRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Telefon nömrəsini daxil edin'**
+  String get registerPhoneRequired;
+
+  /// No description provided for @registerSectionAccount.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesab məlumatları'**
+  String get registerSectionAccount;
+
+  /// No description provided for @registerSectionChild.
+  ///
+  /// In az, this message translates to:
+  /// **'Övladınız'**
+  String get registerSectionChild;
+
+  /// No description provided for @registerSubmit.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeydiyyatdan keç'**
+  String get registerSubmit;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Valideyn hesabı yaradın'**
+  String get registerSubtitle;
+
+  /// No description provided for @registerTerms.
+  ///
+  /// In az, this message translates to:
+  /// **'İstifadə şərtləri və məxfilik siyasəti ilə razıyam'**
+  String get registerTerms;
+
+  /// No description provided for @registerTermsRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Davam etmək üçün istifadə şərtlərini qəbul edin'**
+  String get registerTermsRequired;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeydiyyat'**
+  String get registerTitle;
 
   /// No description provided for @settingsChildCredentials.
   ///

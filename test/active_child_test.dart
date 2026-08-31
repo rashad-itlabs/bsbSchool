@@ -114,6 +114,16 @@ class _FakeAuthService implements AuthService {
     required String email,
     required String password,
   }) async {}
+
+  @override
+  Future<void> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  }) async {}
 }
 
 class _OfflineNetworkInfo implements NetworkInfo {

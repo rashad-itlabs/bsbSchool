@@ -602,6 +602,10 @@ class DrTextField extends StatelessWidget {
   final bool enabled;
   final bool autofocus;
   final TextCapitalization textCapitalization;
+
+  /// Rendered inside the field, against its right edge — a show/hide toggle on
+  /// a password input, for example.
+  final Widget? trailing;
   const DrTextField({
     super.key,
     this.label,
@@ -617,6 +621,7 @@ class DrTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.none,
+    this.trailing,
   });
 
   @override
@@ -673,6 +678,10 @@ class DrTextField extends StatelessWidget {
                   ),
                 ),
               ),
+              if (trailing != null) ...[
+                const SizedBox(width: 8),
+                trailing!,
+              ],
             ],
           ),
         ),

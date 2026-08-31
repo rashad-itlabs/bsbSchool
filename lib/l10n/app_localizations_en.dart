@@ -18,7 +18,7 @@ class AppL10nEn extends AppL10n {
   String get addChildField => 'Admission number';
 
   @override
-  String get addChildHint => 'Your child\'s admission number';
+  String get addChildHint => 'Your child\'s ID';
 
   @override
   String get addChildOtherAccount => 'Sign in with another account';
@@ -742,11 +742,17 @@ class AppL10nEn extends AppL10n {
   String get loginForgotPassword => 'Forgot your password?';
 
   @override
+  String get loginNoAccount => 'Don\'t have an account?';
+
+  @override
   String get loginPassword => 'Password';
 
   @override
   String get loginPasswordUpdated =>
       'Your password has been updated. Sign in with the new one.';
+
+  @override
+  String get loginRegister => 'Sign up';
 
   @override
   String get loginSendEmail => 'Send e-mail';
@@ -870,6 +876,75 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get recentTransactions => 'Recent transactions';
+
+  @override
+  String get registerAdmissionNote =>
+      'The admission number is on the student card and on the admission document from the school.';
+
+  @override
+  String get registerDone =>
+      'Registration complete. You can now sign in to your account.';
+
+  @override
+  String get registerHaveAccount => 'Already have an account?';
+
+  @override
+  String get registerName => 'Full name';
+
+  @override
+  String get registerNameHint => 'Your first and last name';
+
+  @override
+  String get registerNameRequired => 'Enter your first and last name';
+
+  @override
+  String get registerNameShort => 'Enter your full first and last name';
+
+  @override
+  String get registerPasswordHide => 'Hide password';
+
+  @override
+  String get registerPasswordRepeat => 'Password (repeat)';
+
+  @override
+  String get registerPasswordRequired => 'Choose a password';
+
+  @override
+  String get registerPasswordShow => 'Show password';
+
+  @override
+  String get registerPhone => 'Phone';
+
+  @override
+  String get registerPhoneHint => '+994 50 123 45 67';
+
+  @override
+  String get registerPhoneInvalid => 'The phone number is not valid';
+
+  @override
+  String get registerPhoneRequired => 'Enter your phone number';
+
+  @override
+  String get registerSectionAccount => 'Account details';
+
+  @override
+  String get registerSectionChild => 'Your child';
+
+  @override
+  String get registerSubmit => 'Sign up';
+
+  @override
+  String get registerSubtitle => 'Create a parent account';
+
+  @override
+  String get registerTerms =>
+      'I agree to the terms of use and the privacy policy';
+
+  @override
+  String get registerTermsRequired => 'Accept the terms of use to continue';
+
+  @override
+  String get registerTitle => 'Registration';
 
   @override
   String get settingsChildCredentials =>

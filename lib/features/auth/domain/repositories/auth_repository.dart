@@ -22,6 +22,21 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Creates a parent account and links it to the student holding
+  /// [admissionNo]. Issues no session: the caller signs in afterwards with the
+  /// same credentials, so login stays the one place a token is minted.
+  ///
+  /// Fails with a [FieldValidationFailure] when the backend rejects an input,
+  /// so the form can put each message back under its own field.
+  Future<Either<Failure, Unit>> registerParent({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String admissionNo,
+    String? relation,
+  });
+
   /// True when a token is already stored (used to skip the login screen).
   bool get isLoggedIn;
 

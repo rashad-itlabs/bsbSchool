@@ -14,9 +14,11 @@ import '../../features/auth/data/services/auth_service.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
+import '../../features/auth/domain/usecases/register_parent.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
+import '../../features/auth/presentation/bloc/register_bloc.dart';
 
 // Balance
 import '../../features/balance/data/datasources/balance_local_data_source.dart';
@@ -244,10 +246,14 @@ void _initAuth() {
   // Cubit — new instance per "şifrəni unutdum" sheet.
   sl.registerFactory(() => ForgotPasswordCubit(resetPassword: sl()));
 
+  // Bloc — new instance per sign-up screen.
+  sl.registerFactory(() => RegisterBloc(registerParent: sl()));
+
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => LogoutUser(sl()));
   sl.registerLazySingleton(() => ResetPassword(sl()));
+  sl.registerLazySingleton(() => RegisterParent(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(

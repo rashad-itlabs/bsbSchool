@@ -18,7 +18,7 @@ class AppL10nAz extends AppL10n {
   String get addChildField => 'Qəbul nömrəsi';
 
   @override
-  String get addChildHint => 'Övladınızın qəbul nömrəsi';
+  String get addChildHint => 'Övladınızın sistem ID-si';
 
   @override
   String get addChildOtherAccount => 'Başqa hesabla daxil ol';
@@ -741,11 +741,17 @@ class AppL10nAz extends AppL10n {
   String get loginForgotPassword => 'Şifrəni unutmusunuz?';
 
   @override
+  String get loginNoAccount => 'Hesabınız yoxdur?';
+
+  @override
   String get loginPassword => 'Şifrə';
 
   @override
   String get loginPasswordUpdated =>
       'Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.';
+
+  @override
+  String get loginRegister => 'Qeydiyyatdan keçin';
 
   @override
   String get loginSendEmail => 'E-mail göndər';
@@ -869,6 +875,76 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get recentTransactions => 'Son əməliyyatlar';
+
+  @override
+  String get registerAdmissionNote =>
+      'Qəbul nömrəsi şagird vəsiqəsində və məktəbin verdiyi qəbul sənədində yazılıb.';
+
+  @override
+  String get registerDone =>
+      'Qeydiyyat tamamlandı. İndi hesabınıza daxil ola bilərsiniz.';
+
+  @override
+  String get registerHaveAccount => 'Artıq hesabınız var?';
+
+  @override
+  String get registerName => 'Ad Soyad';
+
+  @override
+  String get registerNameHint => 'Ad və soyadınız';
+
+  @override
+  String get registerNameRequired => 'Ad və soyadınızı daxil edin';
+
+  @override
+  String get registerNameShort => 'Ad və soyadı tam yazın';
+
+  @override
+  String get registerPasswordHide => 'Şifrəni gizlə';
+
+  @override
+  String get registerPasswordRepeat => 'Şifrə (təkrar)';
+
+  @override
+  String get registerPasswordRequired => 'Şifrə təyin edin';
+
+  @override
+  String get registerPasswordShow => 'Şifrəni göstər';
+
+  @override
+  String get registerPhone => 'Telefon';
+
+  @override
+  String get registerPhoneHint => '+994 50 123 45 67';
+
+  @override
+  String get registerPhoneInvalid => 'Telefon nömrəsi düzgün deyil';
+
+  @override
+  String get registerPhoneRequired => 'Telefon nömrəsini daxil edin';
+
+  @override
+  String get registerSectionAccount => 'Hesab məlumatları';
+
+  @override
+  String get registerSectionChild => 'Övladınız';
+
+  @override
+  String get registerSubmit => 'Qeydiyyatdan keç';
+
+  @override
+  String get registerSubtitle => 'Valideyn hesabı yaradın';
+
+  @override
+  String get registerTerms =>
+      'İstifadə şərtləri və məxfilik siyasəti ilə razıyam';
+
+  @override
+  String get registerTermsRequired =>
+      'Davam etmək üçün istifadə şərtlərini qəbul edin';
+
+  @override
+  String get registerTitle => 'Qeydiyyat';
 
   @override
   String get settingsChildCredentials =>
