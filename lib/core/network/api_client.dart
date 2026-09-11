@@ -10,7 +10,7 @@ import 'auth_interceptor.dart';
 /// individual services only deal with paths (`/login`, `/homeworks`, ...).
 class ApiClient {
   /// Backend root. All service paths are relative to this.
-  static const String baseUrl = 'https://laravel.bsb.edu.az/api/v1';
+  static const String baseUrl = 'https://online.bsb.edu.az//api/v1';
 
   final Dio dio;
 

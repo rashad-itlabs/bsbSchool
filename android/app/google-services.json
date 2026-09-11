@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "461521717158",
+    "project_id": "bsbpush-bfc1e",
+    "storage_bucket": "bsbpush-bfc1e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461521717158:android:771b9a69df9d42b9e8f167",
+        "android_client_info": {
+          "package_name": "com.itDevStidio.BritishSchool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgJTJ6XOfEudThtZ1JZHAyHGgIDQ1HdQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

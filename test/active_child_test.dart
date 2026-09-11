@@ -89,7 +89,21 @@ class _FakeAuthService implements AuthService {
   /// reports success.
   final AuthUserModel? selectChildResponse;
 
-  _FakeAuthService({this.selectChildError, this.selectChildResponse});
+  /// Every `/attachChild` call the repository made, by admission number.
+  final List<String> attachCalls = [];
+
+  /// What `/attachChild` echoes back — null models an endpoint that only
+  /// reports success.
+  final AuthUserModel? attachChildResponse;
+
+  /// Thrown instead of answering, to stand in for a rejected admission code.
+  Exception? attachError;
+
+  _FakeAuthService({
+    this.selectChildError,
+    this.selectChildResponse,
+    this.attachChildResponse,
+  });
 
   @override
   Future<AuthSessionModel> login({
@@ -110,6 +124,16 @@ class _FakeAuthService implements AuthService {
   }
 
   @override
+  Future<AuthUserModel?> attachChild({
+    required String admissionNo,
+    String? relation,
+  }) async {
+    attachCalls.add(admissionNo);
+    if (attachError != null) throw attachError!;
+    return attachChildResponse;
+  }
+
+  @override
   Future<void> resetPassword({
     required String email,
     required String password,
@@ -123,6 +147,17 @@ class _FakeAuthService implements AuthService {
     required String password,
     required String admissionNo,
     String? relation,
+  }) async {}
+
+  @override
+  Future<void> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {}
+
+  @override
+  Future<void> resendOtp({
+    required String email,
   }) async {}
 }
 
@@ -149,6 +184,7 @@ void main() {
     AuthUserModel? cached,
     Exception? selectChildError,
     AuthUserModel? selectChildResponse,
+    AuthUserModel? attachChildResponse,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     childStorage = SelectedChildStorageImpl(prefs);
@@ -156,6 +192,7 @@ void main() {
     service = _FakeAuthService(
       selectChildError: selectChildError,
       selectChildResponse: selectChildResponse,
+      attachChildResponse: attachChildResponse,
     );
     repository = AuthRepositoryImpl(
       service: service,
@@ -326,6 +363,106 @@ void main() {
 
       expect(childStorage.selectedChildId, 3139);
       expect(repository.activeStudentId, 3139);
+    });
+  });
+
+  group('POST /attachChild', () {
+    /// The roster the endpoint answers with once a third student is linked —
+    /// the two the account already had plus the new one.
+    AuthUserModel rosterOfThree() => AuthUserModel.fromJson({
+          'info': [
+            ...(jsonDecode(_parentBody) as Map<String, dynamic>)['info'] as List,
+            {
+              'child_id': 4021,
+              'class_id': 91,
+              'class_name': 'Class Group 4',
+              'child_name': 'Nigar',
+              'child_surname': 'Alizade',
+              'email': 'std_4021@bsb.edu.az',
+              'password': 'Kd83nQpz',
+              'payment_id': 'NA4021',
+            },
+          ],
+        });
+
+    test('is told which admission number to link', () async {
+      await build();
+
+      await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(service.attachCalls, ['BSB-4021']);
+    });
+
+    // The bug this guards: a response carrying only the refreshed roster — no
+    // `user_id`, no name, no role — used to leave the cache untouched, so the
+    // new student stayed invisible until the next login.
+    test('a roster-only response still lands the new student', () async {
+      await build(attachChildResponse: rosterOfThree());
+
+      await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(repository.currentUser?.children, hasLength(3));
+      expect(
+        repository.currentUser?.children.last.childId,
+        4021,
+      );
+      // Everything the trimmed response left out survives, same as
+      // `/selectChild`.
+      expect(repository.currentUser?.role, 'parent');
+      expect(repository.currentUser?.name, 'Ceyhun Alizade');
+    });
+
+    // Linking a student is not switching to one: the parent keeps looking at
+    // whoever was on screen.
+    test('leaves the active student where it was', () async {
+      await build(attachChildResponse: rosterOfThree());
+      await repository.selectChild(3139);
+
+      await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(childStorage.selectedChildId, 3139);
+      expect(repository.activeChild?.childId, 3139);
+    });
+
+    // An account the school had linked nothing to: `user_id` is null, which is
+    // what sends the parent to AddChildScreen. Once they add a student the app
+    // has to stop asking, even when the response carried no `user_id` of its
+    // own.
+    test('an account with no student adopts the one it just linked', () async {
+      final unlinked = AuthUserModel.fromJson({
+        'name': 'Ceyhun Alizade',
+        'role': 'parent',
+        'user_id': null,
+      });
+      await build(cached: unlinked, attachChildResponse: rosterOfThree());
+
+      expect(unlinked.needsChild, isTrue);
+
+      await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(repository.currentUser?.id, isNotNull);
+      expect(repository.currentUser?.needsChild, isFalse);
+    });
+
+    // Nothing to fold in — the student is linked on the server and the next
+    // login picks them up, but the cache must not be emptied in the meantime.
+    test('an acknowledgement leaves the cached roster intact', () async {
+      await build();
+
+      final result = await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(result.isRight(), isTrue);
+      expect(repository.currentUser?.children, hasLength(2));
+    });
+
+    test('a rejected code fails without touching the cache', () async {
+      await build();
+      service.attachError = ValidationException('Bu şagird artıq bağlıdır.');
+
+      final result = await repository.attachChild(admissionNo: 'BSB-4021');
+
+      expect(result.isLeft(), isTrue);
+      expect(repository.currentUser?.children, hasLength(2));
     });
   });
 }

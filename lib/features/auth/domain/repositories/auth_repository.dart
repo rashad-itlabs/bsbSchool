@@ -37,6 +37,19 @@ abstract class AuthRepository {
     String? relation,
   });
 
+  /// Confirms the 6-digit code mailed to [email] after registration. Mints no
+  /// token either: the caller signs in through login once the code is
+  /// accepted, so login stays the one place a token is minted.
+  ///
+  /// Fails with a [ValidationFailure] when the code is wrong or expired.
+  Future<Either<Failure, Unit>> verifyOtp({
+    required String email,
+    required String otp,
+  });
+
+  /// Mails a fresh code to [email], invalidating the previous one.
+  Future<Either<Failure, Unit>> resendOtp({required String email});
+
   /// True when a token is already stored (used to skip the login screen).
   bool get isLoggedIn;
 
@@ -62,4 +75,19 @@ abstract class AuthRepository {
   /// Fails without touching the local pick, so a rejected or unreachable
   /// switch leaves the app showing the student it already had.
   Future<Either<Failure, Unit>> selectChild(int childId);
+
+  /// Links one more student to the account, by the admission code the school
+  /// issued for them.
+  ///
+  /// Registration only takes one code, but a parent with several children is
+  /// given one per child, so the rest are linked after the fact. On success
+  /// the refreshed user is cached, which is what puts the new student into
+  /// [currentUser]'s `children` and therefore into the switcher.
+  ///
+  /// Fails with a [ValidationFailure] when the code matches no student or the
+  /// student is already on this account.
+  Future<Either<Failure, Unit>> attachChild({
+    required String admissionNo,
+    String? relation,
+  });
 }

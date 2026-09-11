@@ -14,6 +14,13 @@ class LocaleController extends ChangeNotifier {
 
   static const _prefsKey = 'app_locale';
 
+  /// Set once the first-run picker has been through.
+  ///
+  /// Kept apart from [_prefsKey] because "follow the device" is a real choice
+  /// that stores no language of its own — without this flag it would be
+  /// indistinguishable from never having been asked.
+  static const _chosenKey = 'app_locale_chosen';
+
   /// The language a device that asks for something we do not ship falls back
   /// to. The school's own language, not English.
   static const fallback = Locale('az');
@@ -22,9 +29,15 @@ class LocaleController extends ChangeNotifier {
   static const supported = <Locale>[Locale('az'), Locale('en'), Locale('ru')];
 
   Locale? _locale;
+  bool _chosen = false;
 
   /// null means "follow the device", which is the out-of-the-box default.
   Locale? get locale => _locale;
+
+  /// True once the parent has been through the language picker. The first
+  /// launch shows it ahead of the login form; every launch after goes straight
+  /// there.
+  bool get hasChosenLanguage => _chosen;
 
   /// True while the app follows the device language.
   bool get isSystem => _locale == null;
@@ -34,7 +47,23 @@ class LocaleController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString(_prefsKey);
     _locale = _parse(code);
+    // An install that already carries a language was set up before the picker
+    // existed — asking now would interrupt someone who has already answered.
+    _chosen = prefs.getBool(_chosenKey) ?? code != null;
     notifyListeners();
+  }
+
+  /// Closes the first-run picker for good.
+  ///
+  /// The language itself is already stored by [setLocale] as the parent taps
+  /// through the options; this only records that they were asked.
+  Future<void> confirmChoice() async {
+    if (_chosen) return;
+    _chosen = true;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_chosenKey, true);
   }
 
   /// Pass null to hand the choice back to the device.

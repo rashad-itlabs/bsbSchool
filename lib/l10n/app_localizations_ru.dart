@@ -12,6 +12,10 @@ class AppL10nRu extends AppL10n {
   String get addChildAdded => 'Ученик добавлен к вашей учётной записи';
 
   @override
+  String get addChildAnotherText =>
+      'Введите номер зачисления ребёнка — ученик будет привязан к вашей учётной записи, и вы сможете следить за всем отсюда.';
+
+  @override
   String get addChildEnterNumber => 'Введите номер зачисления';
 
   @override
@@ -548,7 +552,7 @@ class AppL10nRu extends AppL10n {
   String get foodCardEmpty => 'Карта питания не найдена';
 
   @override
-  String get foodCardTitle => 'Моя карта питания';
+  String get foodCardTitle => 'Продуктовая карта';
 
   @override
   String get forgotDone =>
@@ -682,6 +686,12 @@ class AppL10nRu extends AppL10n {
   String get languageEn => 'Английский';
 
   @override
+  String get languagePickSubtitle => 'Позже это можно изменить в настройках.';
+
+  @override
+  String get languagePickTitle => 'Выберите язык';
+
+  @override
   String get languageRu => 'Русский';
 
   @override
@@ -779,7 +789,7 @@ class AppL10nRu extends AppL10n {
   String get navAttendance => 'Посещаемость';
 
   @override
-  String get navFoodCard => 'Карта питания';
+  String get navFoodCard => 'Прод. карта';
 
   @override
   String get navHome => 'Главная';
@@ -839,6 +849,58 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get notificationsTitle => 'Уведомления';
+
+  @override
+  String otpIncomplete(int count) {
+    return 'Код состоит из $count цифр';
+  }
+
+  @override
+  String get otpInvalid => 'Код неверный или срок его действия истёк';
+
+  @override
+  String get otpLeaveBody =>
+      'Аккаунт создан, но e-mail не подтверждён. Без ввода кода войти в аккаунт не получится.';
+
+  @override
+  String get otpLeaveExit => 'Выйти';
+
+  @override
+  String get otpLeaveStay => 'Ввести код';
+
+  @override
+  String get otpLeaveTitle => 'Прервать подтверждение?';
+
+  @override
+  String get otpRequired => 'Введите код подтверждения';
+
+  @override
+  String get otpResend => 'Отправить код повторно';
+
+  @override
+  String otpResendIn(int seconds) {
+    return 'Отправить код повторно ($seconds с)';
+  }
+
+  @override
+  String get otpResent => 'Новый код отправлен на ваш e-mail';
+
+  @override
+  String get otpSpamHint => 'Код не пришёл? Проверьте также папку «Спам».';
+
+  @override
+  String otpSubtitle(String email) {
+    return 'Мы отправили 6-значный код подтверждения на $email.';
+  }
+
+  @override
+  String get otpTitle => 'Подтверждение e-mail';
+
+  @override
+  String get otpVerified => 'E-mail подтверждён';
+
+  @override
+  String get otpVerify => 'Подтвердить';
 
   @override
   String overdueWithDate(String date) {
@@ -947,6 +1009,13 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get registerTitle => 'Регистрация';
+
+  @override
+  String get settingsAddChild => 'Добавить ещё одного ученика';
+
+  @override
+  String get settingsAddChildSubtitle =>
+      'Привяжите ещё одного ребёнка к этой учётной записи';
 
   @override
   String get settingsChildCredentials =>

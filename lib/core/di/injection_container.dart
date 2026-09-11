@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/api_client.dart';
 import '../network/network_info.dart';
+import '../push/onesignal_push_service.dart';
+import '../push/push_service.dart';
 import '../storage/selected_child_storage.dart';
 import '../storage/token_storage.dart';
 import '../storage/user_storage.dart';
@@ -15,9 +17,12 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_parent.dart';
+import '../../features/auth/domain/usecases/resend_otp.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
+import '../../features/auth/domain/usecases/verify_otp.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
+import '../../features/auth/presentation/cubit/otp_cubit.dart';
 import '../../features/auth/presentation/bloc/register_bloc.dart';
 
 // Balance
@@ -147,6 +152,9 @@ Future<void> initDependencies() async {
   // A bare Dio, not the app's: the reachability probe hits a third-party host
   // and must not carry the auth interceptor's bearer token there.
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(Dio()));
+  // Singleton: it holds the external id this device is currently bound to, and
+  // a second instance would re-`login` on every sign-in.
+  sl.registerLazySingleton<PushService>(() => OneSignalPushService());
 
   _initAuth();
   _initBalance();
@@ -241,6 +249,7 @@ void _initAuth() {
         loginUser: sl(),
         logoutUser: sl(),
         repository: sl(),
+        push: sl(),
       ));
 
   // Cubit — new instance per "şifrəni unutdum" sheet.
@@ -249,11 +258,19 @@ void _initAuth() {
   // Bloc — new instance per sign-up screen.
   sl.registerFactory(() => RegisterBloc(registerParent: sl()));
 
+  // Cubit — new instance per e-mail confirmation screen; the address being
+  // confirmed is only known once the sign-up form is submitted.
+  sl.registerFactoryParam<OtpCubit, String, void>(
+    (email, _) => OtpCubit(verifyOtp: sl(), resendOtp: sl(), email: email),
+  );
+
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => LogoutUser(sl()));
   sl.registerLazySingleton(() => ResetPassword(sl()));
   sl.registerLazySingleton(() => RegisterParent(sl()));
+  sl.registerLazySingleton(() => VerifyOtp(sl()));
+  sl.registerLazySingleton(() => ResendOtp(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(

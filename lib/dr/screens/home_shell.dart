@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/push/push_router.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../widgets/dr_bottom_nav.dart';
 import 'dashboard_screen.dart';
@@ -30,6 +31,52 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    PushRouter.instance.addListener(_openPushTarget);
+    // A tap that cold-started the app lands before this shell exists, so the
+    // router is still holding it — drain it once the first frame is up.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openPushTarget());
+  }
+
+  @override
+  void dispose() {
+    PushRouter.instance.removeListener(_openPushTarget);
+    super.dispose();
+  }
+
+  /// Moves to the tab a tapped notification asked for.
+  void _openPushTarget() {
+    if (!mounted) return;
+    final target = PushRouter.instance.take();
+    if (target == null) return;
+
+    final isParent = context.read<AuthBloc>().state.user?.isParent ?? false;
+    final tabs = _tabsFor(isParent);
+    var index = tabs.indexWhere((t) => t.destination.label == _labelOf(target));
+    // Tuition is parent-only, so a student can be sent to a tab they don't
+    // have. The feed lists the message either way.
+    if (index < 0) {
+      index = tabs.indexWhere(
+        (t) => t.destination.label == DrNavLabel.notifications,
+      );
+    }
+    if (index >= 0) setState(() => _index = index);
+  }
+
+  static DrNavLabel _labelOf(PushTarget target) => switch (target) {
+        PushTarget.dashboard => DrNavLabel.home,
+        PushTarget.foodCard => DrNavLabel.foodCard,
+        PushTarget.tuition => DrNavLabel.tuition,
+        PushTarget.notifications => DrNavLabel.notifications,
+        PushTarget.profile => DrNavLabel.profile,
+      };
+
+  /// The tabs this account actually sees.
+  static List<_Tab> _tabsFor(bool isParent) =>
+      _allTabs.where((t) => isParent || !t.parentOnly).toList();
 
   static const _allTabs = <_Tab>[
     _Tab(DrNavDestination(Icons.home_rounded, DrNavLabel.home), DashboardScreen()),
@@ -64,7 +111,7 @@ class _HomeShellState extends State<HomeShell> {
     final activeChildId = context.select<AuthBloc, int?>(
       (bloc) => bloc.state.activeChild?.childId,
     );
-    final tabs = _allTabs.where((t) => isParent || !t.parentOnly).toList();
+    final tabs = _tabsFor(isParent);
     // Role is stable within a session, but clamp so a shrunk tab list can never
     // leave `_index` pointing past the end.
     final index = _index.clamp(0, tabs.length - 1);

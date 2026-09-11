@@ -5,10 +5,12 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/di/injection_container.dart';
 import 'core/l10n/l10n.dart';
 import 'core/l10n/locale_controller.dart';
+import 'core/push/push_service.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/notifications/presentation/notification_prefs.dart';
 import 'dr/screens/add_child_screen.dart';
 import 'dr/screens/home_shell.dart';
+import 'dr/screens/language_screen.dart';
 import 'dr/screens/login_screen.dart';
 import 'dr/screens/teacher/teacher_shell.dart';
 import 'dr/theme/dr_theme.dart';
@@ -22,6 +24,10 @@ Future<void> main() async {
   await ThemeController.instance.load();
   await LocaleController.instance.load();
   await NotificationPrefs.instance.load();
+  // After the prefs and the locale: the SDK reads both when it registers the
+  // device. The permission prompt is deliberately not here — [AuthBloc] asks
+  // once the parent has signed in, so the dialog has a reason on screen.
+  await sl<PushService>().init();
   runApp(const BsbSchoolApp());
 }
 
@@ -100,9 +106,33 @@ class AuthGate extends StatelessWidget {
             );
           case AuthStatus.loading:
           case AuthStatus.unauthenticated:
-            return const LoginScreen();
+            return const _LanguageGate();
         }
       },
+    );
+  }
+}
+
+/// Stands between a signed-out app and its login form on a fresh install.
+///
+/// The language picker only makes sense here: an account that is already
+/// signed in has been through it, and an upgrade from a build that predates
+/// the picker must not interrupt someone mid-session — [LocaleController]
+/// treats a language already on disk as an answer.
+///
+/// It listens to [LocaleController] itself rather than leaning on the rebuild
+/// at the app root: `home` is a const widget, so that rebuild stops short of
+/// this subtree and the picker would stay on screen after being answered.
+class _LanguageGate extends StatelessWidget {
+  const _LanguageGate();
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: LocaleController.instance,
+      builder: (context, _) => LocaleController.instance.hasChosenLanguage
+          ? const LoginScreen()
+          : const LanguageScreen(),
     );
   }
 }

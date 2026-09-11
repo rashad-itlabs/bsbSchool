@@ -22,6 +22,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   String _lang = 'AZ';
+
+  /// A second tap must not stack a second sign-up route on the first.
+  bool _registerOpen = false;
+  bool _showPassword = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -72,6 +76,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _openRegister() async {
+    // Two taps inside the push transition would stack two sign-up routes, and
+    // the one left underneath outlives the sign-in that follows it.
+    if (_registerOpen) return;
+    _registerOpen = true;
+
     FocusScope.of(context).unfocus();
     // Returns the credentials just registered, or null if the parent backed
     // out of the form.
@@ -85,6 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
+    _registerOpen = false;
     if (!mounted || registered == null) return;
 
     // `/registerParent` mints no token, so the session starts here. The fields
@@ -112,6 +122,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
+      // Binding the push subscription used to live here, in an `else` this
+      // predicate can never reach. It belongs to [AuthBloc] anyway: a restored
+      // session never opens this screen, and it would have been skipped.
       listenWhen: (prev, curr) =>
           curr.errorMessage != null && curr.errorMessage != prev.errorMessage,
       listener: (context, state) => _showSnack(state.errorMessage!),
@@ -189,10 +202,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       label: context.l10n.loginPassword,
                       hint: '••••••••',
                       icon: Icons.lock_outline,
-                      obscure: true,
+                      obscure: _showPassword,
                       controller: _passwordController,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _login(),
+                      trailing: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: Icon(
+                          _showPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: context.dr.textMuted,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showPassword = !_showPassword;
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Align(

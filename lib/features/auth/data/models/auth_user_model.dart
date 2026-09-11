@@ -4,6 +4,8 @@ import 'child_account_model.dart';
 class AuthUserModel extends AuthUser {
   const AuthUserModel({
     super.id,
+    super.accountId,
+    super.pushId,
     required super.name,
     required super.childName,
     required super.role,
@@ -21,6 +23,17 @@ class AuthUserModel extends AuthUser {
       // linked yet is exactly the `user_id: null` case — see
       // [AuthUser.needsChild].
       id: _asInt(json['user_id'] ?? json['id']),
+      // The account's own row. `user_id` is the student, not the parent — see
+      // [AuthUser.accountId]. `parent_ids` is what the login endpoint calls it
+      // (plural, though it holds one); the singular spellings are accepted so
+      // a rename on the Laravel side doesn't silently orphan every device.
+      accountId: _asInt(
+        json['parent_ids'] ?? json['parent_id'] ?? json['account_id'],
+      ),
+      // The address the backend itself hands out. Kept as text, not parsed to
+      // an int: it is an identity string, and the day it becomes `parent_66`
+      // the app should carry it through unchanged.
+      pushId: _asNullableString(json['push_external_id']),
       name: json['name'] as String? ?? '',
       childName: json['child_name'] as String? ?? '',
       role: json['role'] as String? ?? '',
@@ -35,6 +48,10 @@ class AuthUserModel extends AuthUser {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        // Read back by [fromJson], so the cached session keeps addressing the
+        // same OneSignal user across restarts.
+        'account_id': accountId,
+        'push_external_id': pushId,
         'name': name,
         'child_name': childName,
         'role': role,

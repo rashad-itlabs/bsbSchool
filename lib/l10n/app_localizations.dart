@@ -105,6 +105,12 @@ abstract class AppL10n {
   /// **'Şagird hesabınıza əlavə edildi'**
   String get addChildAdded;
 
+  /// No description provided for @addChildAnotherText.
+  ///
+  /// In az, this message translates to:
+  /// **'Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.'**
+  String get addChildAnotherText;
+
   /// No description provided for @addChildEnterNumber.
   ///
   /// In az, this message translates to:
@@ -1329,6 +1335,18 @@ abstract class AppL10n {
   /// **'İngilis dili'**
   String get languageEn;
 
+  /// No description provided for @languagePickSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Bunu sonra tənzimləmələrdən dəyişə bilərsiniz.'**
+  String get languagePickSubtitle;
+
+  /// No description provided for @languagePickTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Dilinizi seçin'**
+  String get languagePickTitle;
+
   /// No description provided for @languageRu.
   ///
   /// In az, this message translates to:
@@ -1629,6 +1647,96 @@ abstract class AppL10n {
   /// **'Bildirişlər'**
   String get notificationsTitle;
 
+  /// No description provided for @otpIncomplete.
+  ///
+  /// In az, this message translates to:
+  /// **'Kod {count} rəqəmdən ibarətdir'**
+  String otpIncomplete(int count);
+
+  /// No description provided for @otpInvalid.
+  ///
+  /// In az, this message translates to:
+  /// **'Kod yanlışdır və ya vaxtı bitib'**
+  String get otpInvalid;
+
+  /// No description provided for @otpLeaveBody.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesabınız yaradıldı, lakin e-mail təsdiqlənməyib. Kodu daxil etmədən hesaba daxil ola bilməyəcəksiniz.'**
+  String get otpLeaveBody;
+
+  /// No description provided for @otpLeaveExit.
+  ///
+  /// In az, this message translates to:
+  /// **'Çıx'**
+  String get otpLeaveExit;
+
+  /// No description provided for @otpLeaveStay.
+  ///
+  /// In az, this message translates to:
+  /// **'Kodu daxil et'**
+  String get otpLeaveStay;
+
+  /// No description provided for @otpLeaveTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Təsdiqi yarımçıq qoymaq?'**
+  String get otpLeaveTitle;
+
+  /// No description provided for @otpRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Təsdiq kodunu daxil edin'**
+  String get otpRequired;
+
+  /// No description provided for @otpResend.
+  ///
+  /// In az, this message translates to:
+  /// **'Kodu yenidən göndər'**
+  String get otpResend;
+
+  /// No description provided for @otpResendIn.
+  ///
+  /// In az, this message translates to:
+  /// **'Kodu yenidən göndər ({seconds} s)'**
+  String otpResendIn(int seconds);
+
+  /// No description provided for @otpResent.
+  ///
+  /// In az, this message translates to:
+  /// **'Yeni kod e-mail ünvanınıza göndərildi'**
+  String get otpResent;
+
+  /// No description provided for @otpSpamHint.
+  ///
+  /// In az, this message translates to:
+  /// **'Kod gəlmədi? Spam qovluğunu da yoxlayın.'**
+  String get otpSpamHint;
+
+  /// No description provided for @otpSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'{email} ünvanına 6 rəqəmli təsdiq kodu göndərdik.'**
+  String otpSubtitle(String email);
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail təsdiqi'**
+  String get otpTitle;
+
+  /// No description provided for @otpVerified.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail təsdiqləndi'**
+  String get otpVerified;
+
+  /// No description provided for @otpVerify.
+  ///
+  /// In az, this message translates to:
+  /// **'Təsdiqlə'**
+  String get otpVerify;
+
   /// No description provided for @overdueWithDate.
   ///
   /// In az, this message translates to:
@@ -1826,6 +1934,18 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Qeydiyyat'**
   String get registerTitle;
+
+  /// No description provided for @settingsAddChild.
+  ///
+  /// In az, this message translates to:
+  /// **'Yeni şagird əlavə et'**
+  String get settingsAddChild;
+
+  /// No description provided for @settingsAddChildSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Başqa övladınızı bu hesaba bağlayın'**
+  String get settingsAddChildSubtitle;
 
   /// No description provided for @settingsChildCredentials.
   ///

@@ -1,6 +1,7 @@
 {
   "@@locale": "az",
   "addChildAdded": "Şagird hesabınıza əlavə edildi",
+  "addChildAnotherText": "Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.",
   "addChildEnterNumber": "Qəbul nömrəsini daxil edin",
   "addChildField": "Qəbul nömrəsi",
   "addChildHint": "Övladınızın sistem ID-si",
@@ -205,6 +206,8 @@
   "hwTeacher": "Müəllim",
   "languageAz": "Azərbaycan dili",
   "languageEn": "İngilis dili",
+  "languagePickSubtitle": "Bunu sonra tənzimləmələrdən dəyişə bilərsiniz.",
+  "languagePickTitle": "Dilinizi seçin",
   "languageRu": "Rus dili",
   "languageSystem": "Sistem dili",
   "lastPaymentLabel": "Son ödəniş: {date}",
@@ -255,6 +258,21 @@
   "notificationFallback": "Bildiriş",
   "notificationsEmpty": "Hələ bildiriş yoxdur.",
   "notificationsTitle": "Bildirişlər",
+  "otpIncomplete": "Kod {count} rəqəmdən ibarətdir",
+  "otpInvalid": "Kod yanlışdır və ya vaxtı bitib",
+  "otpLeaveBody": "Hesabınız yaradıldı, lakin e-mail təsdiqlənməyib. Kodu daxil etmədən hesaba daxil ola bilməyəcəksiniz.",
+  "otpLeaveExit": "Çıx",
+  "otpLeaveStay": "Kodu daxil et",
+  "otpLeaveTitle": "Təsdiqi yarımçıq qoymaq?",
+  "otpRequired": "Təsdiq kodunu daxil edin",
+  "otpResend": "Kodu yenidən göndər",
+  "otpResendIn": "Kodu yenidən göndər ({seconds} s)",
+  "otpResent": "Yeni kod e-mail ünvanınıza göndərildi",
+  "otpSpamHint": "Kod gəlmədi? Spam qovluğunu da yoxlayın.",
+  "otpSubtitle": "{email} ünvanına 6 rəqəmli təsdiq kodu göndərdik.",
+  "otpTitle": "E-mail təsdiqi",
+  "otpVerified": "E-mail təsdiqləndi",
+  "otpVerify": "Təsdiqlə",
   "overdueWithDate": "Gecikib · {date}",
   "payAtBankPage": "Ödəniş bank səhifəsində tamamlanır.",
   "payNow": "Ödəniş et",
@@ -288,6 +306,8 @@
   "registerTerms": "İstifadə şərtləri və məxfilik siyasəti ilə razıyam",
   "registerTermsRequired": "Davam etmək üçün istifadə şərtlərini qəbul edin",
   "registerTitle": "Qeydiyyat",
+  "settingsAddChild": "Yeni şagird əlavə et",
+  "settingsAddChildSubtitle": "Başqa övladınızı bu hesaba bağlayın",
   "settingsChildCredentials": "Bu e-mail və şifrə ilə övladınız tətbiqə öz hesabı ilə daxil ola bilər. Kopyalayıb ona göndərə bilərsiniz.",
   "settingsLanguage": "Dil",
   "settingsLanguageSubtitle": "Tətbiqin dili",
@@ -628,6 +648,27 @@
   "@libraryTitleWithClass": {
     "placeholders": {
       "className": {
+        "type": "String"
+      }
+    }
+  },
+  "@otpIncomplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@otpResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@otpSubtitle": {
+    "placeholders": {
+      "email": {
         "type": "String"
       }
     }

@@ -137,7 +137,10 @@ class _FoodCardViewState extends State<_FoodCardView> {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                DrBackHeader(title: context.l10n.foodCardTitle, showBack: false),
+                DrBackHeader(
+                    title: context.l10n.foodCardTitle,
+                    showBack: false
+                ),
                 ..._body(context, state),
                 const SizedBox(height: 20),
               ],

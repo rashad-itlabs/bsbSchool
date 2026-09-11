@@ -21,6 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bsbschool/core/l10n/l10n.dart';
+import 'package:bsbschool/core/l10n/locale_controller.dart';
 
 /// Stands in for the network: [cached] is the restored session (null = logged
 /// out) and [loginResult] is who the login endpoint hands back.
@@ -67,6 +68,14 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> attachChild({
+    required String admissionNo,
+    String? relation,
+  }) async {
+    return const Right(unit);
+  }
+
+  @override
   Future<Either<Failure, AuthSession>> login({
     required String email,
     required String password,
@@ -97,6 +106,17 @@ class _FakeAuthRepository implements AuthRepository {
     required String admissionNo,
     String? relation,
   }) async =>
+      const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> verifyOtp({
+    required String email,
+    required String otp,
+  }) async =>
+      const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> resendOtp({required String email}) async =>
       const Right(unit);
 }
 
@@ -145,6 +165,14 @@ void _expectTeacherPortal() {
 }
 
 void main() {
+  // These tests start from an app that is already past the first-run language
+  // picker. Without this, every signed-out case would answer with
+  // LanguageScreen rather than the login form — see `_LanguageGate`.
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({'app_locale_chosen': true});
+    await LocaleController.instance.load();
+  });
+
   group('AuthUser.isTeacher', () {
     test('matches the teacher role regardless of case or padding', () {
       for (final role in ['teacher', 'Teacher', 'TEACHER', '  teacher ']) {

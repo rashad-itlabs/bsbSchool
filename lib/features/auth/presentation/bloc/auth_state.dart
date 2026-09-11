@@ -35,6 +35,16 @@ class AuthState extends Equatable {
   /// the login form and the dashboard can't show each other's messages.
   final String? childSwitchError;
 
+  /// True while `/attachChild` is in flight. Separate from
+  /// [isSwitchingChild]: linking a student and switching to one are different
+  /// requests, and the add sheet must not spin because the switcher is busy.
+  final bool isAddingChild;
+
+  /// Set when linking a student was rejected — "no such admission number",
+  /// "already on this account". Its own field for the same reason as
+  /// [childSwitchError]: one form's failure must not surface in another.
+  final String? addChildError;
+
   const AuthState({
     this.status = AuthStatus.unknown,
     this.user,
@@ -42,6 +52,8 @@ class AuthState extends Equatable {
     this.isSwitchingChild = false,
     this.errorMessage,
     this.childSwitchError,
+    this.isAddingChild = false,
+    this.addChildError,
   });
 
   bool get isLoading => status == AuthStatus.loading;
@@ -66,16 +78,20 @@ class AuthState extends Equatable {
     bool? isSwitchingChild,
     String? errorMessage,
     String? childSwitchError,
+    bool? isAddingChild,
+    String? addChildError,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       activeChild: activeChild ?? this.activeChild,
       isSwitchingChild: isSwitchingChild ?? this.isSwitchingChild,
-      // The two messages are intentionally not carried over: each state sets
+      isAddingChild: isAddingChild ?? this.isAddingChild,
+      // The messages are intentionally not carried over: each state sets
       // them, so a stale failure can't resurface on the next emit.
       errorMessage: errorMessage,
       childSwitchError: childSwitchError,
+      addChildError: addChildError,
     );
   }
 
@@ -87,5 +103,7 @@ class AuthState extends Equatable {
         isSwitchingChild,
         errorMessage,
         childSwitchError,
+        isAddingChild,
+        addChildError,
       ];
 }

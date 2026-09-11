@@ -13,8 +13,9 @@ import '../../core/l10n/l10n.dart';
 /// The parent enters their child's admission number to link one. Parent-only:
 /// [AuthUser.needsChild] gates this, and a teacher has no student to link.
 ///
-/// UI only for now — [_submit] is a stub. See the TODO there for what wiring it
-/// up requires.
+/// Once `/attachChild` lands, the refreshed user carries a `user_id` and
+/// AuthGate replaces this screen with the dashboard on its own — nothing here
+/// navigates.
 class AddChildScreen extends StatefulWidget {
   const AddChildScreen({super.key});
 
@@ -24,7 +25,9 @@ class AddChildScreen extends StatefulWidget {
 
 class _AddChildScreenState extends State<AddChildScreen> {
   final _admissionController = TextEditingController();
-  bool _submitting = false;
+
+  /// What the field is currently being told off for: the empty-input check,
+  /// or the message `/attachChild` came back with.
   String? _error;
 
   @override
@@ -33,7 +36,7 @@ class _AddChildScreenState extends State<AddChildScreen> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  void _submit() {
     FocusScope.of(context).unfocus();
     final admissionNo = _admissionController.text.trim();
     if (admissionNo.isEmpty) {
@@ -41,19 +44,22 @@ class _AddChildScreenState extends State<AddChildScreen> {
       return;
     }
 
-    setState(() {
-      _error = null;
-      _submitting = true;
-    });
+    setState(() => _error = null);
+    // The response carries a `user_id` that is no longer null, which is what
+    // flips [AuthUser.needsChild] and lets AuthGate swap this screen for the
+    // dashboard. Nothing to navigate to from here.
+    context.read<AuthBloc>().add(AuthChildAdded(admissionNo));
+  }
 
-    // TODO: POST the admission number to the link-student endpoint. On success
-    // the session must be refreshed so `user_id` is no longer null — otherwise
-    // AuthGate keeps `needsChild` true and re-mounts this screen. On failure,
-    // assign the server's message to `_error`.
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+  /// Fires once the request settles. Only a failure needs handling here — a
+  /// success takes this screen off the tree.
+  void _onSettled(BuildContext context, AuthState state) {
+    final failure = state.addChildError;
+    if (failure != null) {
+      setState(() => _error = failure);
+      return;
+    }
 
-    if (!mounted) return;
-    setState(() => _submitting = false);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -96,138 +102,145 @@ class _AddChildScreenState extends State<AddChildScreen> {
     final parentName = context.select<AuthBloc, String>(
       (bloc) => bloc.state.user?.name ?? '',
     );
+    final submitting =
+        context.select<AuthBloc, bool>((bloc) => bloc.state.isAddingChild);
 
-    return Scaffold(
-      backgroundColor: context.dr.bgDark,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(30, 40, 30, 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Same glowing circle as the login logo, so this reads as the
-                // last step of signing in rather than a different app.
-                Center(
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    margin: const EdgeInsets.only(bottom: 24),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.dr.accent.withValues(alpha: 0.08),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.dr.accent.withValues(alpha: 0.2),
-                          blurRadius: 30,
-                          spreadRadius: 4,
+    return BlocListener<AuthBloc, AuthState>(
+      listenWhen: (previous, current) =>
+          previous.isAddingChild && !current.isAddingChild,
+      listener: _onSettled,
+      child: Scaffold(
+        backgroundColor: context.dr.bgDark,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(30, 40, 30, 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Same glowing circle as the login logo, so this reads as the
+                  // last step of signing in rather than a different app.
+                  Center(
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.dr.accent.withValues(alpha: 0.08),
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.dr.accent.withValues(alpha: 0.2),
+                            blurRadius: 30,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.person_add_alt_1_rounded,
+                          size: 44,
+                          color: context.dr.accent,
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.person_add_alt_1_rounded,
-                        size: 44,
-                        color: context.dr.accent,
                       ),
                     ),
                   ),
-                ),
-                Center(
-                  child: Text(
-                    context.l10n.addChildTitle,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: context.dr.textMain,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    parentName.isEmpty
-                        ? context.l10n.addChildText
-                        : context.l10n.addChildTextNamed(parentName),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
-                      color: context.dr.textMuted,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                DrGlowCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      DrTextField(
-                        label: context.l10n.addChildField,
-                        hint: context.l10n.addChildHint,
-                        icon: Icons.badge_outlined,
-                        controller: _admissionController,
-                        enabled: !_submitting,
-                        autofocus: true,
-                        textInputAction: TextInputAction.done,
-                        // Codes are alphanumeric: keep iOS from capitalising
-                        // the first character on the parent's behalf.
-                        textCapitalization: TextCapitalization.characters,
-                        onChanged: (_) {
-                          if (_error != null) setState(() => _error = null);
-                        },
-                        onSubmitted: (_) => _submit(),
+                  Center(
+                    child: Text(
+                      context.l10n.addChildTitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: context.dr.textMain,
                       ),
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.error_outline,
-                                size: 16, color: DrColors.redStrong),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _error!,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: DrColors.redStrong,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      parentName.isEmpty
+                          ? context.l10n.addChildText
+                          : context.l10n.addChildTextNamed(parentName),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.5,
+                        color: context.dr.textMuted,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  DrGlowCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        DrTextField(
+                          label: context.l10n.addChildField,
+                          hint: context.l10n.addChildHint,
+                          icon: Icons.badge_outlined,
+                          controller: _admissionController,
+                          enabled: !submitting,
+                          autofocus: true,
+                          textInputAction: TextInputAction.done,
+                          // Codes are alphanumeric: keep iOS from capitalising
+                          // the first character on the parent's behalf.
+                          textCapitalization: TextCapitalization.characters,
+                          onChanged: (_) {
+                            if (_error != null) setState(() => _error = null);
+                          },
+                          onSubmitted: (_) => _submit(),
+                        ),
+                        if (_error != null) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  size: 16, color: DrColors.redStrong),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: DrColors.redStrong,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        DrPrimaryButton(
+                          label: context.l10n.addChildSubmit,
+                          trailingIcon: Icons.arrow_forward_rounded,
+                          loading: submitting,
+                          onTap: _submit,
                         ),
                       ],
-                      const SizedBox(height: 20),
-                      DrPrimaryButton(
-                        label: context.l10n.addChildSubmit,
-                        trailingIcon: Icons.arrow_forward_rounded,
-                        loading: _submitting,
-                        onTap: _submit,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const _WhereToFindCard(),
+                  const SizedBox(height: 24),
+                  // Full-height tap target, unlike a bare text link.
+                  Center(
+                    child: TextButton(
+                      onPressed: submitting ? null : _logout,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(0, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        foregroundColor: context.dr.textMuted,
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _WhereToFindCard(),
-                const SizedBox(height: 24),
-                // Full-height tap target, unlike a bare text link.
-                Center(
-                  child: TextButton(
-                    onPressed: _submitting ? null : _logout,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(0, 48),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      foregroundColor: context.dr.textMuted,
-                    ),
-                    child: Text(
-                      context.l10n.addChildOtherAccount,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      child: Text(
+                        context.l10n.addChildOtherAccount,
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

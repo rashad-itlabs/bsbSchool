@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/di/injection_container.dart';
 import '../../core/l10n/l10n.dart';
 import '../../features/auth/presentation/bloc/register_bloc.dart';
+import '../../features/auth/presentation/cubit/otp_cubit.dart';
+import 'otp_screen.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 
 /// Parent sign-up, reached from the login screen's "Hesabınız yoxdur?" link.
 ///
-/// Pops with the credentials it registered. `/registerParent` deliberately
-/// mints no token, so login takes them and signs the parent straight in —
-/// the session keeps starting in exactly one place.
+/// Sign-up mails a 6-digit code, so success opens the OTP screen and the
+/// credentials only travel back to login once that code is confirmed — login
+/// stays the one place a token is minted.
 ///
 /// Expects a [RegisterBloc] above it; the login screen provides one when it
 /// pushes this route.
@@ -32,6 +35,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _acceptedTerms = false;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+
+  /// A rebuild must not push the confirmation route a second time.
+  bool _otpOpen = false;
 
   @override
   void dispose() {
@@ -57,6 +63,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ));
   }
 
+  /// Sends the parent to the confirmation screen and, if the code is
+  /// accepted, hands the credentials to login.
+  Future<void> _openOtp() async {
+    if (_otpOpen) return;
+    _otpOpen = true;
+
+    // Read before the push: the field can be gone by the time it returns.
+    final email = _emailController.text.trim();
+    final verified = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<OtpCubit>(param1: email),
+          child: OtpScreen(email: email),
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    // Leaving unverified pops null rather than the filled-in form: the account
+    // already exists, so submitting it again would only earn a duplicate
+    // e-mail error, and login reads null as nothing having happened.
+    Navigator.of(context).pop(
+      verified == true
+          ? (email: email, password: _passwordController.text)
+          : null,
+    );
+  }
+
   void _toggleTerms() {
     setState(() => _acceptedTerms = !_acceptedTerms);
     context.read<RegisterBloc>().add(
@@ -70,11 +105,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         if (state.status == RegisterStatus.success) {
-          // Login shows the confirmation and signs this account in.
-          Navigator.of(context).pop((
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          ));
+          // The account exists but is unconfirmed; the code decides whether
+          // login ever sees these credentials.
+          _openOtp();
         }
       },
       builder: (context, state) {

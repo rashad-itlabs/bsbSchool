@@ -9,6 +9,21 @@ class AuthUser extends Equatable {
   /// [needsChild].
   final int? id;
 
+  /// The account row itself, from the login response's `parent_ids`.
+  ///
+  /// Deliberately separate from [id]: for a student or a teacher the two are
+  /// the same, but for a parent [id] is *their student*, which `/selectChild`
+  /// moves and which both parents of one child share. Anything that must
+  /// identify the person who signed in — [pushExternalId] — needs this one.
+  final int? accountId;
+
+  /// The push identity the backend names for itself (`push_external_id`).
+  ///
+  /// Taken verbatim when it is there. The backend is what addresses the
+  /// notification, so it gets to spell the address — a change on that side
+  /// reaches the device on the next sign-in with no app release.
+  final String? pushId;
+
   /// The account holder (parent) — shown on the profile screen.
   final String name;
 
@@ -31,6 +46,8 @@ class AuthUser extends Equatable {
 
   const AuthUser({
     this.id,
+    this.accountId,
+    this.pushId,
     required this.name,
     required this.childName,
     required this.role,
@@ -62,7 +79,45 @@ class AuthUser extends Equatable {
   /// Deliberately parent-only: a teacher has no student to link.
   bool get needsChild => isParent && id == null;
 
+  /// How OneSignal — and therefore the backend — addresses this device.
+  ///
+  /// [pushId] wins when the response carries it: `push_external_id: "66"`
+  /// makes the address `66`, exactly what Laravel puts in `include_aliases`.
+  /// Keeping the two in one field on the server is the point — the app never
+  /// has to agree on a format, it just repeats what it was told.
+  ///
+  /// Otherwise it is composed as `{role}_{id}` — `parent_66`, `student_3139`,
+  /// `teacher_4108` — from [accountId] (`parent_ids`), or from [id] when even
+  /// that is absent. The role is part of the composed form because a parent
+  /// and a student are numbered in different tables, so `66` on its own would
+  /// eventually address two different people. That caveat applies to a raw
+  /// [pushId] too, and is the backend's to resolve.
+  ///
+  /// Null for a parent with no student linked yet and no `parent_ids` — there
+  /// is nothing stable to key on, and that account can't see the app anyway
+  /// (see [needsChild]).
+  String? get pushExternalId {
+    final given = pushId?.trim();
+    if (given != null && given.isNotEmpty) return given;
+
+    final key = accountId ?? id;
+    if (key == null) return null;
+
+    final slug = role.trim().toLowerCase();
+    return '${slug.isEmpty ? 'user' : slug}_$key';
+  }
+
   @override
-  List<Object?> get props =>
-      [id, name, childName, role, email, classId, className, children];
+  List<Object?> get props => [
+        id,
+        accountId,
+        pushId,
+        name,
+        childName,
+        role,
+        email,
+        classId,
+        className,
+        children,
+      ];
 }

@@ -12,6 +12,10 @@ class AppL10nEn extends AppL10n {
   String get addChildAdded => 'The student has been added to your account';
 
   @override
+  String get addChildAnotherText =>
+      'Enter your child\'s admission number — the student will be linked to your account and you can follow everything from here.';
+
+  @override
   String get addChildEnterNumber => 'Enter the admission number';
 
   @override
@@ -681,6 +685,12 @@ class AppL10nEn extends AppL10n {
   String get languageEn => 'English';
 
   @override
+  String get languagePickSubtitle => 'You can change this later in settings.';
+
+  @override
+  String get languagePickTitle => 'Choose your language';
+
+  @override
   String get languageRu => 'Russian';
 
   @override
@@ -840,6 +850,58 @@ class AppL10nEn extends AppL10n {
   String get notificationsTitle => 'Notifications';
 
   @override
+  String otpIncomplete(int count) {
+    return 'The code is $count digits long';
+  }
+
+  @override
+  String get otpInvalid => 'The code is incorrect or has expired';
+
+  @override
+  String get otpLeaveBody =>
+      'Your account has been created, but your e-mail is not verified. You will not be able to sign in without entering the code.';
+
+  @override
+  String get otpLeaveExit => 'Leave';
+
+  @override
+  String get otpLeaveStay => 'Enter the code';
+
+  @override
+  String get otpLeaveTitle => 'Leave the verification unfinished?';
+
+  @override
+  String get otpRequired => 'Enter the verification code';
+
+  @override
+  String get otpResend => 'Send the code again';
+
+  @override
+  String otpResendIn(int seconds) {
+    return 'Send the code again ($seconds s)';
+  }
+
+  @override
+  String get otpResent => 'A new code has been sent to your e-mail';
+
+  @override
+  String get otpSpamHint => 'Didn\'t get the code? Check your spam folder too.';
+
+  @override
+  String otpSubtitle(String email) {
+    return 'We have sent a 6-digit verification code to $email.';
+  }
+
+  @override
+  String get otpTitle => 'E-mail verification';
+
+  @override
+  String get otpVerified => 'Your e-mail has been verified';
+
+  @override
+  String get otpVerify => 'Verify';
+
+  @override
   String overdueWithDate(String date) {
     return 'Overdue · $date';
   }
@@ -945,6 +1007,13 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get registerTitle => 'Registration';
+
+  @override
+  String get settingsAddChild => 'Add another student';
+
+  @override
+  String get settingsAddChildSubtitle =>
+      'Link another of your children to this account';
 
   @override
   String get settingsChildCredentials =>

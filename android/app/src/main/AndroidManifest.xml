@@ -1,11 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13+ won't show a notification until the user has granted this.
+         The OneSignal SDK's own manifest declares it too; kept here so the
+         requirement is visible from the app, not only after a merge. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Saving downloaded books into the public Downloads folder. Android 10+
          goes through MediaStore, which needs no permission at all. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"/>
     <application
-        android:label="bsbschool"
+        android:label="British School In Baku"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

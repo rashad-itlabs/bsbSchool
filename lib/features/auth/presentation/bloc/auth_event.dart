@@ -35,6 +35,21 @@ class AuthChildSelected extends AuthEvent {
   List<Object?> get props => [childId];
 }
 
+/// Parent entered an admission number to link one more student — from the
+/// profile's add tile, or from `AddChildScreen` when the account has none yet.
+///
+/// Unlike [AuthChildSelected] this does not change which student the app is
+/// showing: it only grows the list the switcher offers.
+class AuthChildAdded extends AuthEvent {
+  final String admissionNo;
+  final String? relation;
+
+  const AuthChildAdded(this.admissionNo, {this.relation});
+
+  @override
+  List<Object?> get props => [admissionNo, relation];
+}
+
 /// User tapped "log out".
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();

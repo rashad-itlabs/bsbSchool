@@ -12,6 +12,10 @@ class AppL10nAz extends AppL10n {
   String get addChildAdded => 'Şagird hesabınıza əlavə edildi';
 
   @override
+  String get addChildAnotherText =>
+      'Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.';
+
+  @override
   String get addChildEnterNumber => 'Qəbul nömrəsini daxil edin';
 
   @override
@@ -680,6 +684,13 @@ class AppL10nAz extends AppL10n {
   String get languageEn => 'İngilis dili';
 
   @override
+  String get languagePickSubtitle =>
+      'Bunu sonra tənzimləmələrdən dəyişə bilərsiniz.';
+
+  @override
+  String get languagePickTitle => 'Dilinizi seçin';
+
+  @override
   String get languageRu => 'Rus dili';
 
   @override
@@ -839,6 +850,58 @@ class AppL10nAz extends AppL10n {
   String get notificationsTitle => 'Bildirişlər';
 
   @override
+  String otpIncomplete(int count) {
+    return 'Kod $count rəqəmdən ibarətdir';
+  }
+
+  @override
+  String get otpInvalid => 'Kod yanlışdır və ya vaxtı bitib';
+
+  @override
+  String get otpLeaveBody =>
+      'Hesabınız yaradıldı, lakin e-mail təsdiqlənməyib. Kodu daxil etmədən hesaba daxil ola bilməyəcəksiniz.';
+
+  @override
+  String get otpLeaveExit => 'Çıx';
+
+  @override
+  String get otpLeaveStay => 'Kodu daxil et';
+
+  @override
+  String get otpLeaveTitle => 'Təsdiqi yarımçıq qoymaq?';
+
+  @override
+  String get otpRequired => 'Təsdiq kodunu daxil edin';
+
+  @override
+  String get otpResend => 'Kodu yenidən göndər';
+
+  @override
+  String otpResendIn(int seconds) {
+    return 'Kodu yenidən göndər ($seconds s)';
+  }
+
+  @override
+  String get otpResent => 'Yeni kod e-mail ünvanınıza göndərildi';
+
+  @override
+  String get otpSpamHint => 'Kod gəlmədi? Spam qovluğunu da yoxlayın.';
+
+  @override
+  String otpSubtitle(String email) {
+    return '$email ünvanına 6 rəqəmli təsdiq kodu göndərdik.';
+  }
+
+  @override
+  String get otpTitle => 'E-mail təsdiqi';
+
+  @override
+  String get otpVerified => 'E-mail təsdiqləndi';
+
+  @override
+  String get otpVerify => 'Təsdiqlə';
+
+  @override
   String overdueWithDate(String date) {
     return 'Gecikib · $date';
   }
@@ -945,6 +1008,12 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get registerTitle => 'Qeydiyyat';
+
+  @override
+  String get settingsAddChild => 'Yeni şagird əlavə et';
+
+  @override
+  String get settingsAddChildSubtitle => 'Başqa övladınızı bu hesaba bağlayın';
 
   @override
   String get settingsChildCredentials =>
