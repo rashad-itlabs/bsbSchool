@@ -15,11 +15,56 @@ abstract class AuthRepository {
   /// Revokes the token on the server (best-effort) and clears it locally.
   Future<Either<Failure, Unit>> logout();
 
-  /// Sets a new password for [email] without signing the user in.
-  /// Fails with a [ValidationFailure] when the e-mail is unknown.
+  /// Updates the signed-in account's own details and caches the result, so
+  /// the profile shows the new values without a re-login.
+  ///
+  /// Fails with a [FieldValidationFailure] when the backend rejects an input,
+  /// so the form can put each message back under its own field.
+  Future<Either<Failure, Unit>> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  });
+
+  /// Replaces the signed-in account's own password. Nothing is cached: the
+  /// password is never held by the app, and the session survives the change.
+  ///
+  /// Fails with a [FieldValidationFailure] when the current password is wrong
+  /// or the new one is rejected.
+  Future<Either<Failure, Unit>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Changes the login e-mail of one student on the account, and caches the
+  /// result so the credentials card shows the new address.
+  ///
+  /// Fails with a [ValidationFailure] when the student is on another account
+  /// or the address is already taken.
+  Future<Either<Failure, Unit>> updateChildEmail({
+    required int childId,
+    required String email,
+  });
+
+  /// Mails a 6-digit code to [email] so its password can be replaced.
+  ///
+  /// Not the same code path as [resendOtp]: that one only serves accounts
+  /// still waiting to confirm a registration, so it turns away every account
+  /// that has already been confirmed.
+  ///
+  /// Fails with a [ValidationFailure] when no account holds the address.
+  Future<Either<Failure, Unit>> sendResetCode({required String email});
+
+  /// Sets a new password for [email] without signing the user in. [otp] is the
+  /// code [sendResetCode] mailed; the backend checks it in the same request,
+  /// so a reset cannot be driven by an address alone.
+  ///
+  /// Fails with a [ValidationFailure] when the e-mail is unknown or the code
+  /// no longer holds.
   Future<Either<Failure, Unit>> resetPassword({
     required String email,
     required String password,
+    required String otp,
   });
 
   /// Creates a parent account and links it to the student holding

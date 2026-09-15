@@ -555,6 +555,12 @@ class AppL10nRu extends AppL10n {
   String get foodCardTitle => 'Продуктовая карта';
 
   @override
+  String get forgotBackToCode => 'Ввести код заново';
+
+  @override
+  String get forgotChangeEmail => 'Изменить адрес e-mail';
+
+  @override
   String get forgotDone =>
       'Пароль обновлён. Теперь можно войти с новым паролем.';
 
@@ -590,11 +596,18 @@ class AppL10nRu extends AppL10n {
   String get forgotRepeatPassword => 'Новый пароль (повтор)';
 
   @override
+  String get forgotSendCode => 'Отправить код';
+
+  @override
+  String get forgotSetPasswordText =>
+      'E-mail подтверждён. Теперь задайте новый пароль.';
+
+  @override
   String get forgotSubmit => 'Обновить пароль';
 
   @override
   String get forgotText =>
-      'Введите зарегистрированный e-mail и новый пароль. Если e-mail верный, пароль обновится сразу.';
+      'Введите зарегистрированный адрес e-mail. Мы отправим на него код подтверждения.';
 
   @override
   String get forgotTitle => 'Восстановление пароля';
@@ -933,6 +946,61 @@ class AppL10nRu extends AppL10n {
   @override
   String get paymentUnconfirmed =>
       'Банк принял платёж, но его статус ещё не подтверждён. Сумма будет зачислена в течение нескольких минут — обновите список.';
+
+  @override
+  String get profileChildEmailSaved => 'Адрес e-mail ученика обновлён';
+
+  @override
+  String profileChildEmailText(String name) {
+    return '$name входит в приложение с этим адресом. После изменения старый перестанет работать.';
+  }
+
+  @override
+  String get profileChildEmailTitle => 'Адрес e-mail ученика';
+
+  @override
+  String get profileCurrentPassword => 'Текущий пароль';
+
+  @override
+  String get profileCurrentPasswordRequired => 'Введите текущий пароль';
+
+  @override
+  String get profileEdit => 'Изменить мои данные';
+
+  @override
+  String get profileEditSubtitle => 'Имя, e-mail и телефон';
+
+  @override
+  String get profileEmailNote =>
+      'Если вы измените адрес e-mail, вход будет выполняться по новому адресу.';
+
+  @override
+  String get profileName => 'Имя и фамилия';
+
+  @override
+  String get profileNameRequired => 'Введите ваше имя';
+
+  @override
+  String get profilePassword => 'Изменить пароль';
+
+  @override
+  String get profilePasswordSaved => 'Пароль обновлён';
+
+  @override
+  String get profilePasswordSubtitle => 'Пароль для входа в аккаунт';
+
+  @override
+  String get profilePasswordText =>
+      'Для безопасности сначала подтвердите текущий пароль.';
+
+  @override
+  String get profilePhone => 'Телефон';
+
+  @override
+  String get profileSaved => 'Ваши данные обновлены';
+
+  @override
+  String get profileTitle => 'Мои данные';
 
   @override
   String get purchaseLabel => 'Покупка';
@@ -1445,6 +1513,32 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Общий остаток';
+
+  @override
+  String updateAvailableText(String version) {
+    return 'Версия $version готова. Обновите, чтобы получить последние изменения.';
+  }
+
+  @override
+  String get updateAvailableTitle => 'Доступна новая версия';
+
+  @override
+  String get updateForcedText =>
+      'Эта версия приложения больше не поддерживается. Установите последнюю, чтобы продолжить.';
+
+  @override
+  String get updateForcedTitle => 'Требуется обновление';
+
+  @override
+  String get updateLater => 'Позже';
+
+  @override
+  String get updateNow => 'Обновить';
+
+  @override
+  String updateVersions(String current, String latest) {
+    return 'Установлена: $current · Последняя: $latest';
+  }
 
   @override
   String get webviewLoadFailed => 'Не удалось загрузить страницу';

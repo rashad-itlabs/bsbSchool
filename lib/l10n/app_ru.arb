@@ -1,4 +1,21 @@
 {
+  "@updateAvailableText": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateVersions": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "latest": {
+        "type": "String"
+      }
+    }
+  },
   "@@locale": "ru",
   "addChildAdded": "Ученик добавлен к вашей учётной записи",
   "addChildAnotherText": "Введите номер зачисления ребёнка — ученик будет привязан к вашей учётной записи, и вы сможете следить за всем отсюда.",
@@ -165,6 +182,8 @@
   "fileDownload": "Скачать файл",
   "foodCardEmpty": "Карта питания не найдена",
   "foodCardTitle": "Продуктовая карта",
+  "forgotBackToCode": "Ввести код заново",
+  "forgotChangeEmail": "Изменить адрес e-mail",
   "forgotDone": "Пароль обновлён. Теперь можно войти с новым паролем.",
   "forgotEmailField": "Адрес e-mail",
   "forgotEmailInvalid": "Некорректный адрес e-mail",
@@ -175,8 +194,10 @@
   "forgotPasswordRequired": "Введите новый пароль",
   "forgotPasswordShort": "Пароль должен содержать не менее {count} символов",
   "forgotRepeatPassword": "Новый пароль (повтор)",
+  "forgotSendCode": "Отправить код",
+  "forgotSetPasswordText": "E-mail подтверждён. Теперь задайте новый пароль.",
   "forgotSubmit": "Обновить пароль",
-  "forgotText": "Введите зарегистрированный e-mail и новый пароль. Если e-mail верный, пароль обновится сразу.",
+  "forgotText": "Введите зарегистрированный адрес e-mail. Мы отправим на него код подтверждения.",
   "forgotTitle": "Восстановление пароля",
   "historyCanteen": "Столовая",
   "historyIncome": "Пополнения",
@@ -282,6 +303,23 @@
   "paymentCurrentBalance": "Текущий баланс",
   "paymentStatusUnavailable": "Не удалось получить статус платежа",
   "paymentUnconfirmed": "Банк принял платёж, но его статус ещё не подтверждён. Сумма будет зачислена в течение нескольких минут — обновите список.",
+  "profileChildEmailSaved": "Адрес e-mail ученика обновлён",
+  "profileChildEmailText": "{name} входит в приложение с этим адресом. После изменения старый перестанет работать.",
+  "profileChildEmailTitle": "Адрес e-mail ученика",
+  "profileCurrentPassword": "Текущий пароль",
+  "profileCurrentPasswordRequired": "Введите текущий пароль",
+  "profileEdit": "Изменить мои данные",
+  "profileEditSubtitle": "Имя, e-mail и телефон",
+  "profileEmailNote": "Если вы измените адрес e-mail, вход будет выполняться по новому адресу.",
+  "profileName": "Имя и фамилия",
+  "profileNameRequired": "Введите ваше имя",
+  "profilePassword": "Изменить пароль",
+  "profilePasswordSaved": "Пароль обновлён",
+  "profilePasswordSubtitle": "Пароль для входа в аккаунт",
+  "profilePasswordText": "Для безопасности сначала подтвердите текущий пароль.",
+  "profilePhone": "Телефон",
+  "profileSaved": "Ваши данные обновлены",
+  "profileTitle": "Мои данные",
   "purchaseLabel": "Покупка",
   "recentTransactions": "Последние операции",
   "registerAdmissionNote": "Номер зачисления указан в ученическом билете и в документе о зачислении, выданном школой.",
@@ -444,6 +482,13 @@
   "tuitionTabTuition": "Обучение",
   "tuitionTitle": "График платежей",
   "tuitionTotalDue": "Общий остаток",
+  "updateAvailableText": "Версия {version} готова. Обновите, чтобы получить последние изменения.",
+  "updateAvailableTitle": "Доступна новая версия",
+  "updateForcedText": "Эта версия приложения больше не поддерживается. Установите последнюю, чтобы продолжить.",
+  "updateForcedTitle": "Требуется обновление",
+  "updateLater": "Позже",
+  "updateNow": "Обновить",
+  "updateVersions": "Установлена: {current} · Последняя: {latest}",
   "webviewLoadFailed": "Не удалось загрузить страницу",
   "webviewStopText": "Платёж не завершён. Закрыть страницу?",
   "webviewStopTitle": "Прервать оплату",

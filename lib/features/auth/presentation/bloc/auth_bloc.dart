@@ -35,6 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLogin);
     on<AuthChildSelected>(_onChildSelected);
     on<AuthChildAdded>(_onChildAdded);
+    on<AuthSessionRefreshed>(_onSessionRefreshed);
     on<AuthLogoutRequested>(_onLogout);
   }
 
@@ -154,6 +155,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _bindPush();
       },
     );
+  }
+
+  /// Re-reads the user the repository just cached. Nothing is fetched here —
+  /// the write already happened, and the sheet that made it is waiting on its
+  /// own cubit, not on this.
+  void _onSessionRefreshed(
+    AuthSessionRefreshed event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(state.copyWith(
+      user: repository.currentUser,
+      activeChild: repository.activeChild,
+    ));
   }
 
   /// Points the push subscription at whoever is signed in now.

@@ -11,6 +11,7 @@ import '../../domain/entities/auth_user.dart';
 import '../../domain/entities/child_account.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/auth_user_model.dart';
+import '../models/child_account_model.dart';
 import '../services/auth_service.dart';
 import '../../../../core/l10n/l10n.dart';
 
@@ -129,6 +130,180 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Unit>> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final refreshed = await service.updateProfile(
+        name: name,
+        email: email,
+        phone: phone,
+      );
+      final current = userStorage.cachedUser;
+
+      if (refreshed != null) {
+        await userStorage.saveUser(_merged(refreshed));
+      } else if (current != null) {
+        // The endpoint only acknowledged. What was sent is what the server now
+        // holds, so applying it locally is both correct and what keeps the
+        // profile from showing yesterday's name until the next login.
+        await userStorage.saveUser(
+          _withDetails(current, name: name, email: email, phone: phone),
+        );
+      }
+      return const Right(unit);
+    } on FieldValidationException catch (e) {
+      // Caught before ValidationException — it is a subclass, and dropping to
+      // the plain branch would throw the per-field map away.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      await service.updatePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      return const Right(unit);
+    } on FieldValidationException catch (e) {
+      // Caught before ValidationException — it is a subclass, and dropping to
+      // the plain branch would throw the per-field map away.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateChildEmail({
+    required int childId,
+    required String email,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    // Rejected here as well as on the server: the id comes from the roster
+    // this account was handed, so one that isn't on it is the app's bug, not
+    // a round trip worth making.
+    final known = (currentUser?.children ?? const <ChildAccount>[])
+        .any((c) => c.childId == childId);
+    if (!known) {
+      return Left(ValidationFailure(L.s.errChildNotYoursShort));
+    }
+
+    try {
+      final refreshed = await service.updateChildEmail(
+        childId: childId,
+        email: email,
+      );
+      final current = userStorage.cachedUser;
+
+      if (refreshed != null) {
+        await userStorage.saveUser(_merged(refreshed));
+      } else if (current != null) {
+        await userStorage.saveUser(
+          _withChildEmail(current, childId: childId, email: email),
+        );
+      }
+      return const Right(unit);
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  /// The cached user with the details the profile form just sent.
+  ///
+  /// Takes the values verbatim, [_merged]'s "keep what we had" rule
+  /// deliberately not applied: a parent who cleared their phone means it.
+  AuthUserModel _withDetails(
+    AuthUserModel user, {
+    required String name,
+    required String email,
+    required String phone,
+  }) {
+    return AuthUserModel(
+      id: user.id,
+      accountId: user.accountId,
+      pushId: user.pushId,
+      name: name,
+      childName: user.childName,
+      role: user.role,
+      email: email,
+      phone: phone.isEmpty ? null : phone,
+      classId: user.classId,
+      className: user.className,
+      children: user.children,
+    );
+  }
+
+  /// The cached user with one student's e-mail replaced.
+  AuthUserModel _withChildEmail(
+    AuthUserModel user, {
+    required int childId,
+    required String email,
+  }) {
+    return AuthUserModel(
+      id: user.id,
+      accountId: user.accountId,
+      pushId: user.pushId,
+      name: user.name,
+      childName: user.childName,
+      role: user.role,
+      email: user.email,
+      phone: user.phone,
+      classId: user.classId,
+      className: user.className,
+      children: [
+        for (final child in user.children)
+          if (child.childId == childId)
+            ChildAccountModel(
+              childId: child.childId,
+              classId: child.classId,
+              username: child.username,
+              className: child.className,
+              childName: child.childName,
+              childSurname: child.childSurname,
+              email: email,
+              password: child.password,
+              paymentId: child.paymentId,
+            )
+          else
+            ChildAccountModel.from(child),
+      ],
+    );
+  }
+
   /// Points an account with no student at the first one it now has.
   ///
   /// The backend does this itself — `users.user_id` is set to the newly linked
@@ -153,6 +328,7 @@ class AuthRepositoryImpl implements AuthRepository {
       childName: user.childName,
       role: user.role,
       email: user.email,
+      phone: user.phone,
       classId: user.classId,
       className: user.className,
       children: user.children,
@@ -185,6 +361,7 @@ class AuthRepositoryImpl implements AuthRepository {
           incoming.childName.isNotEmpty ? incoming.childName : current.childName,
       role: incoming.role.isNotEmpty ? incoming.role : current.role,
       email: incoming.email.isNotEmpty ? incoming.email : current.email,
+      phone: incoming.phone ?? current.phone,
       classId: incoming.classId ?? current.classId,
       className: incoming.className ?? current.className,
       children:
@@ -222,15 +399,33 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> sendResetCode({required String email}) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await service.sendResetCode(email: email);
+      return const Right(unit);
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> resetPassword({
     required String email,
     required String password,
+    required String otp,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
     try {
-      await service.resetPassword(email: email, password: password);
+      await service.resetPassword(email: email, password: password, otp: otp);
       return const Right(unit);
     } on ValidationException catch (e) {
       return Left(ValidationFailure(e.message));

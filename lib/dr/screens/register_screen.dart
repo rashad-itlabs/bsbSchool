@@ -213,7 +213,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 onEdited: () =>
                                     bloc.add(const RegisterFieldEdited(RegisterField.phone)),
                                 enabled: enabled,
-                                keyboardType: TextInputType.phone,
+                                // `+994` shows the moment the field is
+                                // entered; the parent types only their own
+                                // digits.
+                                phone: true,
                               ),
                               const SizedBox(height: 16),
                               _FormRow(
@@ -417,6 +420,11 @@ class _FormRow extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction textInputAction;
   final TextCapitalization textCapitalization;
+
+  /// Renders the masked phone field instead of a plain one — same label and
+  /// error line, so the form keeps one shape.
+  final bool phone;
+
   final ValueChanged<String>? onSubmitted;
 
   const _FormRow({
@@ -432,6 +440,7 @@ class _FormRow extends StatelessWidget {
     this.keyboardType,
     this.textInputAction = TextInputAction.next,
     this.textCapitalization = TextCapitalization.none,
+    this.phone = false,
     this.onSubmitted,
   });
 
@@ -440,22 +449,35 @@ class _FormRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DrTextField(
-          label: label,
-          hint: hint,
-          icon: icon,
-          controller: controller,
-          enabled: enabled,
-          obscure: obscure,
-          trailing: trailing,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          textCapitalization: textCapitalization,
-          onChanged: (_) {
-            if (error != null) onEdited();
-          },
-          onSubmitted: onSubmitted,
-        ),
+        if (phone)
+          DrPhoneField(
+            label: label,
+            hint: hint,
+            controller: controller,
+            enabled: enabled,
+            textInputAction: textInputAction,
+            onChanged: (_) {
+              if (error != null) onEdited();
+            },
+            onSubmitted: onSubmitted,
+          )
+        else
+          DrTextField(
+            label: label,
+            hint: hint,
+            icon: icon,
+            controller: controller,
+            enabled: enabled,
+            obscure: obscure,
+            trailing: trailing,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            textCapitalization: textCapitalization,
+            onChanged: (_) {
+              if (error != null) onEdited();
+            },
+            onSubmitted: onSubmitted,
+          ),
         if (error != null) ...[
           const SizedBox(height: 6),
           Text(

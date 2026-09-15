@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/l10n/l10n.dart';
@@ -213,10 +212,11 @@ class _OtpScreenState extends State<OtpScreen> {
                               horizontal: 16,
                               vertical: 24,
                             ),
-                            child: _CodeInput(
+                            child: DrCodeInput(
                               controller: _codeController,
                               focusNode: _codeFocus,
                               onChanged: _onCodeChanged,
+                              length: OtpCubit.codeLength,
                             ),
                           ),
                           // Whatever the backend rejects the code for lands
@@ -314,109 +314,6 @@ class _OtpScreenState extends State<OtpScreen> {
                     : context.dr.textMuted,
               ),
             ),
-    );
-  }
-}
-
-/// Six boxes painted from one invisible [TextField] laid over them.
-///
-/// One field rather than six keeps the OS keyboard, paste and the e-mail
-/// code's autofill working, and leaves no focus to hand between inputs when a
-/// digit is typed or deleted.
-class _CodeInput extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-
-  const _CodeInput({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => focusNode.requestFocus(),
-      behavior: HitTestBehavior.opaque,
-      child: Stack(
-        children: [
-          IgnorePointer(child: _buildBoxes(context)),
-          Positioned.fill(
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              onChanged: onChanged,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              autofillHints: const [AutofillHints.oneTimeCode],
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(OtpCubit.codeLength),
-              ],
-              decoration: const InputDecoration.collapsed(hintText: ''),
-              // The boxes are the visible input; this field only collects.
-              showCursor: false,
-              enableInteractiveSelection: false,
-              cursorColor: Colors.transparent,
-              style: const TextStyle(color: Colors.transparent),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBoxes(BuildContext context) {
-    final code = controller.text;
-    // The caret sits on the first empty box, or on the last one once all six
-    // digits are in.
-    final cursor = code.length.clamp(0, OtpCubit.codeLength - 1);
-
-    return Row(
-      children: [
-        for (var i = 0; i < OtpCubit.codeLength; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
-          // Expanded instead of a plain 48 so six boxes still fit a narrow
-          // phone; the inner width stops them stretching on a wide one.
-          Expanded(
-            child: Center(
-              child: Container(
-                width: 48,
-                height: 56,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.dr.bgDark,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: i == cursor ? context.dr.accent : context.dr.border,
-                    width: i == cursor ? 1.5 : 1,
-                  ),
-                  boxShadow: i == cursor
-                      ? [
-                          BoxShadow(
-                            color:
-                                context.dr.accent.withValues(alpha: 0.25),
-                            blurRadius: 16,
-                            spreadRadius: 1,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  i < code.length ? code[i] : '',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: context.dr.textMain,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

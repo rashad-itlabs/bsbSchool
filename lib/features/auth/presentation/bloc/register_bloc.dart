@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/utils/az_phone.dart';
 import '../../domain/usecases/register_parent.dart';
 
 part 'register_event.dart';
@@ -23,11 +24,6 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   static const int minNameLength = 5;
 
   static final _emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-
-  /// Digits with the separators people actually type, optionally prefixed with
-  /// `+`. Loose on purpose: a local `0501234567` and an international
-  /// `+994 50 123 45 67` are both valid, and the backend has the final say.
-  static final _phoneRegExp = RegExp(r'^\+?[\d\s()-]{9,20}$');
 
   /// Backend field name to the input it belongs to. `registerParent` validates
   /// on the form's controller names, so this map is literal rather than a
@@ -81,7 +77,9 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     final result = await registerParent(RegisterParentParams(
       name: name,
       email: email,
-      phone: phone,
+      // The field is masked for reading; the backend gets the one canonical
+      // shape, whatever spacing the mask happened to show.
+      phone: AzPhone.e164(phone),
       password: event.password,
       admissionNo: admissionNo,
       relation: event.relation,
@@ -155,7 +153,8 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
     if (phone.isEmpty) {
       errors[RegisterField.phone] = L.s.registerPhoneRequired;
-    } else if (!_phoneRegExp.hasMatch(phone)) {
+    } else if (!AzPhone.isComplete(phone)) {
+      // The field is masked, so "invalid" can now only mean "unfinished".
       errors[RegisterField.phone] = L.s.registerPhoneInvalid;
     }
 

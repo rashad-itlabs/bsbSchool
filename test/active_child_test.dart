@@ -134,9 +134,34 @@ class _FakeAuthService implements AuthService {
   }
 
   @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
+  Future<AuthUserModel?> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  }) async =>
+      null;
+
+  @override
+  Future<AuthUserModel?> updateChildEmail({
+    required int childId,
+    required String email,
+  }) async =>
+      null;
+
+  @override
+  Future<void> sendResetCode({required String email}) async {}
+
+  @override
   Future<void> resetPassword({
     required String email,
     required String password,
+    required String otp,
   }) async {}
 
   @override

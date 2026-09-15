@@ -34,6 +34,11 @@ class AuthUser extends Equatable {
 
   final String email;
 
+  /// The account holder's phone. Nullable because the login response only
+  /// carries it once the backend starts sending it — the profile form shows
+  /// an empty field until then rather than inventing a number.
+  final String? phone;
+
   /// The student's class, straight from the login response. Nullable because
   /// an account without an active student session has neither.
   final int? classId;
@@ -52,6 +57,7 @@ class AuthUser extends Equatable {
     required this.childName,
     required this.role,
     required this.email,
+    this.phone,
     this.classId,
     this.className,
     this.children = const [],
@@ -116,6 +122,7 @@ class AuthUser extends Equatable {
         childName,
         role,
         email,
+        phone,
         classId,
         className,
         children,

@@ -1,4 +1,21 @@
 {
+  "@updateAvailableText": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateVersions": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "latest": {
+        "type": "String"
+      }
+    }
+  },
   "@@locale": "en",
   "addChildAdded": "The student has been added to your account",
   "addChildAnotherText": "Enter your child's admission number — the student will be linked to your account and you can follow everything from here.",
@@ -165,6 +182,8 @@
   "fileDownload": "Download file",
   "foodCardEmpty": "No canteen card found",
   "foodCardTitle": "My canteen card",
+  "forgotBackToCode": "Re-enter the code",
+  "forgotChangeEmail": "Change e-mail address",
   "forgotDone": "Your password has been updated. You can sign in with the new one.",
   "forgotEmailField": "E-mail address",
   "forgotEmailInvalid": "The e-mail address is not valid",
@@ -175,8 +194,10 @@
   "forgotPasswordRequired": "Enter a new password",
   "forgotPasswordShort": "The password must be at least {count} characters",
   "forgotRepeatPassword": "New password (repeat)",
+  "forgotSendCode": "Send code",
+  "forgotSetPasswordText": "E-mail confirmed. Now set your new password.",
   "forgotSubmit": "Update password",
-  "forgotText": "Enter your registered e-mail address and a new password. If the e-mail is correct, the password is updated right away.",
+  "forgotText": "Enter your registered e-mail address. We will send a confirmation code to it.",
   "forgotTitle": "Reset password",
   "historyCanteen": "Canteen",
   "historyIncome": "Top-ups",
@@ -282,6 +303,23 @@
   "paymentCurrentBalance": "Current balance",
   "paymentStatusUnavailable": "The payment status could not be read",
   "paymentUnconfirmed": "The bank accepted the payment but its status is not confirmed yet. The amount should be applied within a few minutes — refresh the list to check.",
+  "profileChildEmailSaved": "The student's e-mail address has been updated",
+  "profileChildEmailText": "{name} signs in with this address. The old one stops working once it is changed.",
+  "profileChildEmailTitle": "Student's e-mail address",
+  "profileCurrentPassword": "Current password",
+  "profileCurrentPasswordRequired": "Enter your current password",
+  "profileEdit": "Edit my details",
+  "profileEditSubtitle": "Name, e-mail and phone",
+  "profileEmailNote": "If you change your e-mail address, you will sign in with the new one.",
+  "profileName": "Full name",
+  "profileNameRequired": "Enter your name",
+  "profilePassword": "Change password",
+  "profilePasswordSaved": "Your password has been updated",
+  "profilePasswordSubtitle": "The password you sign in with",
+  "profilePasswordText": "Confirm your current password first, for security.",
+  "profilePhone": "Phone",
+  "profileSaved": "Your details have been updated",
+  "profileTitle": "My details",
   "purchaseLabel": "Purchase",
   "recentTransactions": "Recent transactions",
   "registerAdmissionNote": "The admission number is on the student card and on the admission document from the school.",
@@ -444,6 +482,13 @@
   "tuitionTabTuition": "Tuition",
   "tuitionTitle": "Payment schedule",
   "tuitionTotalDue": "Total outstanding",
+  "updateAvailableText": "Version {version} is ready. Update to get the latest changes.",
+  "updateAvailableTitle": "A new version is available",
+  "updateForcedText": "This version of the app is no longer supported. Install the latest one to continue.",
+  "updateForcedTitle": "Update required",
+  "updateLater": "Later",
+  "updateNow": "Update now",
+  "updateVersions": "Installed: {current} · Latest: {latest}",
   "webviewLoadFailed": "The page could not be loaded",
   "webviewStopText": "The payment is not finished. Do you want to close the page?",
   "webviewStopTitle": "Stop the payment",

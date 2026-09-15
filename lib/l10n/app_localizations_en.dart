@@ -554,6 +554,12 @@ class AppL10nEn extends AppL10n {
   String get foodCardTitle => 'My canteen card';
 
   @override
+  String get forgotBackToCode => 'Re-enter the code';
+
+  @override
+  String get forgotChangeEmail => 'Change e-mail address';
+
+  @override
   String get forgotDone =>
       'Your password has been updated. You can sign in with the new one.';
 
@@ -589,11 +595,18 @@ class AppL10nEn extends AppL10n {
   String get forgotRepeatPassword => 'New password (repeat)';
 
   @override
+  String get forgotSendCode => 'Send code';
+
+  @override
+  String get forgotSetPasswordText =>
+      'E-mail confirmed. Now set your new password.';
+
+  @override
   String get forgotSubmit => 'Update password';
 
   @override
   String get forgotText =>
-      'Enter your registered e-mail address and a new password. If the e-mail is correct, the password is updated right away.';
+      'Enter your registered e-mail address. We will send a confirmation code to it.';
 
   @override
   String get forgotTitle => 'Reset password';
@@ -932,6 +945,62 @@ class AppL10nEn extends AppL10n {
   @override
   String get paymentUnconfirmed =>
       'The bank accepted the payment but its status is not confirmed yet. The amount should be applied within a few minutes — refresh the list to check.';
+
+  @override
+  String get profileChildEmailSaved =>
+      'The student\'s e-mail address has been updated';
+
+  @override
+  String profileChildEmailText(String name) {
+    return '$name signs in with this address. The old one stops working once it is changed.';
+  }
+
+  @override
+  String get profileChildEmailTitle => 'Student\'s e-mail address';
+
+  @override
+  String get profileCurrentPassword => 'Current password';
+
+  @override
+  String get profileCurrentPasswordRequired => 'Enter your current password';
+
+  @override
+  String get profileEdit => 'Edit my details';
+
+  @override
+  String get profileEditSubtitle => 'Name, e-mail and phone';
+
+  @override
+  String get profileEmailNote =>
+      'If you change your e-mail address, you will sign in with the new one.';
+
+  @override
+  String get profileName => 'Full name';
+
+  @override
+  String get profileNameRequired => 'Enter your name';
+
+  @override
+  String get profilePassword => 'Change password';
+
+  @override
+  String get profilePasswordSaved => 'Your password has been updated';
+
+  @override
+  String get profilePasswordSubtitle => 'The password you sign in with';
+
+  @override
+  String get profilePasswordText =>
+      'Confirm your current password first, for security.';
+
+  @override
+  String get profilePhone => 'Phone';
+
+  @override
+  String get profileSaved => 'Your details have been updated';
+
+  @override
+  String get profileTitle => 'My details';
 
   @override
   String get purchaseLabel => 'Purchase';
@@ -1442,6 +1511,32 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Total outstanding';
+
+  @override
+  String updateAvailableText(String version) {
+    return 'Version $version is ready. Update to get the latest changes.';
+  }
+
+  @override
+  String get updateAvailableTitle => 'A new version is available';
+
+  @override
+  String get updateForcedText =>
+      'This version of the app is no longer supported. Install the latest one to continue.';
+
+  @override
+  String get updateForcedTitle => 'Update required';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String updateVersions(String current, String latest) {
+    return 'Installed: $current · Latest: $latest';
+  }
 
   @override
   String get webviewLoadFailed => 'The page could not be loaded';

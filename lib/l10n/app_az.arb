@@ -165,6 +165,8 @@
   "fileDownload": "Faylı yüklə",
   "foodCardEmpty": "Bufet kartı tapılmadı",
   "foodCardTitle": "Bufet Kartım",
+  "forgotBackToCode": "Kodu yenidən daxil et",
+  "forgotChangeEmail": "E-mail ünvanını dəyiş",
   "forgotDone": "Şifrəniz yeniləndi. Yeni şifrə ilə daxil ola bilərsiniz.",
   "forgotEmailField": "E-mail ünvanı",
   "forgotEmailInvalid": "E-mail ünvanı düzgün deyil",
@@ -175,8 +177,10 @@
   "forgotPasswordRequired": "Yeni şifrəni daxil edin",
   "forgotPasswordShort": "Şifrə ən azı {count} simvol olmalıdır",
   "forgotRepeatPassword": "Yeni şifrə (təkrar)",
+  "forgotSendCode": "Kodu göndər",
+  "forgotSetPasswordText": "E-mail təsdiqləndi. İndi yeni şifrənizi təyin edin.",
   "forgotSubmit": "Şifrəni yenilə",
-  "forgotText": "Qeydiyyatdan keçdiyiniz e-mail ünvanını və yeni şifrənizi daxil edin. E-mail doğrudursa, şifrə dərhal yenilənəcək.",
+  "forgotText": "Qeydiyyatdan keçdiyiniz e-mail ünvanını daxil edin. Təsdiq kodunu həmin ünvana göndərəcəyik.",
   "forgotTitle": "Şifrənin bərpası",
   "historyCanteen": "Yeməkxana",
   "historyIncome": "Mədaxil",
@@ -282,6 +286,23 @@
   "paymentCurrentBalance": "Cari balans",
   "paymentStatusUnavailable": "Ödənişin statusu alınmadı",
   "paymentUnconfirmed": "Bank ödənişi qəbul etdi, lakin statusu təsdiqlənmədi. Məbləğ bir neçə dəqiqə ərzində hesabınıza işlənəcək — siyahını yeniləyib yoxlayın.",
+  "profileChildEmailSaved": "Şagirdin e-mail ünvanı yeniləndi",
+  "profileChildEmailText": "{name} bu ünvanla tətbiqə daxil olur. Dəyişdikdən sonra köhnə ünvan işləməyəcək.",
+  "profileChildEmailTitle": "Şagirdin e-mail ünvanı",
+  "profileCurrentPassword": "Cari şifrə",
+  "profileCurrentPasswordRequired": "Cari şifrənizi daxil edin",
+  "profileEdit": "Məlumatlarımı redaktə et",
+  "profileEditSubtitle": "Ad, e-mail və telefon",
+  "profileEmailNote": "E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.",
+  "profileName": "Ad, Soyad",
+  "profileNameRequired": "Adınızı daxil edin",
+  "profilePassword": "Şifrəni dəyiş",
+  "profilePasswordSaved": "Şifrəniz yeniləndi",
+  "profilePasswordSubtitle": "Hesaba giriş şifrəsi",
+  "profilePasswordText": "Təhlükəsizlik üçün əvvəlcə cari şifrənizi təsdiqləyin.",
+  "profilePhone": "Telefon",
+  "profileSaved": "Məlumatlarınız yeniləndi",
+  "profileTitle": "Məlumatlarım",
   "purchaseLabel": "Alış",
   "recentTransactions": "Son əməliyyatlar",
   "registerAdmissionNote": "Qəbul nömrəsi şagird vəsiqəsində və məktəbin verdiyi qəbul sənədində yazılıb.",
@@ -444,6 +465,13 @@
   "tuitionTabTuition": "Təhsil haqqı",
   "tuitionTitle": "Ödəniş cədvəli",
   "tuitionTotalDue": "Ümumi qalıq",
+  "updateAvailableText": "{version} versiyası hazırdır. Yeniləsəniz, son dəyişikliklərdən istifadə edə biləcəksiniz.",
+  "updateAvailableTitle": "Yeni versiya mövcuddur",
+  "updateForcedText": "Tətbiqin bu versiyası artıq dəstəklənmir. Davam etmək üçün ən son versiyanı quraşdırın.",
+  "updateForcedTitle": "Yeniləmə tələb olunur",
+  "updateLater": "Sonra",
+  "updateNow": "İndi yenilə",
+  "updateVersions": "Cari: {current} · Son: {latest}",
   "webviewLoadFailed": "Səhifə yüklənmədi",
   "webviewStopText": "Ödəniş tamamlanmayıb. Səhifəni bağlamaq istəyirsiniz?",
   "webviewStopTitle": "Ödənişi dayandırmaq",
@@ -687,6 +715,13 @@
       }
     }
   },
+  "@profileChildEmailText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "@settingsMyChildren": {
     "placeholders": {
       "count": {
@@ -760,6 +795,23 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@updateAvailableText": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateVersions": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "latest": {
+        "type": "String"
       }
     }
   },

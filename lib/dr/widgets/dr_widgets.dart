@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../../core/utils/az_phone.dart';
 import '../theme/dr_colors.dart';
 
 /// Page scaffold that mimics the `.mobile-container` (dark bg + horizontal
@@ -603,6 +605,13 @@ class DrTextField extends StatelessWidget {
   final bool autofocus;
   final TextCapitalization textCapitalization;
 
+  /// Formatters applied as the field is typed into — the phone mask, mostly.
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// Passed straight to the inner [TextField], for callers that react to the
+  /// field being entered or left — see [DrPhoneField].
+  final FocusNode? focusNode;
+
   /// Rendered inside the field, against its right edge — a show/hide toggle on
   /// a password input, for example.
   final Widget? trailing;
@@ -621,6 +630,8 @@ class DrTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
+    this.focusNode,
     this.trailing,
   });
 
@@ -653,6 +664,7 @@ class DrTextField extends StatelessWidget {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   onChanged: onChanged,
                   onSubmitted: onSubmitted,
                   textInputAction: textInputAction,
@@ -661,6 +673,7 @@ class DrTextField extends StatelessWidget {
                   textCapitalization: textCapitalization,
                   obscureText: obscure,
                   keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
                   textAlign: textAlign,
                   style: TextStyle(
                     fontSize: 15,
@@ -706,6 +719,198 @@ class DrSwitch extends StatelessWidget {
       inactiveThumbColor: Colors.white,
       inactiveTrackColor: Colors.white.withValues(alpha: 0.12),
       trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+    );
+  }
+}
+
+/// [length] boxes painted from one invisible [TextField] laid over them —
+/// the e-mail confirmation screen and the password-reset sheet share it.
+///
+/// One field rather than six keeps the OS keyboard, paste and the e-mail
+/// code's autofill working, and leaves no focus to hand between inputs when a
+/// digit is typed or deleted.
+class DrCodeInput extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final int length;
+  final bool autofocus;
+
+  const DrCodeInput({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+    this.length = 6,
+    this.autofocus = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => focusNode.requestFocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Stack(
+        children: [
+          IgnorePointer(child: _buildBoxes(context)),
+          Positioned.fill(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              onChanged: onChanged,
+              autofocus: autofocus,
+              keyboardType: TextInputType.number,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(length),
+              ],
+              decoration: const InputDecoration.collapsed(hintText: ''),
+              // The boxes are the visible input; this field only collects.
+              showCursor: false,
+              enableInteractiveSelection: false,
+              cursorColor: Colors.transparent,
+              style: const TextStyle(color: Colors.transparent),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBoxes(BuildContext context) {
+    final code = controller.text;
+    // The caret sits on the first empty box, or on the last one once every
+    // digit is in.
+    final cursor = code.length.clamp(0, length - 1);
+
+    return Row(
+      children: [
+        for (var i = 0; i < length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          // Expanded instead of a plain 48 so the boxes still fit a narrow
+          // phone; the inner width stops them stretching on a wide one.
+          Expanded(
+            child: Center(
+              child: Container(
+                width: 48,
+                height: 56,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: context.dr.bgDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: i == cursor ? context.dr.accent : context.dr.border,
+                    width: i == cursor ? 1.5 : 1,
+                  ),
+                  boxShadow: i == cursor
+                      ? [
+                          BoxShadow(
+                            color: context.dr.accent.withValues(alpha: 0.25),
+                            blurRadius: 16,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Text(
+                  i < code.length ? code[i] : '',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: context.dr.textMain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// A phone field that puts the country code in for the parent.
+///
+/// `+994 ` appears the moment the field is entered, the mask groups the digits
+/// as they are typed (`+994 50 123 45 67`), and leaving the field without
+/// typing anything takes the prefix away again — so an empty phone reads as
+/// empty rather than as a number someone started and abandoned.
+class DrPhoneField extends StatefulWidget {
+  final String? label;
+  final String hint;
+  final TextEditingController controller;
+  final bool enabled;
+  final bool autofocus;
+  final TextInputAction textInputAction;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+
+  const DrPhoneField({
+    super.key,
+    this.label,
+    required this.hint,
+    required this.controller,
+    this.enabled = true,
+    this.autofocus = false,
+    this.textInputAction = TextInputAction.next,
+    this.onChanged,
+    this.onSubmitted,
+  });
+
+  @override
+  State<DrPhoneField> createState() => _DrPhoneFieldState();
+}
+
+class _DrPhoneFieldState extends State<DrPhoneField> {
+  final _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChanged);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChanged() {
+    final controller = widget.controller;
+    // A field holding digits is left alone in both directions — this is only
+    // about the prefix on an otherwise empty one.
+    if (!AzPhone.isEmpty(controller.text)) return;
+
+    if (_focusNode.hasFocus) {
+      controller.value = const TextEditingValue(
+        text: AzPhone.prefix,
+        selection: TextSelection.collapsed(offset: AzPhone.prefix.length),
+      );
+    } else if (controller.text.isNotEmpty) {
+      // Left without a number: the hint says more than a bare `+994 ` does.
+      controller.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DrTextField(
+      label: widget.label,
+      hint: widget.hint,
+      icon: Icons.phone_outlined,
+      controller: widget.controller,
+      focusNode: _focusNode,
+      enabled: widget.enabled,
+      autofocus: widget.autofocus,
+      keyboardType: TextInputType.phone,
+      textInputAction: widget.textInputAction,
+      inputFormatters: const [AzPhoneInputFormatter()],
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
     );
   }
 }

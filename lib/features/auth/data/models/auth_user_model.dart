@@ -10,6 +10,7 @@ class AuthUserModel extends AuthUser {
     required super.childName,
     required super.role,
     required super.email,
+    super.phone,
     super.classId,
     super.className,
     super.children,
@@ -38,6 +39,7 @@ class AuthUserModel extends AuthUser {
       childName: json['child_name'] as String? ?? '',
       role: json['role'] as String? ?? '',
       email: json['email'] as String? ?? '',
+      phone: _asNullableString(json['phone']),
       classId: _asInt(json['class_id']),
       className: _asNullableString(json['className'] ?? json['class_name']),
       // `info` — the students linked to a parent account, with the login the
@@ -56,6 +58,7 @@ class AuthUserModel extends AuthUser {
         'child_name': childName,
         'role': role,
         'email': email,
+        'phone': phone,
         'class_id': classId,
         'className': className,
         'info':

@@ -7,22 +7,34 @@ import '../network/network_info.dart';
 import '../push/onesignal_push_service.dart';
 import '../push/push_service.dart';
 import '../storage/selected_child_storage.dart';
+import '../storage/update_prompt_storage.dart';
+import '../utils/app_info.dart';
 import '../storage/token_storage.dart';
 import '../storage/user_storage.dart';
 
 // Auth
+import '../../features/app_update/data/repositories/app_version_repository_impl.dart';
+import '../../features/app_update/data/services/app_version_service.dart';
+import '../../features/app_update/domain/repositories/app_version_repository.dart';
+import '../../features/app_update/domain/usecases/check_app_version.dart';
+import '../../features/app_update/presentation/cubit/app_update_cubit.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/data/services/auth_service.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/forgot_password.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_parent.dart';
 import '../../features/auth/domain/usecases/resend_otp.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
+import '../../features/auth/domain/usecases/update_child_email.dart';
+import '../../features/auth/domain/usecases/update_password.dart';
+import '../../features/auth/domain/usecases/update_profile.dart';
 import '../../features/auth/domain/usecases/verify_otp.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/cubit/otp_cubit.dart';
+import '../../features/auth/presentation/cubit/profile_cubit.dart';
 import '../../features/auth/presentation/bloc/register_bloc.dart';
 
 // Balance
@@ -145,6 +157,12 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<UserStorage>(() => UserStorageImpl(sl()));
   sl.registerLazySingleton<SelectedChildStorage>(
       () => SelectedChildStorageImpl(sl()));
+  sl.registerLazySingleton<UpdatePromptStorage>(
+      () => UpdatePromptStorageImpl(sl()));
+
+  // What this binary reports about itself — read once, asked for on every
+  // foreground.
+  sl.registerLazySingleton<AppInfo>(() => PackageAppInfo());
   // The single configured Dio (base URL + token interceptor) is shared by
   // every service in the app.
   sl.registerLazySingleton<ApiClient>(() => ApiClient(sl()));
@@ -171,6 +189,25 @@ Future<void> initDependencies() async {
   _initNotifications();
   _initNews();
   _initEvents();
+  _initAppUpdate();
+}
+
+/// The version gate. Registered like any other feature, but reached from the
+/// app root rather than a screen: it decides whether there is an app to show.
+void _initAppUpdate() {
+  // Cubit — one for the whole session, created at the app root.
+  sl.registerFactory(() => AppUpdateCubit(
+        checkAppVersion: sl(),
+        appInfo: sl(),
+        promptStorage: sl(),
+      ));
+
+  sl.registerLazySingleton(() => CheckAppVersion(sl()));
+
+  sl.registerLazySingleton<AppVersionRepository>(
+      () => AppVersionRepositoryImpl(service: sl()));
+
+  sl.registerLazySingleton<AppVersionService>(() => AppVersionServiceImpl(sl()));
 }
 
 void _initEvents() {
@@ -252,8 +289,21 @@ void _initAuth() {
         push: sl(),
       ));
 
-  // Cubit — new instance per "şifrəni unutdum" sheet.
-  sl.registerFactory(() => ForgotPasswordCubit(resetPassword: sl()));
+  // Cubit — new instance per "şifrəni unutdum" sheet. It asks for a code, then
+  // sends it back together with the new password: the backend checks the two
+  // in one request, so there is no verify step of its own to wire up.
+  sl.registerFactory(() => ForgotPasswordCubit(
+        sendResetCode: sl(),
+        resetPassword: sl(),
+      ));
+
+  // Cubit — new instance per profile edit sheet (the parent's own details,
+  // or one student's login e-mail).
+  sl.registerFactory(() => ProfileCubit(
+        updateProfile: sl(),
+        updateChildEmail: sl(),
+        updatePassword: sl(),
+      ));
 
   // Bloc — new instance per sign-up screen.
   sl.registerFactory(() => RegisterBloc(registerParent: sl()));
@@ -267,7 +317,11 @@ void _initAuth() {
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => LogoutUser(sl()));
+  sl.registerLazySingleton(() => ForgotPassword(sl()));
   sl.registerLazySingleton(() => ResetPassword(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl()));
+  sl.registerLazySingleton(() => UpdateChildEmail(sl()));
+  sl.registerLazySingleton(() => UpdatePassword(sl()));
   sl.registerLazySingleton(() => RegisterParent(sl()));
   sl.registerLazySingleton(() => VerifyOtp(sl()));
   sl.registerLazySingleton(() => ResendOtp(sl()));

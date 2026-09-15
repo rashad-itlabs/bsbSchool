@@ -50,6 +50,15 @@ class AuthChildAdded extends AuthEvent {
   List<Object?> get props => [admissionNo, relation];
 }
 
+/// The cached user changed underneath the bloc — the profile sheets edit it
+/// through their own cubit, and this is what puts the new values on screen.
+///
+/// Carries nothing: the repository has already stored the result, so the bloc
+/// only has to read it back.
+class AuthSessionRefreshed extends AuthEvent {
+  const AuthSessionRefreshed();
+}
+
 /// User tapped "log out".
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();

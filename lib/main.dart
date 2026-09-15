@@ -6,6 +6,8 @@ import 'core/di/injection_container.dart';
 import 'core/l10n/l10n.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/push/push_service.dart';
+import 'features/app_update/presentation/cubit/app_update_cubit.dart';
+import 'features/app_update/presentation/widgets/update_gate.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/notifications/presentation/notification_prefs.dart';
 import 'dr/screens/add_child_screen.dart';
@@ -36,8 +38,17 @@ class BsbSchoolApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>(
-      create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+        ),
+        // Above the theme/locale rebuild, so the check runs once per launch
+        // rather than every time one of those changes.
+        BlocProvider<AppUpdateCubit>(
+          create: (_) => sl<AppUpdateCubit>()..check(),
+        ),
+      ],
       child: AnimatedBuilder(
         animation: Listenable.merge([
           ThemeController.instance,
@@ -58,7 +69,11 @@ class BsbSchoolApp extends StatelessWidget {
             localeResolutionCallback: (device, supported) {
               return LocaleController.instance.resolve([?device]);
             },
-            home: const _L10nBridge(child: AuthGate()),
+            // The version gate wraps everything: a build the backend no
+            // longer supports never reaches the login screen either.
+            home: const _L10nBridge(
+              child: UpdateGate(child: AuthGate()),
+            ),
           );
         },
       ),

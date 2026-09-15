@@ -553,6 +553,12 @@ class AppL10nAz extends AppL10n {
   String get foodCardTitle => 'Bufet Kartım';
 
   @override
+  String get forgotBackToCode => 'Kodu yenidən daxil et';
+
+  @override
+  String get forgotChangeEmail => 'E-mail ünvanını dəyiş';
+
+  @override
   String get forgotDone =>
       'Şifrəniz yeniləndi. Yeni şifrə ilə daxil ola bilərsiniz.';
 
@@ -588,11 +594,18 @@ class AppL10nAz extends AppL10n {
   String get forgotRepeatPassword => 'Yeni şifrə (təkrar)';
 
   @override
+  String get forgotSendCode => 'Kodu göndər';
+
+  @override
+  String get forgotSetPasswordText =>
+      'E-mail təsdiqləndi. İndi yeni şifrənizi təyin edin.';
+
+  @override
   String get forgotSubmit => 'Şifrəni yenilə';
 
   @override
   String get forgotText =>
-      'Qeydiyyatdan keçdiyiniz e-mail ünvanını və yeni şifrənizi daxil edin. E-mail doğrudursa, şifrə dərhal yenilənəcək.';
+      'Qeydiyyatdan keçdiyiniz e-mail ünvanını daxil edin. Təsdiq kodunu həmin ünvana göndərəcəyik.';
 
   @override
   String get forgotTitle => 'Şifrənin bərpası';
@@ -932,6 +945,61 @@ class AppL10nAz extends AppL10n {
   @override
   String get paymentUnconfirmed =>
       'Bank ödənişi qəbul etdi, lakin statusu təsdiqlənmədi. Məbləğ bir neçə dəqiqə ərzində hesabınıza işlənəcək — siyahını yeniləyib yoxlayın.';
+
+  @override
+  String get profileChildEmailSaved => 'Şagirdin e-mail ünvanı yeniləndi';
+
+  @override
+  String profileChildEmailText(String name) {
+    return '$name bu ünvanla tətbiqə daxil olur. Dəyişdikdən sonra köhnə ünvan işləməyəcək.';
+  }
+
+  @override
+  String get profileChildEmailTitle => 'Şagirdin e-mail ünvanı';
+
+  @override
+  String get profileCurrentPassword => 'Cari şifrə';
+
+  @override
+  String get profileCurrentPasswordRequired => 'Cari şifrənizi daxil edin';
+
+  @override
+  String get profileEdit => 'Məlumatlarımı redaktə et';
+
+  @override
+  String get profileEditSubtitle => 'Ad, e-mail və telefon';
+
+  @override
+  String get profileEmailNote =>
+      'E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.';
+
+  @override
+  String get profileName => 'Ad, Soyad';
+
+  @override
+  String get profileNameRequired => 'Adınızı daxil edin';
+
+  @override
+  String get profilePassword => 'Şifrəni dəyiş';
+
+  @override
+  String get profilePasswordSaved => 'Şifrəniz yeniləndi';
+
+  @override
+  String get profilePasswordSubtitle => 'Hesaba giriş şifrəsi';
+
+  @override
+  String get profilePasswordText =>
+      'Təhlükəsizlik üçün əvvəlcə cari şifrənizi təsdiqləyin.';
+
+  @override
+  String get profilePhone => 'Telefon';
+
+  @override
+  String get profileSaved => 'Məlumatlarınız yeniləndi';
+
+  @override
+  String get profileTitle => 'Məlumatlarım';
 
   @override
   String get purchaseLabel => 'Alış';
@@ -1442,6 +1510,32 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Ümumi qalıq';
+
+  @override
+  String updateAvailableText(String version) {
+    return '$version versiyası hazırdır. Yeniləsəniz, son dəyişikliklərdən istifadə edə biləcəksiniz.';
+  }
+
+  @override
+  String get updateAvailableTitle => 'Yeni versiya mövcuddur';
+
+  @override
+  String get updateForcedText =>
+      'Tətbiqin bu versiyası artıq dəstəklənmir. Davam etmək üçün ən son versiyanı quraşdırın.';
+
+  @override
+  String get updateForcedTitle => 'Yeniləmə tələb olunur';
+
+  @override
+  String get updateLater => 'Sonra';
+
+  @override
+  String get updateNow => 'İndi yenilə';
+
+  @override
+  String updateVersions(String current, String latest) {
+    return 'Cari: $current · Son: $latest';
+  }
 
   @override
   String get webviewLoadFailed => 'Səhifə yüklənmədi';

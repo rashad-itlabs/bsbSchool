@@ -1089,6 +1089,18 @@ abstract class AppL10n {
   /// **'Bufet Kartım'**
   String get foodCardTitle;
 
+  /// No description provided for @forgotBackToCode.
+  ///
+  /// In az, this message translates to:
+  /// **'Kodu yenidən daxil et'**
+  String get forgotBackToCode;
+
+  /// No description provided for @forgotChangeEmail.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail ünvanını dəyiş'**
+  String get forgotChangeEmail;
+
   /// No description provided for @forgotDone.
   ///
   /// In az, this message translates to:
@@ -1149,6 +1161,18 @@ abstract class AppL10n {
   /// **'Yeni şifrə (təkrar)'**
   String get forgotRepeatPassword;
 
+  /// No description provided for @forgotSendCode.
+  ///
+  /// In az, this message translates to:
+  /// **'Kodu göndər'**
+  String get forgotSendCode;
+
+  /// No description provided for @forgotSetPasswordText.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail təsdiqləndi. İndi yeni şifrənizi təyin edin.'**
+  String get forgotSetPasswordText;
+
   /// No description provided for @forgotSubmit.
   ///
   /// In az, this message translates to:
@@ -1158,7 +1182,7 @@ abstract class AppL10n {
   /// No description provided for @forgotText.
   ///
   /// In az, this message translates to:
-  /// **'Qeydiyyatdan keçdiyiniz e-mail ünvanını və yeni şifrənizi daxil edin. E-mail doğrudursa, şifrə dərhal yenilənəcək.'**
+  /// **'Qeydiyyatdan keçdiyiniz e-mail ünvanını daxil edin. Təsdiq kodunu həmin ünvana göndərəcəyik.'**
   String get forgotText;
 
   /// No description provided for @forgotTitle.
@@ -1790,6 +1814,108 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Bank ödənişi qəbul etdi, lakin statusu təsdiqlənmədi. Məbləğ bir neçə dəqiqə ərzində hesabınıza işlənəcək — siyahını yeniləyib yoxlayın.'**
   String get paymentUnconfirmed;
+
+  /// No description provided for @profileChildEmailSaved.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagirdin e-mail ünvanı yeniləndi'**
+  String get profileChildEmailSaved;
+
+  /// No description provided for @profileChildEmailText.
+  ///
+  /// In az, this message translates to:
+  /// **'{name} bu ünvanla tətbiqə daxil olur. Dəyişdikdən sonra köhnə ünvan işləməyəcək.'**
+  String profileChildEmailText(String name);
+
+  /// No description provided for @profileChildEmailTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagirdin e-mail ünvanı'**
+  String get profileChildEmailTitle;
+
+  /// No description provided for @profileCurrentPassword.
+  ///
+  /// In az, this message translates to:
+  /// **'Cari şifrə'**
+  String get profileCurrentPassword;
+
+  /// No description provided for @profileCurrentPasswordRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Cari şifrənizi daxil edin'**
+  String get profileCurrentPasswordRequired;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In az, this message translates to:
+  /// **'Məlumatlarımı redaktə et'**
+  String get profileEdit;
+
+  /// No description provided for @profileEditSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad, e-mail və telefon'**
+  String get profileEditSubtitle;
+
+  /// No description provided for @profileEmailNote.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.'**
+  String get profileEmailNote;
+
+  /// No description provided for @profileName.
+  ///
+  /// In az, this message translates to:
+  /// **'Ad, Soyad'**
+  String get profileName;
+
+  /// No description provided for @profileNameRequired.
+  ///
+  /// In az, this message translates to:
+  /// **'Adınızı daxil edin'**
+  String get profileNameRequired;
+
+  /// No description provided for @profilePassword.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrəni dəyiş'**
+  String get profilePassword;
+
+  /// No description provided for @profilePasswordSaved.
+  ///
+  /// In az, this message translates to:
+  /// **'Şifrəniz yeniləndi'**
+  String get profilePasswordSaved;
+
+  /// No description provided for @profilePasswordSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesaba giriş şifrəsi'**
+  String get profilePasswordSubtitle;
+
+  /// No description provided for @profilePasswordText.
+  ///
+  /// In az, this message translates to:
+  /// **'Təhlükəsizlik üçün əvvəlcə cari şifrənizi təsdiqləyin.'**
+  String get profilePasswordText;
+
+  /// No description provided for @profilePhone.
+  ///
+  /// In az, this message translates to:
+  /// **'Telefon'**
+  String get profilePhone;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In az, this message translates to:
+  /// **'Məlumatlarınız yeniləndi'**
+  String get profileSaved;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Məlumatlarım'**
+  String get profileTitle;
 
   /// No description provided for @purchaseLabel.
   ///
@@ -2762,6 +2888,48 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Ümumi qalıq'**
   String get tuitionTotalDue;
+
+  /// No description provided for @updateAvailableText.
+  ///
+  /// In az, this message translates to:
+  /// **'{version} versiyası hazırdır. Yeniləsəniz, son dəyişikliklərdən istifadə edə biləcəksiniz.'**
+  String updateAvailableText(String version);
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Yeni versiya mövcuddur'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateForcedText.
+  ///
+  /// In az, this message translates to:
+  /// **'Tətbiqin bu versiyası artıq dəstəklənmir. Davam etmək üçün ən son versiyanı quraşdırın.'**
+  String get updateForcedText;
+
+  /// No description provided for @updateForcedTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Yeniləmə tələb olunur'**
+  String get updateForcedTitle;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In az, this message translates to:
+  /// **'Sonra'**
+  String get updateLater;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In az, this message translates to:
+  /// **'İndi yenilə'**
+  String get updateNow;
+
+  /// No description provided for @updateVersions.
+  ///
+  /// In az, this message translates to:
+  /// **'Cari: {current} · Son: {latest}'**
+  String updateVersions(String current, String latest);
 
   /// No description provided for @webviewLoadFailed.
   ///

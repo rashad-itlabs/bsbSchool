@@ -36,10 +36,55 @@ abstract class AuthService {
     String? relation,
   });
 
-  /// Sets a new password for the account matching [email].
+  /// Updates the signed-in account's own details.
+  ///
+  /// Returns the refreshed user when the endpoint echoes one back (same shape
+  /// as the login body), null when it only reports success — the caller then
+  /// applies what it sent.
+  ///
+  /// Throws a [FieldValidationException] when the backend rejects one of the
+  /// inputs, so the form can show each message under its own field.
+  Future<AuthUserModel?> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  });
+
+  /// Replaces the signed-in account's own password, proving ownership with
+  /// [currentPassword] rather than a mailed code — the parent is already in.
+  ///
+  /// Throws a [FieldValidationException] so a wrong current password is shown
+  /// under that field rather than over the whole form.
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
+  /// Changes the login e-mail of one student on the account.
+  ///
+  /// Same return contract as [updateProfile]: the refreshed user (whose `info`
+  /// carries the student's new address) when the endpoint echoes one, null
+  /// when it only acknowledges.
+  Future<AuthUserModel?> updateChildEmail({
+    required int childId,
+    required String email,
+  });
+
+  /// Mails a 6-digit code to [email] so its password can be replaced.
+  ///
+  /// Separate from [resendOtp]: that one only serves accounts still waiting
+  /// to confirm a registration, so it answers "Bu email üçün təsdiq gözləyən
+  /// hesab yoxdur." for every account that has already been confirmed — which
+  /// is precisely who asks for a password reset.
+  Future<void> sendResetCode({required String email});
+
+  /// Sets a new password for the account matching [email]. [otp] is the code
+  /// [sendResetCode] mailed: it is checked here, in the same request, which
+  /// is what keeps an address alone from being enough to take an account.
   Future<void> resetPassword({
     required String email,
     required String password,
+    required String otp,
   });
 
   /// Creates a parent account and links it to the student whose admission
@@ -70,9 +115,19 @@ abstract class AuthService {
 }
 
 class AuthServiceImpl implements AuthService {
-  /// Backend route that swaps the password of a known e-mail. Kept here so a
-  /// rename on the Laravel side is a one-line change.
+  /// Backend routes of the password reset, in the order the sheet walks
+  /// them. Kept here so a rename on the Laravel side is a one-line change.
+  static const String forgotPasswordPath = '/forgotPassword';
   static const String resetPasswordPath = '/changePassword';
+
+  /// Backend route that updates the signed-in account's own details.
+  static const String updateProfilePath = '/updateProfile';
+
+  /// Backend route that changes one student's login e-mail.
+  static const String updateChildEmailPath = '/updateChildEmail';
+
+  /// Backend route that changes the signed-in account's own password.
+  static const String updatePasswordPath = '/updatePassword';
 
   /// Backend route that re-points the account at another of its students.
   static const String selectChildPath = '/selectChild';
@@ -227,6 +282,160 @@ class AuthServiceImpl implements AuthService {
     }
   }
 
+  @override
+  Future<AuthUserModel?> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    try {
+      final response = await dio.post(
+        updateProfilePath,
+        data: {
+          'name': name,
+          'email': email,
+          'phone': phone,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if (status == 200 || status == 201 || status == 204) {
+        if (data is! Map<String, dynamic>) return null;
+        // `{"success": false, ...}` — a 200 that isn't one.
+        if (data['success'] == false) {
+          throw FieldValidationException(
+            _fieldErrorsFrom(data),
+            _profileMessageFrom(data, status),
+          );
+        }
+        // Same three hiding places as `/selectChild`.
+        final user = _userFrom(data);
+        return user == null ? null : AuthUserModel.fromJson(user);
+      }
+
+      // 422 — the address is already on another account, or a field is empty.
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _profileMessageFrom(data, status),
+      );
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await dio.post(
+        updatePasswordPath,
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          // Laravel's `confirmed` rule on `new_password` looks for this exact
+          // key; without it the request fails validation.
+          'new_password_confirmation': newPassword,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if (status == 200 || status == 201 || status == 204) {
+        if (data is Map && data['success'] == false) {
+          throw FieldValidationException(
+            _fieldErrorsFrom(data),
+            _profileMessageFrom(data, status),
+          );
+        }
+        return;
+      }
+
+      // 422 — the current password is wrong, or the new one failed `min:6` /
+      // `confirmed`.
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _profileMessageFrom(data, status),
+      );
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
+  Future<AuthUserModel?> updateChildEmail({
+    required int childId,
+    required String email,
+  }) async {
+    try {
+      final response = await dio.post(
+        updateChildEmailPath,
+        data: {
+          'child_id': childId,
+          'email': email,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if (status == 200 || status == 201 || status == 204) {
+        if (data is! Map<String, dynamic>) return null;
+        if (data['success'] == false) {
+          throw ValidationException(_childEmailMessage(data, status));
+        }
+        final user = _userFrom(data);
+        if (user != null) return AuthUserModel.fromJson(user);
+
+        // Failing that, the roster alone is enough — the repository folds a
+        // children-only model into the cached session, exactly as it does for
+        // `/attachChild`.
+        final roster = _rosterFrom(data);
+        return roster == null
+            ? null
+            : AuthUserModel.fromJson({'info': roster});
+      }
+
+      // 403 — the student isn't on this account. 422 — the address is taken.
+      throw ValidationException(_childEmailMessage(data, status));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  /// Form-wide wording for the profile form. The per-field messages are the
+  /// specific ones, so this only covers a body that carries none.
+  String _profileMessageFrom(dynamic data, int status) {
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    if (status == 422) return L.s.errInvalid;
+    return L.s.errServer;
+  }
+
+  /// One field, so the nested error wins and there is nothing to map — same
+  /// order as [_resetMessageFrom], with a 403 of its own: the student named
+  /// belongs to somebody else's account.
+  String _childEmailMessage(dynamic data, int status) {
+    if (data is Map) {
+      final errors = data['errors'];
+      if (errors is Map && errors.isNotEmpty) {
+        final first = errors.values.first;
+        if (first is List && first.isNotEmpty) return first.first.toString();
+        if (first != null) return first.toString();
+      }
+      if (data['message'] != null) return data['message'].toString();
+    }
+    if (status == 403) return L.s.errChildNotYours;
+    if (status == 404) return L.s.errStudentNotFound;
+    if (status == 422) return L.s.errInvalid;
+    return L.s.errServer;
+  }
+
   /// The students array on its own, wherever the response chose to put it.
   ///
   /// An empty list is treated as absent: it is indistinguishable from an
@@ -271,15 +480,44 @@ class AuthServiceImpl implements AuthService {
   }
 
   @override
+  Future<void> sendResetCode({required String email}) async {
+    try {
+      final response = await dio.post(
+        forgotPasswordPath,
+        data: {'email': email},
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if (status == 200 || status == 201 || status == 204) {
+        if (data is Map && data['success'] == false) {
+          throw ValidationException(_resetMessageFrom(data, status));
+        }
+        return;
+      }
+
+      // 422 — no account holds this address (or re-sends are being throttled).
+      throw ValidationException(_resetMessageFrom(data, status));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
   Future<void> resetPassword({
     required String email,
     required String password,
+    required String otp,
   }) async {
     try {
       final response = await dio.post(
         resetPasswordPath,
         data: {
           'email': email,
+          // The code is checked here: without it the endpoint would swap the
+          // password of any address a caller cares to name.
+          'otp': otp,
           'new_password': password,
           // Laravel's `confirmed` rule on `new_password` looks for this exact
           // key; without it the request fails validation.

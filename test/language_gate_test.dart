@@ -58,9 +58,36 @@ class _SignedOutRepository implements AuthRepository {
       const Right(unit);
 
   @override
+  Future<Either<Failure, Unit>> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async =>
+      const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> updateProfile({
+    required String name,
+    required String email,
+    required String phone,
+  }) async =>
+      const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> updateChildEmail({
+    required int childId,
+    required String email,
+  }) async =>
+      const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> sendResetCode({required String email}) async =>
+      const Right(unit);
+
+  @override
   Future<Either<Failure, Unit>> resetPassword({
     required String email,
     required String password,
+    required String otp,
   }) async =>
       const Right(unit);
 
