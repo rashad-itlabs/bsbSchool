@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
@@ -9,9 +11,19 @@ import '../../../../core/l10n/l10n.dart';
 /// The month overview as a real calendar grid: one cell per day of the shown
 /// month, tinted by the attendance logged that day, with arrows to walk back
 /// through the months the API returned records for.
+///
+/// Today and past days are tappable and report through [onDaySelected]; the
+/// [selectedDay] cell is filled so the list below it reads as "this day".
 class AttendanceMonthCalendar extends StatefulWidget {
   final List<AttendanceRecord> records;
-  const AttendanceMonthCalendar({super.key, required this.records});
+  final DateTime? selectedDay;
+  final ValueChanged<DateTime>? onDaySelected;
+  const AttendanceMonthCalendar({
+    super.key,
+    required this.records,
+    this.selectedDay,
+    this.onDaySelected,
+  });
 
   @override
   State<AttendanceMonthCalendar> createState() =>
@@ -150,14 +162,34 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
     final now = DateTime.now();
     final isToday =
         day.year == now.year && day.month == now.month && day.day == now.day;
-    final color = status == null ? null : _statusColor(context, status);
+    final selected = widget.selectedDay;
+    final isSelected = selected != null &&
+        day.year == selected.year &&
+        day.month == selected.month &&
+        day.day == selected.day;
+    // Future days have nothing logged yet, so only today and earlier respond.
+    final canTap = widget.onDaySelected != null &&
+        !day.isAfter(DateTime(now.year, now.month, now.day));
+    final isMixed = status == _DayStatus.mixed;
+    // A mixed day has no single colour: it is painted half and half instead,
+    // and its number stays neutral so it reads on both halves.
+    final color = status == null || isMixed
+        ? null
+        : _statusColor(context, status);
+    final alpha = isSelected ? 0.4 : 0.15;
+    final fill = isMixed
+        ? null
+        : isSelected
+            ? (color ?? context.dr.accent).withValues(alpha: alpha)
+            : color?.withValues(alpha: alpha);
 
-    return Padding(
+    final cell = Padding(
       padding: const EdgeInsets.all(3),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: color?.withValues(alpha: 0.15),
+          color: fill,
+          gradient: isMixed ? _mixedGradient(context, alpha) : null,
           shape: BoxShape.circle,
           border: isToday
               ? Border.all(color: context.dr.accent, width: 1.5)
@@ -169,20 +201,29 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
             fontSize: 12,
             // Today keeps full weight/contrast even with no session logged, so
             // the ringed cell doesn't read as a faded one.
-            fontWeight: status == null && !isToday
+            fontWeight: status == null && !isToday && !isSelected
                 ? FontWeight.w400
                 : FontWeight.w600,
             color: color ??
-                (isToday ? context.dr.textMain : context.dr.textMuted),
+                (isToday || isSelected || isMixed
+                    ? context.dr.textMain
+                    : context.dr.textMuted),
           ),
         ),
       ),
+    );
+
+    if (!canTap) return cell;
+    return GestureDetector(
+      onTap: () => widget.onDaySelected!(day),
+      behavior: HitTestBehavior.opaque,
+      child: cell,
     );
   }
 
   Widget _legend(BuildContext context, DateTime month) {
     // Counted per day, not per record, so the numbers match the coloured cells.
-    var present = 0, late = 0, absent = 0;
+    var present = 0, late = 0, absent = 0, mixed = 0;
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     for (var d = 1; d <= daysInMonth; d++) {
       switch (_statusOn(DateTime(month.year, month.month, d))) {
@@ -192,41 +233,54 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           late++;
         case _DayStatus.absent:
           absent++;
+        case _DayStatus.mixed:
+          mixed++;
         case null:
           break;
       }
     }
 
+    // One line, spread edge to edge. Each item is loosely Flexible so a long
+    // label shrinks (with an ellipsis) on a narrow phone instead of overflowing.
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _legendItem(context, _DayStatus.present, context.l10n.attendancePresent, present),
         _legendItem(context, _DayStatus.late, context.l10n.attendanceLateTag, late),
         _legendItem(context, _DayStatus.absent, context.l10n.attendanceAbsent, absent),
-      ],
+        _legendItem(context, _DayStatus.mixed, context.l10n.attendanceMixed, mixed),
+      ].map((item) => Flexible(child: item)).toList(),
     );
   }
 
   Widget _legendItem(
       BuildContext context, _DayStatus status, String label, int count) {
-    final color = _statusColor(context, status);
+    final isMixed = status == _DayStatus.mixed;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: isMixed ? null : _statusColor(context, status),
+            gradient: isMixed ? _mixedGradient(context, 1) : null,
+            shape: BoxShape.circle,
+          ),
         ),
         const SizedBox(width: 6),
-        Text('$label $count',
-            style: TextStyle(fontSize: 11, color: context.dr.textMuted)),
+        Flexible(
+          child: Text('$label $count',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 11, color: context.dr.textMuted)),
+        ),
       ],
     );
   }
 
-  /// The worst status logged on [day] wins (absent > late > present) so a single
-  /// missed lesson shows up even when the other sessions were attended.
+  /// A day with both a missed and an attended session is [_DayStatus.mixed];
+  /// otherwise the worst status logged on [day] wins (absent > late > present).
   _DayStatus? _statusOn(DateTime day) {
     final onDay = widget.records.where((r) {
       final d = r.date;
@@ -236,7 +290,9 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           d.day == day.day;
     });
     if (onDay.isEmpty) return null;
-    if (onDay.any((r) => r.isAbsent)) return _DayStatus.absent;
+    final anyAbsent = onDay.any((r) => r.isAbsent);
+    if (anyAbsent && onDay.any((r) => !r.isAbsent)) return _DayStatus.mixed;
+    if (anyAbsent) return _DayStatus.absent;
     if (onDay.any((r) => r.isLate)) return _DayStatus.late;
     return _DayStatus.present;
   }
@@ -246,8 +302,23 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
       _DayStatus.present => context.dr.accent,
       _DayStatus.late => DrColors.teal,
       _DayStatus.absent => DrColors.red,
+      // Only used where a single colour is unavoidable; cells and the legend
+      // dot paint [_mixedGradient] instead.
+      _DayStatus.mixed => DrColors.red,
     };
+  }
+
+  /// Present green top-left, absent red bottom-right, with a hard diagonal
+  /// edge: the left/right split turned 45° clockwise.
+  Gradient _mixedGradient(BuildContext context, double alpha) {
+    final green = _statusColor(context, _DayStatus.present).withValues(alpha: alpha);
+    final red = _statusColor(context, _DayStatus.absent).withValues(alpha: alpha);
+    return LinearGradient(
+      colors: [green, green, red, red],
+      stops: const [0, 0.5, 0.5, 1],
+      transform: const GradientRotation(math.pi / 4),
+    );
   }
 }
 
-enum _DayStatus { present, late, absent }
+enum _DayStatus { present, late, absent, mixed }

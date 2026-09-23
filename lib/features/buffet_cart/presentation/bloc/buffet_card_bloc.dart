@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/buffet_card.dart';
+import '../../domain/entities/buffet_top_up.dart';
 import '../../domain/entities/buffet_transaction.dart';
 import '../../domain/usecases/get_buffet_card.dart';
 
@@ -40,6 +41,7 @@ class BuffetCardBloc extends Bloc<BuffetCardEvent, BuffetCardState> {
         userId: content.userId,
         card: content.card,
         transactions: content.transactions,
+        topUps: content.topUps,
       )),
     );
   }

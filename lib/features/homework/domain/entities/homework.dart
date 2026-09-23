@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'homework_submission.dart';
+
 /// One entry of the `data` array returned by `GET /homework`.
 class Homework extends Equatable {
   final int id;
@@ -30,6 +32,11 @@ class Homework extends Equatable {
   final int? classId;
   final int? subjectId;
 
+  /// The student's hand-in; null until it has been marked as submitted.
+  final HomeworkSubmission? submission;
+
+  bool get isSubmitted => submission != null;
+
   const Homework({
     required this.id,
     required this.name,
@@ -43,6 +50,7 @@ class Homework extends Equatable {
     this.documentUrl,
     this.classId,
     this.subjectId,
+    this.submission,
   });
 
   @override
@@ -59,5 +67,6 @@ class Homework extends Equatable {
         documentUrl,
         classId,
         subjectId,
+        submission,
       ];
 }

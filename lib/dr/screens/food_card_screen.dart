@@ -3,16 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
+import '../../core/l10n/app_dates.dart';
 import '../../features/buffet_cart/domain/entities/buffet_card.dart';
+import '../../features/buffet_cart/domain/entities/buffet_top_up.dart';
 import '../../features/buffet_cart/domain/entities/buffet_transaction.dart';
 import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
+import '../../features/buffet_cart/presentation/widgets/top_up_receipt_sheet.dart';
 import '../../features/payment/domain/entities/payment_result.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
 import '../../features/payment/presentation/pages/payment_webview_page.dart';
 import '../../features/payment/presentation/widgets/payment_result_sheet.dart';
 import '../theme/dr_colors.dart';
+import '../widgets/dr_day_picker.dart';
 import '../widgets/dr_widgets.dart';
-import 'cafeteria_screen.dart';
 import '../../core/l10n/l10n.dart';
 
 /// Port of `idcard.html`, backed by `GET /getBuffetCart` — the daily-limit
@@ -45,10 +48,75 @@ class _FoodCardViewState extends State<_FoodCardView> {
   final _controller = PageController();
   int _index = 0;
 
+  /// The inclusive day range the transactions list shows; both ends open on
+  /// today.
+  DateTime _fromDay = _today();
+  DateTime _toDay = _today();
+
+  static DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  static DateTime _dayOf(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  bool _inRange(BuffetTransaction t) {
+    final date = t.date;
+    if (date == null) return false;
+    final day = _dayOf(date);
+    return !day.isBefore(_fromDay) && !day.isAfter(_toDay);
+  }
+
+  /// The earliest pickable day: the oldest purchase the API returned, or a
+  /// year back when there is nothing older.
+  static DateTime _earliestDay(List<BuffetTransaction> transactions) {
+    final today = _today();
+    var first = DateTime(today.year - 1, today.month, today.day);
+    for (final d in transactions.map((t) => t.date).whereType<DateTime>()) {
+      if (d.isBefore(first)) first = _dayOf(d);
+    }
+    return first;
+  }
+
+  /// The start can't go past the end, so the picker stops at [_toDay].
+  Future<void> _pickFromDay(List<BuffetTransaction> transactions) async {
+    final picked = await showDrDayPicker(
+      context: context,
+      initialDate: _fromDay,
+      firstDate: _earliestDay(transactions),
+      lastDate: _toDay,
+    );
+    if (picked != null && mounted) setState(() => _fromDay = picked);
+  }
+
+  /// The end can't come before the start, nor after today.
+  Future<void> _pickToDay() async {
+    final picked = await showDrDayPicker(
+      context: context,
+      initialDate: _toDay,
+      firstDate: _fromDay,
+      lastDate: _today(),
+    );
+    if (picked != null && mounted) setState(() => _toDay = picked);
+  }
+
+  String _dayLabel(BuildContext context, DateTime day) => day == _today()
+      ? context.l10n.homeworkToday
+      : AppDates.short(context, day);
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+
+  Future<void> _addBalanceBlocked() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(context.l10n.paymentUnavailable)
+      ),
+    );
   }
 
   /// Asks for the amount, opens the bank page the server minted for it, and
@@ -93,7 +161,9 @@ class _FoodCardViewState extends State<_FoodCardView> {
     if (!mounted) return;
 
     if (result == null) {
-      _toast(payment.state.errorMessage ?? context.l10n.paymentStatusUnavailable);
+      _toast(
+        payment.state.errorMessage ?? context.l10n.paymentStatusUnavailable,
+      );
       payment.reset();
       return;
     }
@@ -138,8 +208,8 @@ class _FoodCardViewState extends State<_FoodCardView> {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 DrBackHeader(
-                    title: context.l10n.foodCardTitle,
-                    showBack: false
+                  title: context.l10n.foodCardTitle,
+                  showBack: false,
                 ),
                 ..._body(context, state),
                 const SizedBox(height: 20),
@@ -177,7 +247,9 @@ class _FoodCardViewState extends State<_FoodCardView> {
       return [_Message(text: context.l10n.foodCardEmpty)];
     }
 
-    final transactions = state.recentTransactions;
+    final allTransactions = state.recentTransactions;
+    final transactions = allTransactions.where(_inRange).toList();
+    final topUps = state.recentTopUps;
 
     return [
       const SizedBox(height: 4),
@@ -226,19 +298,42 @@ class _FoodCardViewState extends State<_FoodCardView> {
               : context.l10n.balanceTopUp,
           trailingIcon: Icons.add_card_outlined,
           loading: payment.isBusy,
-          onTap: _addBalance,
+          onTap: _addBalanceBlocked, /// _addBalance,
         ),
       ),
       const SizedBox(height: 28),
-      DrSectionHeader(
-        title: context.l10n.recentTransactions,
-        // action: 'Hamısı',
-        onAction: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const CafeteriaScreen())),
+      DrSectionHeader(title: context.l10n.recentTransactions),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 15),
+        child: Row(
+          children: [
+            Expanded(
+              child: _DayFilterChip(
+                caption: context.l10n.filterFrom,
+                label: _dayLabel(context, _fromDay),
+                onTap: () => _pickFromDay(allTransactions),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                size: 16,
+                color: context.dr.textMuted,
+              ),
+            ),
+            Expanded(
+              child: _DayFilterChip(
+                caption: context.l10n.filterTo,
+                label: _dayLabel(context, _toDay),
+                onTap: _pickToDay,
+              ),
+            ),
+          ],
+        ),
       ),
       if (transactions.isEmpty)
-        _Message(text: context.l10n.noTransactions)
+        _Message(text: context.l10n.noTransactionsInRange)
       else
         DrListCard(
           children: [
@@ -249,7 +344,95 @@ class _FoodCardViewState extends State<_FoodCardView> {
               ),
           ],
         ),
+      const SizedBox(height: 28),
+      DrSectionHeader(title: context.l10n.balanceTopUps),
+      if (topUps.isEmpty)
+        _Message(text: context.l10n.noTopUps)
+      else
+        DrListCard(
+          children: [
+            for (var i = 0; i < topUps.length; i++)
+              _TopUpTile(
+                topUp: topUps[i],
+                card: card,
+                divider: i != topUps.length - 1,
+                onTap: () => _showReceipt(topUps[i], card),
+              ),
+          ],
+        ),
     ];
+  }
+
+  /// The gateway's receipt for one top-up, with the PDF download on it. The
+  /// sheet pops with the message to show once the file has been written.
+  Future<void> _showReceipt(BuffetTopUp topUp, BuffetCard card) async {
+    final message = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => TopUpReceiptSheet(topUp: topUp, card: card),
+    );
+    if (message != null && mounted) _toast(message);
+  }
+}
+
+/// One end of the date range under "Recent transactions" — its caption and
+/// chosen day; a tap opens the day picker.
+class _DayFilterChip extends StatelessWidget {
+  final String caption;
+  final String label;
+  final VoidCallback onTap;
+  const _DayFilterChip({
+    required this.caption,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(
+          color: context.dr.accentSoft,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: 14,
+              color: context.dr.accent,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    caption,
+                    style: TextStyle(fontSize: 10, color: context.dr.textMuted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.dr.accent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -283,8 +466,7 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
 
   void _submit() {
     // A comma is what the AZ keyboard offers as the decimal separator.
-    final value =
-        double.tryParse(_amount.text.trim().replaceAll(',', '.'));
+    final value = double.tryParse(_amount.text.trim().replaceAll(',', '.'));
 
     if (value == null || value <= 0) {
       setState(() => _error = context.l10n.amountEnterValid);
@@ -292,11 +474,12 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
     }
 
     if (value < _min || value > _max) {
-      setState(() => _error =
-          context.l10n.amountRange(
-        _min.toStringAsFixed(0),
-        _max.toStringAsFixed(0),
-      ));
+      setState(
+        () => _error = context.l10n.amountRange(
+          _min.toStringAsFixed(0),
+          _max.toStringAsFixed(0),
+        ),
+      );
       return;
     }
 
@@ -307,8 +490,9 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
   Widget build(BuildContext context) {
     return Padding(
       // Lifts the sheet above the keyboard while the amount is being typed.
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
         decoration: BoxDecoration(
@@ -348,7 +532,8 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
                       controller: _amount,
                       autofocus: true,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       textAlign: TextAlign.center,
                       onChanged: (_) {
                         if (_error != null) setState(() => _error = null);
@@ -388,7 +573,9 @@ class _AddBalanceSheetState extends State<_AddBalanceSheet> {
                   child: Text(
                     _error!,
                     style: const TextStyle(
-                        fontSize: 13, color: DrColors.redStrong),
+                      fontSize: 13,
+                      color: DrColors.redStrong,
+                    ),
                   ),
                 ),
               ],
@@ -425,6 +612,60 @@ class _TransactionTile extends StatelessWidget {
       title: transaction.title ?? context.l10n.purchaseLabel,
       subtitle: subtitle,
       trailing: _Amount(amount == null ? '—' : '- ${_money(amount)}'),
+    );
+  }
+}
+
+/// A balance top-up (`incoming`). Reads as the mirror image of a purchase —
+/// green and with a plus — and opens the gateway's receipt when tapped.
+class _TopUpTile extends StatelessWidget {
+  final BuffetTopUp topUp;
+  final BuffetCard card;
+  final bool divider;
+  final VoidCallback onTap;
+
+  const _TopUpTile({
+    required this.topUp,
+    required this.card,
+    required this.onTap,
+    this.divider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final date = topUp.date;
+    final amount = topUp.amount;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: DrTransactionTile(
+        leading: const DrEmojiBadge(emoji: '💳', color: DrColors.green),
+        // The API's own wording for the row; the app's label only stands in
+        // when it sends none.
+        title: topUp.purpose ?? context.l10n.topUpLabel,
+        subtitle: date == null ? '—' : AppDates.shortWithTime(context, date),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              amount == null ? '—' : '+ ${_money(amount)}',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: DrColors.green,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 16,
+              color: context.dr.textMuted,
+            ),
+          ],
+        ),
+        divider: divider,
+      ),
     );
   }
 }

@@ -78,6 +78,9 @@ class AppL10nEn extends AppL10n {
   String get attendanceLateTag => 'Late';
 
   @override
+  String get attendanceMixed => 'Mixed';
+
+  @override
   String get attendanceLesson => 'Lesson';
 
   @override
@@ -117,6 +120,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get balanceTopUp => 'Top up balance';
+
+  @override
+  String get balanceTopUps => 'Balance top-ups';
 
   @override
   String bookDeleteText(String location) {
@@ -554,6 +560,12 @@ class AppL10nEn extends AppL10n {
   String get foodCardTitle => 'My canteen card';
 
   @override
+  String get filterFrom => 'From';
+
+  @override
+  String get filterTo => 'To';
+
+  @override
   String get forgotBackToCode => 'Re-enter the code';
 
   @override
@@ -690,6 +702,30 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get hwTeacher => 'Teacher';
+
+  @override
+  String get hwSubmitted => 'Submitted';
+
+  @override
+  String get hwSubmission => 'Submission';
+
+  @override
+  String get hwStatus => 'Status';
+
+  @override
+  String get hwMarkedAt => 'Marked on';
+
+  @override
+  String get hwGrade => 'Grade';
+
+  @override
+  String get hwNotes => 'Notes';
+
+  @override
+  String get hwTeacherComment => 'Teacher\'s comment';
+
+  @override
+  String get hwSubmissionFile => 'Download submitted file';
 
   @override
   String get languageAz => 'Azerbaijani';
@@ -830,7 +866,13 @@ class AppL10nEn extends AppL10n {
   String get newsTitle => 'News';
 
   @override
+  String get noTopUps => 'No top-ups yet';
+
+  @override
   String get noTransactions => 'No transactions yet';
+
+  @override
+  String get noTransactionsInRange => 'No transactions in this period';
 
   @override
   String get notifPrefAttendance => 'Attendance';
@@ -852,6 +894,13 @@ class AppL10nEn extends AppL10n {
   @override
   String get notifPrefExamsText =>
       'Notifications about your child\'s exam results and sittings.';
+
+  @override
+  String get notifPrefHomework => 'Homework';
+
+  @override
+  String get notifPrefHomeworkText =>
+      'Notifications about new homework for your child and its due dates.';
 
   @override
   String get notificationFallback => 'Notification';
@@ -937,6 +986,9 @@ class AppL10nEn extends AppL10n {
   String get paymentCouldNotStart => 'The payment could not be started';
 
   @override
+  String get paymentUnavailable => 'Payments are not available at the moment';
+
+  @override
   String get paymentCurrentBalance => 'Current balance';
 
   @override
@@ -1004,6 +1056,81 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get purchaseLabel => 'Purchase';
+
+  @override
+  String get receiptAmount => 'Amount';
+
+  @override
+  String get receiptApproval => 'Approval code';
+
+  @override
+  String get receiptCard => 'Card';
+
+  @override
+  String get receiptClass => 'Class';
+
+  @override
+  String get receiptDate => 'Date';
+
+  @override
+  String get receiptDownload => 'Download receipt as PDF';
+
+  @override
+  String get receiptFailed => 'Payment failed';
+
+  @override
+  String get receiptFee => 'Fee';
+
+  @override
+  String get receiptFileBase => 'BSB-receipt';
+
+  @override
+  String get receiptFooter =>
+      'This receipt was generated automatically by the BSB School app and needs no signature.';
+
+  @override
+  String get receiptIssuer => 'Bank';
+
+  @override
+  String get receiptMethod => 'Payment method';
+
+  @override
+  String get receiptNoDetails => 'No receipt details for this payment';
+
+  @override
+  String get receiptPaymentDetails => 'Payment details';
+
+  @override
+  String get receiptPurpose => 'Purpose';
+
+  @override
+  String get receiptReference => 'Transaction reference';
+
+  @override
+  String get receiptRrn => 'RRN';
+
+  @override
+  String get receiptSaveFailed => 'Receipt could not be saved';
+
+  @override
+  String receiptSaved(String location) {
+    return 'Receipt saved to \"$location\"';
+  }
+
+  @override
+  String get receiptStatus => 'Status';
+
+  @override
+  String get receiptStudent => 'Student';
+
+  @override
+  String get receiptSuccess => 'Payment successful';
+
+  @override
+  String get receiptSystem => 'Payment system';
+
+  @override
+  String get receiptTitle => 'Payment receipt';
 
   @override
   String get recentTransactions => 'Recent transactions';
@@ -1404,6 +1531,9 @@ class AppL10nEn extends AppL10n {
   String get topUpCardSection => 'Payment card';
 
   @override
+  String get topUpLabel => 'Balance top-up';
+
+  @override
   String get tuitionAmountInvalid => 'Enter a valid amount';
 
   @override
@@ -1511,6 +1641,45 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Total outstanding';
+
+  @override
+  String get underConstructionBadge => 'Coming soon';
+
+  @override
+  String get underConstructionComingTitle => 'Coming to this screen';
+
+  @override
+  String get underConstructionFeatureHistory => 'Receipts and history';
+
+  @override
+  String get underConstructionFeatureHistoryHint => 'Every payment in one list';
+
+  @override
+  String get underConstructionFeaturePay => 'Card payments';
+
+  @override
+  String get underConstructionFeaturePayHint => 'Tuition and extra fees';
+
+  @override
+  String get underConstructionFeatureSchedule => 'Payment schedule';
+
+  @override
+  String get underConstructionFeatureScheduleHint =>
+      'Instalments and due dates';
+
+  @override
+  String get underConstructionNote =>
+      'The section opens in the app on its own as soon as it is ready — there is nothing for you to do.';
+
+  @override
+  String get underConstructionProgress => 'In progress';
+
+  @override
+  String get underConstructionSubtitle =>
+      'We are building the payment section. Soon you will be able to pay tuition and extra fees straight from the app.';
+
+  @override
+  String get underConstructionTitle => 'Under Construction';
 
   @override
   String updateAvailableText(String version) {

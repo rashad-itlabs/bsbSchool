@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
+import '../../core/l10n/app_dates.dart';
 import '../../features/attendance/domain/entities/attendance_record.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_month_calendar.dart';
@@ -51,12 +52,34 @@ class _AttendanceView extends StatelessWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   final AttendanceState state;
   const _Body({required this.state});
 
   @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  /// The calendar day whose sessions are listed; opens on today.
+  late DateTime _selectedDay = _today();
+
+  static DateTime _today() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  bool _isSelected(AttendanceRecord record) {
+    final d = record.date;
+    return d != null &&
+        d.year == _selectedDay.year &&
+        d.month == _selectedDay.month &&
+        d.day == _selectedDay.day;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = widget.state;
     if (state.isLoading && state.records.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
@@ -74,6 +97,7 @@ class _Body extends StatelessWidget {
 
     final summary = state.summary;
     final records = state.recentRecords;
+    final dayRecords = records.where(_isSelected).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -106,16 +130,21 @@ class _Body extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 30),
-        AttendanceMonthCalendar(records: records),
+        AttendanceMonthCalendar(
+          records: records,
+          selectedDay: _selectedDay,
+          onDaySelected: (day) => setState(() => _selectedDay = day),
+        ),
         const SizedBox(height: 30),
-        DrSectionHeader(title: context.l10n.attendanceRecent),
-        if (records.isEmpty)
+        DrSectionHeader(title: AppDates.full(context, _selectedDay)),
+        if (dayRecords.isEmpty)
           _Message(text: context.l10n.attendanceEmpty)
         else
           DrListCard(
             children: [
-              for (var i = 0; i < records.length; i++)
-                _log(context, records[i], divider: i != records.length - 1),
+              for (var i = 0; i < dayRecords.length; i++)
+                _log(context, dayRecords[i],
+                    divider: i != dayRecords.length - 1),
             ],
           ),
       ],

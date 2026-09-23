@@ -205,7 +205,10 @@ class _HomeworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desc = _stripHtml(homework.description);
-    final tag = _deadlineTag(context, homework.submitDate);
+    // Handed-in work no longer counts down to its deadline.
+    final tag = homework.isSubmitted
+        ? _DeadlineTag(context.l10n.hwSubmitted, context.dr.accent)
+        : _deadlineTag(context, homework.submitDate);
 
     return GestureDetector(
       onTap: () => _open(context),
@@ -305,7 +308,7 @@ class _Message extends StatelessWidget {
   }
 }
 
-/// A small deadline badge derived from the submit date.
+/// A small badge on a card: "submitted", or how the deadline stands.
 class _DeadlineTag {
   final String label;
   final Color color;

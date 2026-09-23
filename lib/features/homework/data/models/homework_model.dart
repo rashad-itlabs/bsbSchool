@@ -1,4 +1,5 @@
 import '../../domain/entities/homework.dart';
+import '../../domain/entities/homework_submission.dart';
 
 class HomeworkModel extends Homework {
   const HomeworkModel({
@@ -14,6 +15,7 @@ class HomeworkModel extends Homework {
     super.documentUrl,
     super.classId,
     super.subjectId,
+    super.submission,
   });
 
   /// Matches one entry of the `data` array returned by `GET /homework`.
@@ -30,7 +32,21 @@ class HomeworkModel extends Homework {
         documentUrl: _asString(json['document']),
         classId: _asNullableInt(json['class_id']),
         subjectId: _asNullableInt(json['subject_id']),
+        submission: _asSubmission(json['submission']),
       );
+
+  /// `submission` is `null` until the work is handed in, then an object.
+  static HomeworkSubmission? _asSubmission(dynamic value) {
+    if (value is! Map) return null;
+    return HomeworkSubmission(
+      markedAt: _asDate(value['marked_at']),
+      notes: _asString(value['notes']),
+      documentUrl: _asString(value['document']),
+      originalName: _asString(value['original_name']),
+      grade: _asString(value['grade']),
+      teacherComment: _asString(value['teacher_comment']),
+    );
+  }
 
   /// `id` arrives as an int, but a JSON-encoded string is cheap to tolerate.
   static int _asInt(dynamic value) =>
@@ -45,7 +61,8 @@ class HomeworkModel extends Homework {
     return (text == null || text.isEmpty) ? null : text;
   }
 
-  /// Dates come as `yyyy-MM-dd`; a bad value degrades to null, not a crash.
+  /// Dates come as `yyyy-MM-dd` (`marked_at` adds ` HH:mm:ss`); a bad value
+  /// degrades to null, not a crash.
   static DateTime? _asDate(dynamic value) {
     final text = _asString(value);
     return text == null ? null : DateTime.tryParse(text);

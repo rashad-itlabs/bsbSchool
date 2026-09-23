@@ -78,6 +78,9 @@ class AppL10nRu extends AppL10n {
   String get attendanceLateTag => 'Опоздал';
 
   @override
+  String get attendanceMixed => 'Смешанный';
+
+  @override
   String get attendanceLesson => 'Урок';
 
   @override
@@ -117,6 +120,9 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get balanceTopUp => 'Пополнить баланс';
+
+  @override
+  String get balanceTopUps => 'Пополнения баланса';
 
   @override
   String bookDeleteText(String location) {
@@ -555,6 +561,12 @@ class AppL10nRu extends AppL10n {
   String get foodCardTitle => 'Продуктовая карта';
 
   @override
+  String get filterFrom => 'С';
+
+  @override
+  String get filterTo => 'По';
+
+  @override
   String get forgotBackToCode => 'Ввести код заново';
 
   @override
@@ -691,6 +703,30 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get hwTeacher => 'Учитель';
+
+  @override
+  String get hwSubmitted => 'Сдано';
+
+  @override
+  String get hwSubmission => 'Сдача';
+
+  @override
+  String get hwStatus => 'Статус';
+
+  @override
+  String get hwMarkedAt => 'Отмечено';
+
+  @override
+  String get hwGrade => 'Оценка';
+
+  @override
+  String get hwNotes => 'Заметки';
+
+  @override
+  String get hwTeacherComment => 'Комментарий учителя';
+
+  @override
+  String get hwSubmissionFile => 'Скачать сданный файл';
 
   @override
   String get languageAz => 'Азербайджанский';
@@ -832,7 +868,13 @@ class AppL10nRu extends AppL10n {
   String get newsTitle => 'Новость';
 
   @override
+  String get noTopUps => 'Пополнений пока нет';
+
+  @override
   String get noTransactions => 'Операций пока нет';
+
+  @override
+  String get noTransactionsInRange => 'За этот период операций нет';
 
   @override
   String get notifPrefAttendance => 'Посещаемость';
@@ -853,6 +895,13 @@ class AppL10nRu extends AppL10n {
   @override
   String get notifPrefExamsText =>
       'Уведомления о результатах экзаменов и их сдаче.';
+
+  @override
+  String get notifPrefHomework => 'Домашние задания';
+
+  @override
+  String get notifPrefHomeworkText =>
+      'Уведомления о новых домашних заданиях ребёнка и сроках их сдачи.';
 
   @override
   String get notificationFallback => 'Уведомление';
@@ -938,6 +987,9 @@ class AppL10nRu extends AppL10n {
   String get paymentCouldNotStart => 'Не удалось начать оплату';
 
   @override
+  String get paymentUnavailable => 'В данный момент оплата недоступна';
+
+  @override
   String get paymentCurrentBalance => 'Текущий баланс';
 
   @override
@@ -1004,6 +1056,81 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get purchaseLabel => 'Покупка';
+
+  @override
+  String get receiptAmount => 'Сумма';
+
+  @override
+  String get receiptApproval => 'Код авторизации';
+
+  @override
+  String get receiptCard => 'Карта';
+
+  @override
+  String get receiptClass => 'Класс';
+
+  @override
+  String get receiptDate => 'Дата';
+
+  @override
+  String get receiptDownload => 'Скачать квитанцию в PDF';
+
+  @override
+  String get receiptFailed => 'Платёж не прошёл';
+
+  @override
+  String get receiptFee => 'Комиссия';
+
+  @override
+  String get receiptFileBase => 'BSB-kvitansiya';
+
+  @override
+  String get receiptFooter =>
+      'Квитанция сформирована автоматически приложением BSB School и не требует подписи.';
+
+  @override
+  String get receiptIssuer => 'Банк';
+
+  @override
+  String get receiptMethod => 'Способ оплаты';
+
+  @override
+  String get receiptNoDetails => 'Для этого платежа нет данных квитанции';
+
+  @override
+  String get receiptPaymentDetails => 'Данные платежа';
+
+  @override
+  String get receiptPurpose => 'Назначение';
+
+  @override
+  String get receiptReference => 'Номер операции';
+
+  @override
+  String get receiptRrn => 'RRN';
+
+  @override
+  String get receiptSaveFailed => 'Не удалось сохранить квитанцию';
+
+  @override
+  String receiptSaved(String location) {
+    return 'Квитанция сохранена в «$location»';
+  }
+
+  @override
+  String get receiptStatus => 'Статус';
+
+  @override
+  String get receiptStudent => 'Ученик';
+
+  @override
+  String get receiptSuccess => 'Платёж прошёл успешно';
+
+  @override
+  String get receiptSystem => 'Платёжная система';
+
+  @override
+  String get receiptTitle => 'Квитанция об оплате';
 
   @override
   String get recentTransactions => 'Последние операции';
@@ -1406,6 +1533,9 @@ class AppL10nRu extends AppL10n {
   String get topUpCardSection => 'Платёжная карта';
 
   @override
+  String get topUpLabel => 'Пополнение баланса';
+
+  @override
   String get tuitionAmountInvalid => 'Введите корректную сумму';
 
   @override
@@ -1513,6 +1643,46 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Общий остаток';
+
+  @override
+  String get underConstructionBadge => 'Скоро';
+
+  @override
+  String get underConstructionComingTitle => 'Скоро в этом разделе';
+
+  @override
+  String get underConstructionFeatureHistory => 'Чеки и история';
+
+  @override
+  String get underConstructionFeatureHistoryHint =>
+      'Все платежи в одном списке';
+
+  @override
+  String get underConstructionFeaturePay => 'Оплата картой';
+
+  @override
+  String get underConstructionFeaturePayHint =>
+      'Обучение и дополнительные услуги';
+
+  @override
+  String get underConstructionFeatureSchedule => 'График платежей';
+
+  @override
+  String get underConstructionFeatureScheduleHint => 'Рассрочка и сроки оплаты';
+
+  @override
+  String get underConstructionNote =>
+      'Раздел откроется в приложении сам, как только будет готов — от вас ничего не требуется.';
+
+  @override
+  String get underConstructionProgress => 'В работе';
+
+  @override
+  String get underConstructionSubtitle =>
+      'Мы работаем над разделом оплаты. Скоро вы сможете оплачивать обучение и дополнительные услуги прямо в приложении.';
+
+  @override
+  String get underConstructionTitle => 'В процессе разработки';
 
   @override
   String updateAvailableText(String version) {

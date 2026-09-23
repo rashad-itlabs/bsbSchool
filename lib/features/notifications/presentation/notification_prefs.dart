@@ -10,7 +10,8 @@ import '../../../core/l10n/l10n.dart';
 enum NotificationKind {
   attendance('notify_attendance', '🏫'),
   cafeteria('notify_cafeteria', '☕'),
-  exam('notify_exam', '📚');
+  exam('notify_exam', '📚'),
+  homework('notify_homework', '📝');
 
   const NotificationKind(this.prefsKey, this.emoji);
 
@@ -21,12 +22,14 @@ enum NotificationKind {
     NotificationKind.attendance => L.s.notifPrefAttendance,
     NotificationKind.cafeteria => L.s.notifPrefBuffet,
     NotificationKind.exam => L.s.notifPrefExams,
+    NotificationKind.homework => L.s.notifPrefHomework,
   };
 
   String get subtitle => switch (this) {
     NotificationKind.attendance => L.s.notifPrefAttendanceText,
     NotificationKind.cafeteria => L.s.notifPrefBuffetText,
     NotificationKind.exam => L.s.notifPrefExamsText,
+    NotificationKind.homework => L.s.notifPrefHomeworkText,
   };
 }
 

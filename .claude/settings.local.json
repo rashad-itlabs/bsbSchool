@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(flutter analyze *)"
+      "Bash(flutter analyze *)",
+      "Bash(git check-ignore *)",
+      "Bash(flutter gen-l10n *)",
+      "Bash(ls ~/development/flutter/bin/cache/artifacts/material_fonts/ 2>/dev/null | head; ls /System/Library/Fonts/Supplemental/Arial*.ttf 2>/dev/null | head -3)",
+      "Read(//Users/rashadaliyev/development/flutter/bin/cache/artifacts/material_fonts/**)",
+      "Read(//System/Library/Fonts/Supplemental/**)",
+      "Bash(awk 'NR>=100 && NR<=135 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/dr/screens/pass_screen.dart)",
+      "Bash(awk 'NR>=280 && NR<=320 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/dr/screens/pass_screen.dart)",
+      "Bash(awk 'NR>=15 && NR<=70 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/dr/screens/teacher/settings_screen.dart)",
+      "Bash(awk 'NR>=240 && NR<=380 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/features/auth/data/repositories/auth_repository_impl.dart)",
+      "Bash(awk 'NR>=380 && NR<=440 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/features/auth/data/repositories/auth_repository_impl.dart)",
+      "Bash(awk 'NR>=148 && NR<=190 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/features/auth/data/services/auth_service.dart)",
+      "Bash(awk 'NR>=1 && NR<=140 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/features/auth/presentation/bloc/auth_bloc.dart)",
+      "Bash(awk 'NR>=44 && NR<=90 {printf \"%d\\\\t%s\\\\n\", NR, $0}' docs/backend-endpoints.md)",
+      "Bash(awk 'NR>=1 && NR<=30 {printf \"%d\\\\t%s\\\\n\", NR, $0}' test/auth_user_model_test.dart)",
+      "Bash(awk '\\(NR>=150 && NR<=170\\) || \\(NR>=280 && NR<=300\\) {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/core/di/injection_container.dart)",
+      "Bash(awk 'NR>=30 && NR<=110 {printf \"%d\\\\t%s\\\\n\", NR, $0}' test/auth_user_model_test.dart)",
+      "Bash(awk 'NR>=1225 && NR<=1275 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/dr/screens/pass_screen.dart)",
+      "Bash(awk 'NR>=205 && NR<=235 {printf \"%d\\\\t%s\\\\n\", NR, $0}' lib/core/push/onesignal_push_service.dart)"
     ]
   }
 }

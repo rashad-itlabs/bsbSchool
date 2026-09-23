@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../features/homework/domain/entities/homework.dart';
+import '../../features/homework/domain/entities/homework_submission.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import '../../core/l10n/l10n.dart';
@@ -60,6 +61,10 @@ class HomeworkDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
+          if (homework.submission != null) ...[
+            _SubmissionSection(submission: homework.submission!),
+            const SizedBox(height: 24),
+          ],
           if (desc.isNotEmpty) ...[
             DrSectionHeader(title: context.l10n.hwDetailDescription),
             DrCard(
@@ -102,6 +107,93 @@ class HomeworkDetailScreen extends StatelessWidget {
           const SizedBox(height: 20),
         ],
       ),
+    );
+  }
+}
+
+/// The hand-in, shown only once the server has one: a "submitted" status plus
+/// whatever of the date, notes, grade, comment and file it filled in.
+class _SubmissionSection extends StatelessWidget {
+  final HomeworkSubmission submission;
+  const _SubmissionSection({required this.submission});
+
+  @override
+  Widget build(BuildContext context) {
+    final markedAt = submission.markedAt;
+    final rows = <(String, String?)>[
+      if (markedAt != null)
+        (context.l10n.hwMarkedAt,
+            DateFormat('dd MMM yyyy, HH:mm').format(markedAt)),
+      (context.l10n.hwGrade, submission.grade),
+      (context.l10n.hwNotes, submission.notes),
+      (context.l10n.hwTeacherComment, submission.teacherComment),
+    ].where((r) => r.$2 != null && r.$2!.isNotEmpty).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DrSectionHeader(title: context.l10n.hwSubmission),
+        DrCard(
+          radius: 20,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 120,
+                    child: Text(context.l10n.hwStatus,
+                        style: TextStyle(
+                            fontSize: 13, color: context.dr.textMuted)),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.dr.accentSoft,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_rounded,
+                            size: 14, color: context.dr.accent),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.hwSubmitted,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: context.dr.accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (rows.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Divider(color: context.dr.border, height: 1),
+                const SizedBox(height: 10),
+              ],
+              for (var i = 0; i < rows.length; i++)
+                _InfoRow(
+                  label: rows[i].$1,
+                  value: rows[i].$2,
+                  last: i == rows.length - 1,
+                ),
+            ],
+          ),
+        ),
+        if (submission.documentUrl != null) ...[
+          const SizedBox(height: 12),
+          _DownloadButton(
+            url: submission.documentUrl!,
+            label: submission.originalName ?? context.l10n.hwSubmissionFile,
+          ),
+        ],
+      ],
     );
   }
 }
@@ -149,7 +241,10 @@ class _InfoRow extends StatelessWidget {
 
 class _DownloadButton extends StatelessWidget {
   final String url;
-  const _DownloadButton({required this.url});
+
+  /// Defaults to the generic "download file" wording.
+  final String? label;
+  const _DownloadButton({required this.url, this.label});
 
   Future<void> _open(BuildContext context) async {
     final uri = Uri.tryParse(url);
@@ -169,7 +264,7 @@ class _DownloadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DrPrimaryButton(
-      label: context.l10n.fileDownload,
+      label: label ?? context.l10n.fileDownload,
       trailingIcon: Icons.download_rounded,
       onTap: () => _open(context),
     );

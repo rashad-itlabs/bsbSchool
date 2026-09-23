@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s --max-time 25 https://pub.dev/api/packages/pdf)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('pdf latest:', d['latest']['version']\\)\")",
+      "Bash(curl -s --max-time 25 https://pub.dev/api/packages/printing)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('printing latest:', d['latest']['version']\\)\")",
+      "Bash(ls -la /Users/rashadaliyev/development/flutter/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf /Users/rashadaliyev/development/flutter/bin/cache/artifacts/material_fonts/Roboto-Bold.ttf; grep -rn \"savedTo\\\\|downloadsFiles\\\\|BookExportException\\\\|publicFileName\" lib --include=\"*.dart\" | head -20)",
+      "Read(//Users/rashadaliyev/development/flutter/bin/cache/artifacts/material_fonts/**)",
+      "Bash(ls -la /Users/rashadaliyev/development/flutter/bin/cache/artifacts/material_fonts/ ; cd /Users/rashadaliyev/StudioProjects/bsbschool && sed -n '340,440p' lib/dr/widgets/dr_widgets.dart)",
+      "Bash(cp __TRACKED_VAR__/Roboto-Regular.ttf __TRACKED_VAR__/Roboto-Bold.ttf assets/fonts/)",
+      "Bash(cp __TRACKED_VAR__/Roboto_LICENSE.txt assets/fonts/LICENSE-Roboto.txt)",
+      "Bash(cd ~/.pub-cache/hosted/pub.dev && ls -d pdf-* && grep -n \"class Divider\" -A 25 pdf-*/lib/src/widgets/basic.dart | head -45)",
+      "Read(//Users/rashadaliyev/.pub-cache/hosted/pub.dev/**)",
+      "Bash(cd ~/.pub-cache/hosted/pub.dev && grep -rn \"const TextStyle\\(\" pdf-*/lib/src/widgets/text_style.dart | head -5; grep -n \"class Spacer\" -A 12 pdf-*/lib/src/widgets/flex.dart | head -20; grep -n \"MainAxisSize mainAxisSize = \" pdf-*/lib/src/widgets/flex.dart | head)",
+      "Bash(flutter gen-l10n *)"
+    ]
+  }
+}

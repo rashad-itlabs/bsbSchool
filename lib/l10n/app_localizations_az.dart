@@ -78,6 +78,9 @@ class AppL10nAz extends AppL10n {
   String get attendanceLateTag => 'Gecikib';
 
   @override
+  String get attendanceMixed => 'Qarışıq';
+
+  @override
   String get attendanceLesson => 'Dərs';
 
   @override
@@ -117,6 +120,9 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get balanceTopUp => 'Balansı artır';
+
+  @override
+  String get balanceTopUps => 'Balans artımları';
 
   @override
   String bookDeleteText(String location) {
@@ -553,6 +559,12 @@ class AppL10nAz extends AppL10n {
   String get foodCardTitle => 'Bufet Kartım';
 
   @override
+  String get filterFrom => 'Başlanğıc';
+
+  @override
+  String get filterTo => 'Son';
+
+  @override
   String get forgotBackToCode => 'Kodu yenidən daxil et';
 
   @override
@@ -689,6 +701,30 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get hwTeacher => 'Müəllim';
+
+  @override
+  String get hwSubmitted => 'Təhvil verilib';
+
+  @override
+  String get hwSubmission => 'Təhvil';
+
+  @override
+  String get hwStatus => 'Status';
+
+  @override
+  String get hwMarkedAt => 'Qeyd edilib';
+
+  @override
+  String get hwGrade => 'Qiymət';
+
+  @override
+  String get hwNotes => 'Qeyd';
+
+  @override
+  String get hwTeacherComment => 'Müəllimin rəyi';
+
+  @override
+  String get hwSubmissionFile => 'Təhvil faylını yüklə';
 
   @override
   String get languageAz => 'Azərbaycan dili';
@@ -830,7 +866,13 @@ class AppL10nAz extends AppL10n {
   String get newsTitle => 'Xəbər';
 
   @override
+  String get noTopUps => 'Hələ balans artımı yoxdur';
+
+  @override
   String get noTransactions => 'Hələ əməliyyat yoxdur';
+
+  @override
+  String get noTransactionsInRange => 'Bu tarixlərdə əməliyyat yoxdur';
 
   @override
   String get notifPrefAttendance => 'Davamiyyət';
@@ -852,6 +894,13 @@ class AppL10nAz extends AppL10n {
   @override
   String get notifPrefExamsText =>
       'Uşağın imtahan nəticələri və imtahana girilməsi barədə bildirişlər.';
+
+  @override
+  String get notifPrefHomework => 'Ev tapşırıqları';
+
+  @override
+  String get notifPrefHomeworkText =>
+      'Uşağa verilən yeni ev tapşırıqları və onların son tarixi barədə bildirişlər.';
 
   @override
   String get notificationFallback => 'Bildiriş';
@@ -937,6 +986,9 @@ class AppL10nAz extends AppL10n {
   String get paymentCouldNotStart => 'Ödəniş başladıla bilmədi';
 
   @override
+  String get paymentUnavailable => 'Hal-hazırda ödəniş etmək mümkün deyil';
+
+  @override
   String get paymentCurrentBalance => 'Cari balans';
 
   @override
@@ -1003,6 +1055,81 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get purchaseLabel => 'Alış';
+
+  @override
+  String get receiptAmount => 'Məbləğ';
+
+  @override
+  String get receiptApproval => 'Təsdiq kodu';
+
+  @override
+  String get receiptCard => 'Kart';
+
+  @override
+  String get receiptClass => 'Sinif';
+
+  @override
+  String get receiptDate => 'Tarix';
+
+  @override
+  String get receiptDownload => 'Qəbzi PDF yüklə';
+
+  @override
+  String get receiptFailed => 'Ödəniş alınmadı';
+
+  @override
+  String get receiptFee => 'Komissiya';
+
+  @override
+  String get receiptFileBase => 'BSB-qebz';
+
+  @override
+  String get receiptFooter =>
+      'Bu qəbz BSB School tətbiqində avtomatik yaradılıb və imza tələb etmir.';
+
+  @override
+  String get receiptIssuer => 'Bank';
+
+  @override
+  String get receiptMethod => 'Ödəniş üsulu';
+
+  @override
+  String get receiptNoDetails => 'Bu ödəniş üçün qəbz məlumatı yoxdur';
+
+  @override
+  String get receiptPaymentDetails => 'Ödəniş məlumatları';
+
+  @override
+  String get receiptPurpose => 'Təyinat';
+
+  @override
+  String get receiptReference => 'Əməliyyat nömrəsi';
+
+  @override
+  String get receiptRrn => 'RRN';
+
+  @override
+  String get receiptSaveFailed => 'Qəbz yüklənmədi';
+
+  @override
+  String receiptSaved(String location) {
+    return 'Qəbz \"$location\" bölməsinə yükləndi';
+  }
+
+  @override
+  String get receiptStatus => 'Status';
+
+  @override
+  String get receiptStudent => 'Şagird';
+
+  @override
+  String get receiptSuccess => 'Ödəniş uğurludur';
+
+  @override
+  String get receiptSystem => 'Ödəniş sistemi';
+
+  @override
+  String get receiptTitle => 'Ödəniş qəbzi';
 
   @override
   String get recentTransactions => 'Son əməliyyatlar';
@@ -1403,6 +1530,9 @@ class AppL10nAz extends AppL10n {
   String get topUpCardSection => 'Ödəniş kartı';
 
   @override
+  String get topUpLabel => 'Balans artımı';
+
+  @override
   String get tuitionAmountInvalid => 'Məbləği düzgün daxil edin';
 
   @override
@@ -1510,6 +1640,47 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get tuitionTotalDue => 'Ümumi qalıq';
+
+  @override
+  String get underConstructionBadge => 'Tezliklə';
+
+  @override
+  String get underConstructionComingTitle => 'Tezliklə burada olacaq';
+
+  @override
+  String get underConstructionFeatureHistory => 'Qəbz və tarixçə';
+
+  @override
+  String get underConstructionFeatureHistoryHint =>
+      'Bütün ödənişlər bir siyahıda';
+
+  @override
+  String get underConstructionFeaturePay => 'Kart ilə ödəniş';
+
+  @override
+  String get underConstructionFeaturePayHint =>
+      'Təhsil haqqı və əlavə xidmətlər';
+
+  @override
+  String get underConstructionFeatureSchedule => 'Ödəniş cədvəli';
+
+  @override
+  String get underConstructionFeatureScheduleHint =>
+      'Taksitlər və son ödəniş tarixləri';
+
+  @override
+  String get underConstructionNote =>
+      'Bölmə hazır olan kimi tətbiqdə avtomatik açılacaq — sizin heç nə etməyinizə ehtiyac yoxdur.';
+
+  @override
+  String get underConstructionProgress => 'Hazırlanır';
+
+  @override
+  String get underConstructionSubtitle =>
+      'Ödəniş bölməsi üzərində işləyirik. Tezliklə təhsil haqqını və əlavə xidmətləri birbaşa tətbiqdən ödəyə biləcəksiniz.';
+
+  @override
+  String get underConstructionTitle => 'Hazırlanma mərhələsindədir';
 
   @override
   String updateAvailableText(String version) {

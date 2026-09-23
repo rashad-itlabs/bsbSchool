@@ -225,6 +225,12 @@ abstract class AppL10n {
   /// **'Gecikib'**
   String get attendanceLateTag;
 
+  /// No description provided for @attendanceMixed.
+  ///
+  /// In az, this message translates to:
+  /// **'Qarışıq'**
+  String get attendanceMixed;
+
   /// No description provided for @attendanceLesson.
   ///
   /// In az, this message translates to:
@@ -302,6 +308,12 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Balansı artır'**
   String get balanceTopUp;
+
+  /// No description provided for @balanceTopUps.
+  ///
+  /// In az, this message translates to:
+  /// **'Balans artımları'**
+  String get balanceTopUps;
 
   /// No description provided for @bookDeleteText.
   ///
@@ -1089,6 +1101,18 @@ abstract class AppL10n {
   /// **'Bufet Kartım'**
   String get foodCardTitle;
 
+  /// No description provided for @filterFrom.
+  ///
+  /// In az, this message translates to:
+  /// **'Başlanğıc'**
+  String get filterFrom;
+
+  /// No description provided for @filterTo.
+  ///
+  /// In az, this message translates to:
+  /// **'Son'**
+  String get filterTo;
+
   /// No description provided for @forgotBackToCode.
   ///
   /// In az, this message translates to:
@@ -1346,6 +1370,54 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Müəllim'**
   String get hwTeacher;
+
+  /// No description provided for @hwSubmitted.
+  ///
+  /// In az, this message translates to:
+  /// **'Təhvil verilib'**
+  String get hwSubmitted;
+
+  /// No description provided for @hwSubmission.
+  ///
+  /// In az, this message translates to:
+  /// **'Təhvil'**
+  String get hwSubmission;
+
+  /// No description provided for @hwStatus.
+  ///
+  /// In az, this message translates to:
+  /// **'Status'**
+  String get hwStatus;
+
+  /// No description provided for @hwMarkedAt.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeyd edilib'**
+  String get hwMarkedAt;
+
+  /// No description provided for @hwGrade.
+  ///
+  /// In az, this message translates to:
+  /// **'Qiymət'**
+  String get hwGrade;
+
+  /// No description provided for @hwNotes.
+  ///
+  /// In az, this message translates to:
+  /// **'Qeyd'**
+  String get hwNotes;
+
+  /// No description provided for @hwTeacherComment.
+  ///
+  /// In az, this message translates to:
+  /// **'Müəllimin rəyi'**
+  String get hwTeacherComment;
+
+  /// No description provided for @hwSubmissionFile.
+  ///
+  /// In az, this message translates to:
+  /// **'Təhvil faylını yüklə'**
+  String get hwSubmissionFile;
 
   /// No description provided for @languageAz.
   ///
@@ -1611,11 +1683,23 @@ abstract class AppL10n {
   /// **'Xəbər'**
   String get newsTitle;
 
+  /// No description provided for @noTopUps.
+  ///
+  /// In az, this message translates to:
+  /// **'Hələ balans artımı yoxdur'**
+  String get noTopUps;
+
   /// No description provided for @noTransactions.
   ///
   /// In az, this message translates to:
   /// **'Hələ əməliyyat yoxdur'**
   String get noTransactions;
+
+  /// No description provided for @noTransactionsInRange.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu tarixlərdə əməliyyat yoxdur'**
+  String get noTransactionsInRange;
 
   /// No description provided for @notifPrefAttendance.
   ///
@@ -1652,6 +1736,18 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Uşağın imtahan nəticələri və imtahana girilməsi barədə bildirişlər.'**
   String get notifPrefExamsText;
+
+  /// No description provided for @notifPrefHomework.
+  ///
+  /// In az, this message translates to:
+  /// **'Ev tapşırıqları'**
+  String get notifPrefHomework;
+
+  /// No description provided for @notifPrefHomeworkText.
+  ///
+  /// In az, this message translates to:
+  /// **'Uşağa verilən yeni ev tapşırıqları və onların son tarixi barədə bildirişlər.'**
+  String get notifPrefHomeworkText;
 
   /// No description provided for @notificationFallback.
   ///
@@ -1797,6 +1893,12 @@ abstract class AppL10n {
   /// **'Ödəniş başladıla bilmədi'**
   String get paymentCouldNotStart;
 
+  /// No description provided for @paymentUnavailable.
+  ///
+  /// In az, this message translates to:
+  /// **'Hal-hazırda ödəniş etmək mümkün deyil'**
+  String get paymentUnavailable;
+
   /// No description provided for @paymentCurrentBalance.
   ///
   /// In az, this message translates to:
@@ -1922,6 +2024,150 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Alış'**
   String get purchaseLabel;
+
+  /// No description provided for @receiptAmount.
+  ///
+  /// In az, this message translates to:
+  /// **'Məbləğ'**
+  String get receiptAmount;
+
+  /// No description provided for @receiptApproval.
+  ///
+  /// In az, this message translates to:
+  /// **'Təsdiq kodu'**
+  String get receiptApproval;
+
+  /// No description provided for @receiptCard.
+  ///
+  /// In az, this message translates to:
+  /// **'Kart'**
+  String get receiptCard;
+
+  /// No description provided for @receiptClass.
+  ///
+  /// In az, this message translates to:
+  /// **'Sinif'**
+  String get receiptClass;
+
+  /// No description provided for @receiptDate.
+  ///
+  /// In az, this message translates to:
+  /// **'Tarix'**
+  String get receiptDate;
+
+  /// No description provided for @receiptDownload.
+  ///
+  /// In az, this message translates to:
+  /// **'Qəbzi PDF yüklə'**
+  String get receiptDownload;
+
+  /// No description provided for @receiptFailed.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş alınmadı'**
+  String get receiptFailed;
+
+  /// No description provided for @receiptFee.
+  ///
+  /// In az, this message translates to:
+  /// **'Komissiya'**
+  String get receiptFee;
+
+  /// No description provided for @receiptFileBase.
+  ///
+  /// In az, this message translates to:
+  /// **'BSB-qebz'**
+  String get receiptFileBase;
+
+  /// No description provided for @receiptFooter.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu qəbz BSB School tətbiqində avtomatik yaradılıb və imza tələb etmir.'**
+  String get receiptFooter;
+
+  /// No description provided for @receiptIssuer.
+  ///
+  /// In az, this message translates to:
+  /// **'Bank'**
+  String get receiptIssuer;
+
+  /// No description provided for @receiptMethod.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş üsulu'**
+  String get receiptMethod;
+
+  /// No description provided for @receiptNoDetails.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu ödəniş üçün qəbz məlumatı yoxdur'**
+  String get receiptNoDetails;
+
+  /// No description provided for @receiptPaymentDetails.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş məlumatları'**
+  String get receiptPaymentDetails;
+
+  /// No description provided for @receiptPurpose.
+  ///
+  /// In az, this message translates to:
+  /// **'Təyinat'**
+  String get receiptPurpose;
+
+  /// No description provided for @receiptReference.
+  ///
+  /// In az, this message translates to:
+  /// **'Əməliyyat nömrəsi'**
+  String get receiptReference;
+
+  /// No description provided for @receiptRrn.
+  ///
+  /// In az, this message translates to:
+  /// **'RRN'**
+  String get receiptRrn;
+
+  /// No description provided for @receiptSaveFailed.
+  ///
+  /// In az, this message translates to:
+  /// **'Qəbz yüklənmədi'**
+  String get receiptSaveFailed;
+
+  /// No description provided for @receiptSaved.
+  ///
+  /// In az, this message translates to:
+  /// **'Qəbz \"{location}\" bölməsinə yükləndi'**
+  String receiptSaved(String location);
+
+  /// No description provided for @receiptStatus.
+  ///
+  /// In az, this message translates to:
+  /// **'Status'**
+  String get receiptStatus;
+
+  /// No description provided for @receiptStudent.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagird'**
+  String get receiptStudent;
+
+  /// No description provided for @receiptSuccess.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş uğurludur'**
+  String get receiptSuccess;
+
+  /// No description provided for @receiptSystem.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş sistemi'**
+  String get receiptSystem;
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş qəbzi'**
+  String get receiptTitle;
 
   /// No description provided for @recentTransactions.
   ///
@@ -2685,6 +2931,12 @@ abstract class AppL10n {
   /// **'Ödəniş kartı'**
   String get topUpCardSection;
 
+  /// No description provided for @topUpLabel.
+  ///
+  /// In az, this message translates to:
+  /// **'Balans artımı'**
+  String get topUpLabel;
+
   /// No description provided for @tuitionAmountInvalid.
   ///
   /// In az, this message translates to:
@@ -2888,6 +3140,78 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Ümumi qalıq'**
   String get tuitionTotalDue;
+
+  /// No description provided for @underConstructionBadge.
+  ///
+  /// In az, this message translates to:
+  /// **'Tezliklə'**
+  String get underConstructionBadge;
+
+  /// No description provided for @underConstructionComingTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Tezliklə burada olacaq'**
+  String get underConstructionComingTitle;
+
+  /// No description provided for @underConstructionFeatureHistory.
+  ///
+  /// In az, this message translates to:
+  /// **'Qəbz və tarixçə'**
+  String get underConstructionFeatureHistory;
+
+  /// No description provided for @underConstructionFeatureHistoryHint.
+  ///
+  /// In az, this message translates to:
+  /// **'Bütün ödənişlər bir siyahıda'**
+  String get underConstructionFeatureHistoryHint;
+
+  /// No description provided for @underConstructionFeaturePay.
+  ///
+  /// In az, this message translates to:
+  /// **'Kart ilə ödəniş'**
+  String get underConstructionFeaturePay;
+
+  /// No description provided for @underConstructionFeaturePayHint.
+  ///
+  /// In az, this message translates to:
+  /// **'Təhsil haqqı və əlavə xidmətlər'**
+  String get underConstructionFeaturePayHint;
+
+  /// No description provided for @underConstructionFeatureSchedule.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş cədvəli'**
+  String get underConstructionFeatureSchedule;
+
+  /// No description provided for @underConstructionFeatureScheduleHint.
+  ///
+  /// In az, this message translates to:
+  /// **'Taksitlər və son ödəniş tarixləri'**
+  String get underConstructionFeatureScheduleHint;
+
+  /// No description provided for @underConstructionNote.
+  ///
+  /// In az, this message translates to:
+  /// **'Bölmə hazır olan kimi tətbiqdə avtomatik açılacaq — sizin heç nə etməyinizə ehtiyac yoxdur.'**
+  String get underConstructionNote;
+
+  /// No description provided for @underConstructionProgress.
+  ///
+  /// In az, this message translates to:
+  /// **'Hazırlanır'**
+  String get underConstructionProgress;
+
+  /// No description provided for @underConstructionSubtitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Ödəniş bölməsi üzərində işləyirik. Tezliklə təhsil haqqını və əlavə xidmətləri birbaşa tətbiqdən ödəyə biləcəksiniz.'**
+  String get underConstructionSubtitle;
+
+  /// No description provided for @underConstructionTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Hazırlanma mərhələsindədir'**
+  String get underConstructionTitle;
 
   /// No description provided for @updateAvailableText.
   ///

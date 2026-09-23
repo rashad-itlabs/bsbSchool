@@ -269,6 +269,7 @@ class OneSignalPushService implements PushService {
       'attendance' => NotificationKind.attendance,
       'cafeteria' || 'buffet' || 'food_card' => NotificationKind.cafeteria,
       'exam' || 'examination' => NotificationKind.exam,
+      'homework' || 'home_work' || 'assignment' => NotificationKind.homework,
       _ => null,
     };
   }

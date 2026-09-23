@@ -1,9 +1,12 @@
+import 'package:bsbschool/dr/screens/under_constructor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/l10n/l10n.dart';
+import '../../features/auth/domain/entities/child_account.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/extra_fees/domain/entities/extra_fee.dart';
 import '../../features/extra_fees/presentation/bloc/extra_fees_bloc.dart';
 import '../../features/payment/domain/entities/payment_result.dart';
@@ -26,6 +29,17 @@ class TuitionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The section is still being built, so only the accounts in
+    // [_paymentsPreview] reach it. Decided before the blocs are made: a parent
+    // who gets the placeholder has no reason to call `/tuition` or
+    // `/extra_fees`.
+    final email = context.select<AuthBloc, String>(
+      (bloc) => bloc.state.user?.email ?? '',
+    );
+    if (!_paymentsPreview.contains(email.trim().toLowerCase())) {
+      return const _PaymentsPlaceholder();
+    }
+
     // Both load up front: the tab badge has to say how many extra fees are
     // waiting before the parent ever opens that tab.
     return MultiBlocProvider(
@@ -39,6 +53,32 @@ class TuitionScreen extends StatelessWidget {
         BlocProvider(create: (_) => sl<PaymentCubit>()),
       ],
       child: const _TuitionView(),
+    );
+  }
+}
+
+/// The accounts that reach the payment section while it is under construction.
+///
+/// Held lower-case — the address is folded before the lookup, so a login typed
+/// with capitals still matches. The switch fails closed: a session whose email
+/// the API never sent reads as `''` and stays on the placeholder.
+const _paymentsPreview = {'mr.ealiyev@gmail.com'};
+
+/// What the tab shows until the section opens: the usual header over the
+/// under-construction card, and no blocs behind it.
+class _PaymentsPlaceholder extends StatelessWidget {
+  const _PaymentsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return DrScaffold(
+      child: ListView(
+        children: [
+          DrBackHeader(title: context.l10n.tuitionTitle, showBack: false),
+          const UnderConstructor(),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 }
@@ -191,6 +231,8 @@ class _TuitionViewState extends State<_TuitionView> {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 DrBackHeader(title: context.l10n.tuitionTitle, showBack: false),
+                // Only reached by an account on the preview list — everyone
+                // else is turned back in `TuitionScreen.build`.
                 _Body(
                   state: state,
                   tab: _tab,
