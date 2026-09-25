@@ -8,6 +8,9 @@ class WeeklyFeedbackState extends Equatable {
   /// False when the server has no school-year weeks to offer yet.
   final bool ready;
 
+  /// The student the feedback is about, for the card headings.
+  final String? studentName;
+
   final int? currentWeek;
 
   /// The highlighted week. Set the moment a week is tapped, so the grid
@@ -25,6 +28,7 @@ class WeeklyFeedbackState extends Equatable {
   const WeeklyFeedbackState({
     this.status = WeeklyFeedbackStatus.initial,
     this.ready = true,
+    this.studentName,
     this.currentWeek,
     this.selectedWeek,
     this.weeks = const [],
@@ -34,13 +38,14 @@ class WeeklyFeedbackState extends Equatable {
 
   bool get isLoading => status == WeeklyFeedbackStatus.loading;
 
-  /// Whether [week] can be picked: it exists and has started.
+  /// Whether [week] can be picked — see [FeedbackWeek.isSelectable].
   bool canSelect(int week) =>
-      weeks.any((w) => w.week == week && !w.isFuture);
+      weeks.any((w) => w.week == week && w.isSelectable);
 
   WeeklyFeedbackState copyWith({
     WeeklyFeedbackStatus? status,
     bool? ready,
+    String? studentName,
     int? currentWeek,
     int? selectedWeek,
     List<FeedbackWeek>? weeks,
@@ -50,6 +55,7 @@ class WeeklyFeedbackState extends Equatable {
     return WeeklyFeedbackState(
       status: status ?? this.status,
       ready: ready ?? this.ready,
+      studentName: studentName ?? this.studentName,
       currentWeek: currentWeek ?? this.currentWeek,
       selectedWeek: selectedWeek ?? this.selectedWeek,
       weeks: weeks ?? this.weeks,
@@ -63,6 +69,7 @@ class WeeklyFeedbackState extends Equatable {
   List<Object?> get props => [
         status,
         ready,
+        studentName,
         currentWeek,
         selectedWeek,
         weeks,

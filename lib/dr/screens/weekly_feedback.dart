@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -106,7 +107,7 @@ class _WeeklyFeedbackView extends StatelessWidget {
         _Message(text: context.l10n.weeklyFeedbackNoneForWeek)
       else
         for (final item in state.feedback) ...[
-          _FeedbackCard(feedback: item),
+          _FeedbackCard(feedback: item, studentName: state.studentName),
           const SizedBox(height: 15),
         ],
     ];
@@ -191,49 +192,73 @@ class _WeekGrid extends StatelessWidget {
 
   Widget _cell(BuildContext context, FeedbackWeek week) {
     final isSelected = week.week == selectedWeek;
+    final green = week.hasFeedback;
 
     final Color? border = isSelected
         ? context.dr.textMain
         : week.isCurrent
             ? context.dr.accent
-            : week.hasFeedback
+            : green
                 ? null
                 : context.dr.border;
 
-    final cell = AspectRatio(
-      aspectRatio: 1.25,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          // Filled lime keeps black text legible on both themes.
-          color: week.hasFeedback ? DrColors.accentGreen : null,
-          borderRadius: BorderRadius.circular(12),
-          border: border == null
-              ? null
-              : Border.all(color: border, width: isSelected ? 2 : 1.5),
-        ),
-        child: Text(
-          '${week.week}',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: week.hasFeedback || week.isCurrent || isSelected
-                ? FontWeight.w700
-                : FontWeight.w500,
-            color: week.hasFeedback
-                ? Colors.black
-                : week.isFuture
-                    ? context.dr.textMuted.withValues(alpha: 0.5)
-                    : context.dr.textMain,
+    // The selected week is lifted out of the grid: slightly larger, a thick
+    // ring and a glow, so it reads as picked at a glance — green or not.
+    final cell = AnimatedScale(
+      scale: isSelected ? 1.1 : 1,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutBack,
+      child: AspectRatio(
+        aspectRatio: 1.25,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            // Filled lime keeps black text legible on both themes.
+            color: green
+                ? DrColors.accentGreen
+                : isSelected
+                    ? context.dr.accentSoft
+                    : null,
+            borderRadius: BorderRadius.circular(12),
+            border: border == null
+                ? null
+                : Border.all(color: border, width: isSelected ? 2.5 : 1.5),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: DrColors.accentGreen
+                          .withValues(alpha: green ? 0.55 : 0.3),
+                      blurRadius: 14,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            '${week.week}',
+            style: TextStyle(
+              fontSize: isSelected ? 16 : 15,
+              fontWeight: green || week.isCurrent || isSelected
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: green
+                  ? Colors.black
+                  : !week.isSelectable
+                      ? context.dr.textMuted.withValues(alpha: 0.5)
+                      : context.dr.textMain,
+            ),
           ),
         ),
       ),
     );
 
-    // Nothing can have been written about a week that hasn't started.
-    if (week.isFuture) return cell;
+    if (!week.isSelectable) return cell;
     return GestureDetector(
-      onTap: () => onSelected(week.week),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onSelected(week.week);
+      },
       behavior: HitTestBehavior.opaque,
       child: cell,
     );
@@ -252,12 +277,21 @@ class _WeekGrid extends StatelessWidget {
 
 class _FeedbackCard extends StatelessWidget {
   final WeeklyFeedback feedback;
-  const _FeedbackCard({required this.feedback});
+
+  /// Names the student in the heading of feedback about them.
+  final String? studentName;
+
+  const _FeedbackCard({required this.feedback, this.studentName});
 
   @override
   Widget build(BuildContext context) {
     final date = feedback.date;
-    final title = feedback.kindLabel ?? feedback.teacher;
+    // Feedback about the student is headed with their name ("About Said
+    // Aliyev") in place of the server's generic "About your child"; other
+    // kinds keep the server's own label.
+    final title = feedback.kind == 'student' && studentName != null
+        ? context.l10n.weeklyFeedbackAboutStudent(studentName!)
+        : feedback.kindLabel ?? feedback.teacher;
 
     return DrCard(
       radius: 20,

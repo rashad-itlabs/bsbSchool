@@ -1749,6 +1749,11 @@ class AppL10nRu extends AppL10n {
   String get weeklyFeedbackHas => 'Есть отзыв';
 
   @override
+  String weeklyFeedbackAboutStudent(String name) {
+    return 'Об ученике: $name';
+  }
+
+  @override
   String get weeklyFeedbackCurrent => 'Текущая неделя';
 
   @override

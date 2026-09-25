@@ -555,6 +555,7 @@
   "weeklyFeedbackNoneForWeek": "За эту неделю отзывов нет",
   "weeklyFeedbackUnavailable": "Отзывы за неделю пока недоступны",
   "weeklyFeedbackHas": "Есть отзыв",
+  "weeklyFeedbackAboutStudent": "Об ученике: {name}",
   "weeklyFeedbackCurrent": "Текущая неделя",
   "weeklyFeedbackFiles": "Файлы",
   "weeklyLessonCount": "{count} уроков",

@@ -3327,6 +3327,12 @@ abstract class AppL10n {
   /// **'Rəy var'**
   String get weeklyFeedbackHas;
 
+  /// No description provided for @weeklyFeedbackAboutStudent.
+  ///
+  /// In az, this message translates to:
+  /// **'{name} haqqında'**
+  String weeklyFeedbackAboutStudent(String name);
+
   /// No description provided for @weeklyFeedbackCurrent.
   ///
   /// In az, this message translates to:

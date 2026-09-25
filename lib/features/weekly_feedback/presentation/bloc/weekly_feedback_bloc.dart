@@ -20,12 +20,47 @@ class WeeklyFeedbackBloc
     on<WeeklyFeedbackWeekSelected>(_onWeekSelected);
   }
 
+  /// Opens on the latest week that has feedback. The server answers a request
+  /// without a week with the current one, so when a newer-written week exists
+  /// its feedback is fetched right after, with that week already highlighted.
   Future<void> _onFetched(
     WeeklyFeedbackFetched event,
     Emitter<WeeklyFeedbackState> emit,
   ) async {
     emit(state.copyWith(status: WeeklyFeedbackStatus.loading));
-    await _load(null, emit);
+
+    final result = await getWeeklyFeedback(const WeeklyFeedbackParams());
+    final content = result.fold((failure) {
+      emit(state.copyWith(
+        status: WeeklyFeedbackStatus.error,
+        errorMessage: failure.message,
+      ));
+      return null;
+    }, (content) => content);
+    if (content == null) return;
+
+    final loaded = _stateFrom(content);
+    final latest = _latestWithFeedback(content.weeks);
+    if (latest == null || latest == loaded.selectedWeek) {
+      emit(loaded);
+      return;
+    }
+
+    emit(loaded.copyWith(
+      status: WeeklyFeedbackStatus.loading,
+      selectedWeek: latest,
+      feedback: const [],
+    ));
+    await _load(latest, emit);
+  }
+
+  /// The highest week number a teacher has written for, or null if none.
+  static int? _latestWithFeedback(List<FeedbackWeek> weeks) {
+    int? latest;
+    for (final w in weeks) {
+      if (w.hasFeedback && (latest == null || w.week > latest)) latest = w.week;
+    }
+    return latest;
   }
 
   /// Keeps the current week's feedback on screen while it reloads.
@@ -79,6 +114,7 @@ class WeeklyFeedbackBloc
     return WeeklyFeedbackState(
       status: WeeklyFeedbackStatus.loaded,
       ready: content.ready,
+      studentName: content.studentName,
       currentWeek: content.currentWeek,
       selectedWeek: content.selectedWeek ?? content.currentWeek,
       weeks: content.weeks,

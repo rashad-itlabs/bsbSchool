@@ -1748,6 +1748,11 @@ class AppL10nEn extends AppL10n {
   String get weeklyFeedbackHas => 'Has feedback';
 
   @override
+  String weeklyFeedbackAboutStudent(String name) {
+    return 'About $name';
+  }
+
+  @override
   String get weeklyFeedbackCurrent => 'This week';
 
   @override

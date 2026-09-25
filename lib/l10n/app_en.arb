@@ -555,6 +555,7 @@
   "weeklyFeedbackNoneForWeek": "No feedback for this week",
   "weeklyFeedbackUnavailable": "Weekly feedback is not available yet",
   "weeklyFeedbackHas": "Has feedback",
+  "weeklyFeedbackAboutStudent": "About {name}",
   "weeklyFeedbackCurrent": "This week",
   "weeklyFeedbackFiles": "Files",
   "weeklyLessonCount": "{count} lessons",

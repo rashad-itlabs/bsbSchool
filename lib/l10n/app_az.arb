@@ -538,6 +538,7 @@
   "weeklyFeedbackNoneForWeek": "Bu həftə üçün rəy yoxdur",
   "weeklyFeedbackUnavailable": "Həftəlik rəylər hələ əlçatan deyil",
   "weeklyFeedbackHas": "Rəy var",
+  "weeklyFeedbackAboutStudent": "{name} haqqında",
   "weeklyFeedbackCurrent": "Cari həftə",
   "weeklyFeedbackFiles": "Fayllar",
   "weeklyLessonCount": "{count} dərs",
@@ -720,6 +721,13 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@weeklyFeedbackAboutStudent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

@@ -14,6 +14,11 @@ class FeedbackWeek extends Equatable {
   /// A week that hasn't started yet — nothing can have been written for it.
   final bool isFuture;
 
+  /// Whether the parent can open the week: any week that has started, and a
+  /// later one too once a teacher has already written for it (the server can
+  /// flag a week as future while its report is in).
+  bool get isSelectable => !isFuture || hasFeedback;
+
   const FeedbackWeek({
     required this.week,
     this.count = 0,

@@ -1748,6 +1748,11 @@ class AppL10nAz extends AppL10n {
   String get weeklyFeedbackHas => 'Rəy var';
 
   @override
+  String weeklyFeedbackAboutStudent(String name) {
+    return '$name haqqında';
+  }
+
+  @override
   String get weeklyFeedbackCurrent => 'Cari həftə';
 
   @override

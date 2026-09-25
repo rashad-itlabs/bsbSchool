@@ -9,8 +9,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Answers like the real endpoint for a Year 6 student in week 2 of 40: only
-/// week 2 has feedback, weeks 3+ haven't started.
+/// Answers like the real endpoint for a Year 6 student in week 2 of 40:
+/// weeks 2 and 3 have feedback, and week 3 is already written although the
+/// server still flags it as future.
 class _FakeService implements WeeklyFeedbackService {
   final requestedWeeks = <int?>[];
 
@@ -24,6 +25,7 @@ class _FakeService implements WeeklyFeedbackService {
     return WeeklyFeedbackContentModel.fromJson({
       'success': true,
       'ready': true,
+      'student_name': 'Said Aliyev',
       'total_weeks': 40,
       'current_week': 2,
       'selected_week': selected,
@@ -31,8 +33,8 @@ class _FakeService implements WeeklyFeedbackService {
         for (var w = 1; w <= 40; w++)
           {
             'week': w,
-            'count': w == 2 ? 1 : 0,
-            'has_feedback': w == 2,
+            'count': w == 2 || w == 3 ? 1 : 0,
+            'has_feedback': w == 2 || w == 3,
             'is_current': w == 2,
             'is_future': w > 2,
           },
@@ -47,6 +49,15 @@ class _FakeService implements WeeklyFeedbackService {
             'text': 'Said has a satisfactory behavior in class.',
             'files': [],
             'date': '2026-09-24',
+          },
+        if (selected == 3)
+          {
+            'kind': 'student',
+            'kind_label': 'About your child',
+            'teacher': 'Felipe Caceres',
+            'text': 'Week three report.',
+            'files': [],
+            'date': '2026-10-02',
           },
       ],
     });
@@ -90,23 +101,34 @@ void main() {
       expect(tester.takeException(), isNull);
       final l10n = lookupAppL10n(locale);
 
-      // Opens on whatever week the server calls current.
-      expect(service.requestedWeeks, [null]);
-      expect(find.text(l10n.weeklyFeedbackWeek(2)), findsOneWidget);
-      expect(find.text('About your child'), findsOneWidget);
+      // The server answers with the current week (2), but week 3 was written
+      // later, so the screen moves on to it straight away.
+      expect(service.requestedWeeks, [null, 3]);
+      expect(find.text(l10n.weeklyFeedbackWeek(3)), findsOneWidget);
+      expect(find.text('Week three report.'), findsOneWidget);
+
+      // An earlier week with feedback, headed with the student's name rather
+      // than the server's "About your child".
+      await tester.tap(find.text('2'));
+      await tester.pumpAndSettle();
+      expect(service.requestedWeeks, [null, 3, 2]);
+      final heading = l10n.weeklyFeedbackAboutStudent('Said Aliyev');
+      expect(find.text(heading), findsOneWidget);
+      expect(find.text('About your child'), findsNothing);
       expect(find.text('Felipe Caceres'), findsOneWidget);
 
       // A past week without feedback is fetched and says so.
       await tester.tap(find.text('1'));
       await tester.pumpAndSettle();
-      expect(service.requestedWeeks, [null, 1]);
-      expect(find.text('About your child'), findsNothing);
+      expect(service.requestedWeeks, [null, 3, 2, 1]);
+      expect(find.text(heading), findsNothing);
       expect(find.text(l10n.weeklyFeedbackNoneForWeek), findsOneWidget);
 
-      // A future week can't be picked, so nothing is requested.
+      // A future week with nothing in it can't be picked, so nothing is
+      // requested.
       await tester.tap(find.text('10'));
       await tester.pumpAndSettle();
-      expect(service.requestedWeeks, [null, 1]);
+      expect(service.requestedWeeks, [null, 3, 2, 1]);
       expect(tester.takeException(), isNull);
     });
   }
