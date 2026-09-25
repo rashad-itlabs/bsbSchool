@@ -143,6 +143,11 @@ import '../../features/payment/domain/usecases/get_payment_status.dart';
 import '../../features/payment/domain/usecases/start_fee_payment.dart';
 import '../../features/payment/domain/usecases/start_top_up.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
+import '../../features/weekly_feedback/data/repositories/weekly_feedback_repository_impl.dart';
+import '../../features/weekly_feedback/data/services/weekly_feedback_service.dart';
+import '../../features/weekly_feedback/domain/repositories/weekly_feedback_repository.dart';
+import '../../features/weekly_feedback/domain/usecases/get_weekly_feedback.dart';
+import '../../features/weekly_feedback/presentation/bloc/weekly_feedback_bloc.dart';
 
 /// Service locator. Call [initDependencies] once before runApp.
 final sl = GetIt.instance;
@@ -184,6 +189,7 @@ Future<void> initDependencies() async {
   _initLibrary();
   _initExamination();
   _initWeeklyPlan();
+  _initWeeklyFeedback();
   _initBuffet();
   _initPayment();
   _initNotifications();
@@ -384,6 +390,25 @@ void _initAttendance() {
   // Service
   sl.registerLazySingleton<AttendanceService>(
       () => AttendanceServiceImpl(sl()));
+}
+
+void _initWeeklyFeedback() {
+  // Bloc — new instance per screen mount.
+  sl.registerFactory(() => WeeklyFeedbackBloc(getWeeklyFeedback: sl()));
+
+  // Use case
+  sl.registerLazySingleton(() => GetWeeklyFeedback(sl()));
+
+  // Repository
+  sl.registerLazySingleton<WeeklyFeedbackRepository>(
+      () => WeeklyFeedbackRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
+
+  // Service
+  sl.registerLazySingleton<WeeklyFeedbackService>(
+      () => WeeklyFeedbackServiceImpl(sl()));
 }
 
 void _initTuition() {

@@ -328,6 +328,9 @@ class AppL10nEn extends AppL10n {
   String get errHomeworkLoad => 'Assignments could not be loaded';
 
   @override
+  String get errWeeklyFeedbackLoad => 'Weekly feedback could not be loaded';
+
+  @override
   String get errInsufficientBalance => 'Insufficient balance';
 
   @override
@@ -546,6 +549,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get featureWeeklyPlan => 'Weekly plan';
+
+  @override
+  String get featureWeeklyFeedback => 'Weekly feedback';
 
   @override
   String get fileCouldNotOpen => 'The file could not be opened';
@@ -1719,6 +1725,33 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get webviewTitle => 'Payment';
+
+  @override
+  String get weeklyFeedbackTitle => 'Weekly feedback';
+
+  @override
+  String get weeklyFeedbackWeeks => 'School weeks';
+
+  @override
+  String weeklyFeedbackWeek(int week) {
+    return 'Week $week';
+  }
+
+  @override
+  String get weeklyFeedbackNoneForWeek => 'No feedback for this week';
+
+  @override
+  String get weeklyFeedbackUnavailable =>
+      'Weekly feedback is not available yet';
+
+  @override
+  String get weeklyFeedbackHas => 'Has feedback';
+
+  @override
+  String get weeklyFeedbackCurrent => 'This week';
+
+  @override
+  String get weeklyFeedbackFiles => 'Files';
 
   @override
   String weeklyLessonCount(int count) {

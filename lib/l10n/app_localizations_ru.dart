@@ -330,6 +330,9 @@ class AppL10nRu extends AppL10n {
   String get errHomeworkLoad => 'Не удалось загрузить задания';
 
   @override
+  String get errWeeklyFeedbackLoad => 'Не удалось загрузить отзывы';
+
+  @override
   String get errInsufficientBalance => 'Недостаточно средств';
 
   @override
@@ -547,6 +550,9 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get featureWeeklyPlan => 'Недельный план';
+
+  @override
+  String get featureWeeklyFeedback => 'Отзывы недели';
 
   @override
   String get fileCouldNotOpen => 'Не удалось открыть файл';
@@ -1721,6 +1727,32 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get webviewTitle => 'Оплата';
+
+  @override
+  String get weeklyFeedbackTitle => 'Отзывы за неделю';
+
+  @override
+  String get weeklyFeedbackWeeks => 'Учебные недели';
+
+  @override
+  String weeklyFeedbackWeek(int week) {
+    return 'Неделя $week';
+  }
+
+  @override
+  String get weeklyFeedbackNoneForWeek => 'За эту неделю отзывов нет';
+
+  @override
+  String get weeklyFeedbackUnavailable => 'Отзывы за неделю пока недоступны';
+
+  @override
+  String get weeklyFeedbackHas => 'Есть отзыв';
+
+  @override
+  String get weeklyFeedbackCurrent => 'Текущая неделя';
+
+  @override
+  String get weeklyFeedbackFiles => 'Файлы';
 
   @override
   String weeklyLessonCount(int count) {

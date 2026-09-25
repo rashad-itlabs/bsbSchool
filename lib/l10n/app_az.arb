@@ -97,6 +97,7 @@
   "errExamLoad": "İmtahan nəticələri yüklənmədi",
   "errExtraFeesLoad": "Əlavə ödənişlər yüklənmədi",
   "errHomeworkLoad": "Tapşırıqlar yüklənmədi",
+  "errWeeklyFeedbackLoad": "Həftəlik rəylər yüklənmədi",
   "errInsufficientBalance": "Balans kifayət etmir",
   "errInvalid": "Yanlış əməliyyat",
   "errLibraryLoad": "Kitabxana məlumatları yüklənmədi",
@@ -163,6 +164,7 @@
   "featureLiveLessons": "Onlayn dərslər",
   "featureTimetable": "Dərs cədvəli",
   "featureWeeklyPlan": "Həftəlik plan",
+  "featureWeeklyFeedback": "Həftəlik rəy",
   "fileCouldNotOpen": "Fayl açıla bilmədi",
   "fileDownload": "Faylı yüklə",
   "foodCardEmpty": "Bufet kartı tapılmadı",
@@ -530,6 +532,14 @@
   "webviewStopText": "Ödəniş tamamlanmayıb. Səhifəni bağlamaq istəyirsiniz?",
   "webviewStopTitle": "Ödənişi dayandırmaq",
   "webviewTitle": "Ödəniş",
+  "weeklyFeedbackTitle": "Həftəlik rəy",
+  "weeklyFeedbackWeeks": "Tədris həftələri",
+  "weeklyFeedbackWeek": "Həftə {week}",
+  "weeklyFeedbackNoneForWeek": "Bu həftə üçün rəy yoxdur",
+  "weeklyFeedbackUnavailable": "Həftəlik rəylər hələ əlçatan deyil",
+  "weeklyFeedbackHas": "Rəy var",
+  "weeklyFeedbackCurrent": "Cari həftə",
+  "weeklyFeedbackFiles": "Fayllar",
   "weeklyLessonCount": "{count} dərs",
   "weeklyTeacherRoom": "{teacher} • Otaq {room}",
   "@addChildTextNamed": {
@@ -709,6 +719,13 @@
   "@forgotPasswordShort": {
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@weeklyFeedbackWeek": {
+    "placeholders": {
+      "week": {
         "type": "int"
       }
     }

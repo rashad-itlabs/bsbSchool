@@ -328,6 +328,9 @@ class AppL10nAz extends AppL10n {
   String get errHomeworkLoad => 'Tapşırıqlar yüklənmədi';
 
   @override
+  String get errWeeklyFeedbackLoad => 'Həftəlik rəylər yüklənmədi';
+
+  @override
   String get errInsufficientBalance => 'Balans kifayət etmir';
 
   @override
@@ -545,6 +548,9 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get featureWeeklyPlan => 'Həftəlik plan';
+
+  @override
+  String get featureWeeklyFeedback => 'Həftəlik rəy';
 
   @override
   String get fileCouldNotOpen => 'Fayl açıla bilmədi';
@@ -1720,6 +1726,32 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get webviewTitle => 'Ödəniş';
+
+  @override
+  String get weeklyFeedbackTitle => 'Həftəlik rəy';
+
+  @override
+  String get weeklyFeedbackWeeks => 'Tədris həftələri';
+
+  @override
+  String weeklyFeedbackWeek(int week) {
+    return 'Həftə $week';
+  }
+
+  @override
+  String get weeklyFeedbackNoneForWeek => 'Bu həftə üçün rəy yoxdur';
+
+  @override
+  String get weeklyFeedbackUnavailable => 'Həftəlik rəylər hələ əlçatan deyil';
+
+  @override
+  String get weeklyFeedbackHas => 'Rəy var';
+
+  @override
+  String get weeklyFeedbackCurrent => 'Cari həftə';
+
+  @override
+  String get weeklyFeedbackFiles => 'Fayllar';
 
   @override
   String weeklyLessonCount(int count) {

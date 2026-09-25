@@ -681,6 +681,12 @@ abstract class AppL10n {
   /// **'Tapşırıqlar yüklənmədi'**
   String get errHomeworkLoad;
 
+  /// No description provided for @errWeeklyFeedbackLoad.
+  ///
+  /// In az, this message translates to:
+  /// **'Həftəlik rəylər yüklənmədi'**
+  String get errWeeklyFeedbackLoad;
+
   /// No description provided for @errInsufficientBalance.
   ///
   /// In az, this message translates to:
@@ -1076,6 +1082,12 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Həftəlik plan'**
   String get featureWeeklyPlan;
+
+  /// No description provided for @featureWeeklyFeedback.
+  ///
+  /// In az, this message translates to:
+  /// **'Həftəlik rəy'**
+  String get featureWeeklyFeedback;
 
   /// No description provided for @fileCouldNotOpen.
   ///
@@ -3278,6 +3290,54 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Ödəniş'**
   String get webviewTitle;
+
+  /// No description provided for @weeklyFeedbackTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Həftəlik rəy'**
+  String get weeklyFeedbackTitle;
+
+  /// No description provided for @weeklyFeedbackWeeks.
+  ///
+  /// In az, this message translates to:
+  /// **'Tədris həftələri'**
+  String get weeklyFeedbackWeeks;
+
+  /// No description provided for @weeklyFeedbackWeek.
+  ///
+  /// In az, this message translates to:
+  /// **'Həftə {week}'**
+  String weeklyFeedbackWeek(int week);
+
+  /// No description provided for @weeklyFeedbackNoneForWeek.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu həftə üçün rəy yoxdur'**
+  String get weeklyFeedbackNoneForWeek;
+
+  /// No description provided for @weeklyFeedbackUnavailable.
+  ///
+  /// In az, this message translates to:
+  /// **'Həftəlik rəylər hələ əlçatan deyil'**
+  String get weeklyFeedbackUnavailable;
+
+  /// No description provided for @weeklyFeedbackHas.
+  ///
+  /// In az, this message translates to:
+  /// **'Rəy var'**
+  String get weeklyFeedbackHas;
+
+  /// No description provided for @weeklyFeedbackCurrent.
+  ///
+  /// In az, this message translates to:
+  /// **'Cari həftə'**
+  String get weeklyFeedbackCurrent;
+
+  /// No description provided for @weeklyFeedbackFiles.
+  ///
+  /// In az, this message translates to:
+  /// **'Fayllar'**
+  String get weeklyFeedbackFiles;
 
   /// No description provided for @weeklyLessonCount.
   ///

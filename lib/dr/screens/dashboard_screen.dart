@@ -22,6 +22,7 @@ import 'library_screen.dart';
 import 'live_lessons_screen.dart';
 import 'news_detail_screen.dart';
 import 'timetable_screen.dart';
+import 'weekly_feedback.dart';
 import '../../core/l10n/l10n.dart';
 
 /// Port of `index.html` — the home dashboard.
@@ -263,12 +264,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _extraGrid() {
+    // Teachers' weekly feedback is for parents; a student signed in on their
+    // own account gets the online lessons in that slot instead.
+    final isParent = context.select<AuthBloc, bool>(
+      (bloc) => bloc.state.user?.isParent ?? false,
+    );
+
     return Row(
       children: [
         _action(context.l10n.featureAttendance, Icons.how_to_reg_outlined, false,
             () => _push(const AttendanceScreen())),
-        _action(context.l10n.featureLiveLessons, Icons.video_camera_front_outlined, false,
-            () => _push(const LiveLessonsScreen())),
+        if (isParent)
+          _action(context.l10n.featureWeeklyFeedback, Icons.rate_review_outlined,
+              false, () => _push(const WeeklyFeedbackScreen()))
+        else
+          _action(context.l10n.featureLiveLessons,
+              Icons.video_camera_front_outlined, false,
+              () => _push(const LiveLessonsScreen())),
         _action(context.l10n.featureTimetable, Icons.calendar_today_outlined, false,
             () => _push(const TimetableScreen())),
       ],
