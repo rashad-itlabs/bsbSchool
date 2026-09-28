@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:461521717158:android:bf59c4b8b3ff08d8e8f167",
+        "android_client_info": {
+          "package_name": "com.british.school_in_baku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgJTJ6XOfEudThtZ1JZHAyHGgIDQ1HdQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:461521717158:android:771b9a69df9d42b9e8f167",
         "android_client_info": {
           "package_name": "com.itDevStidio.BritishSchool"
