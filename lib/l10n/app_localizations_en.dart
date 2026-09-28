@@ -1543,14 +1543,8 @@ class AppL10nEn extends AppL10n {
   String get tuitionAmountInvalid => 'Enter a valid amount';
 
   @override
-  String get tuitionAmountOther => 'Other amount';
-
-  @override
-  String get tuitionAmountOtherHint => 'Enter any amount';
-
-  @override
-  String get tuitionAmountSheetHint =>
-      'Pick a suggested amount or enter your own.';
+  String get tuitionAmountSheetEditHint =>
+      'Pay the whole balance or any part of it. To change the amount, type it in the field above.';
 
   @override
   String get tuitionAmountSheetTitle => 'Payment amount';
@@ -1601,6 +1595,9 @@ class AppL10nEn extends AppL10n {
   String get tuitionNoDate => 'No date';
 
   @override
+  String get tuitionOutstandingDebt => 'Outstanding balance';
+
+  @override
   String get tuitionNoDebt => 'No debt. You can pay in advance.';
 
   @override
@@ -1608,18 +1605,6 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get tuitionNothingDueYet => 'Nothing is due yet.';
-
-  @override
-  String get tuitionPayDueNow => 'Due now';
-
-  @override
-  String get tuitionPayDueNowHint => 'Amount already due';
-
-  @override
-  String get tuitionPayFull => 'Full balance';
-
-  @override
-  String get tuitionPayFullHint => 'Everything still owed';
 
   @override
   String get tuitionPaySection => 'Payments';

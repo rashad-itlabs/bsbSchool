@@ -1545,14 +1545,8 @@ class AppL10nRu extends AppL10n {
   String get tuitionAmountInvalid => 'Введите корректную сумму';
 
   @override
-  String get tuitionAmountOther => 'Другая сумма';
-
-  @override
-  String get tuitionAmountOtherHint => 'Введите любую сумму';
-
-  @override
-  String get tuitionAmountSheetHint =>
-      'Выберите предложенную сумму или введите свою.';
+  String get tuitionAmountSheetEditHint =>
+      'Можно оплатить весь долг или любую его часть. Чтобы изменить сумму, введите её в поле выше.';
 
   @override
   String get tuitionAmountSheetTitle => 'Сумма платежа';
@@ -1603,6 +1597,9 @@ class AppL10nRu extends AppL10n {
   String get tuitionNoDate => 'Нет даты';
 
   @override
+  String get tuitionOutstandingDebt => 'Остаток долга';
+
+  @override
   String get tuitionNoDebt => 'Задолженности нет. Можно оплатить заранее.';
 
   @override
@@ -1610,18 +1607,6 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get tuitionNothingDueYet => 'Просроченной задолженности нет.';
-
-  @override
-  String get tuitionPayDueNow => 'К оплате сейчас';
-
-  @override
-  String get tuitionPayDueNowHint => 'Просроченная сумма';
-
-  @override
-  String get tuitionPayFull => 'Вся задолженность';
-
-  @override
-  String get tuitionPayFullHint => 'Весь остаток долга';
 
   @override
   String get tuitionPaySection => 'Раздел оплаты';

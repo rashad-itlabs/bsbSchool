@@ -5,8 +5,9 @@ import '../models/payment_result_model.dart';
 import '../models/payment_session_model.dart';
 import '../../../../core/l10n/l10n.dart';
 
-/// Talks to the buffet top-up endpoints over the shared [Dio] instance (base
-/// URL and bearer token come from the interceptor).
+/// Talks to the payment endpoints — buffet top-up, extra fees and tuition —
+/// over the shared [Dio] instance (base URL and bearer token come from the
+/// interceptor).
 abstract class PaymentService {
   Future<PaymentSessionModel> startTopUp(double amount);
 
@@ -24,6 +25,19 @@ abstract class PaymentService {
   });
 
   Future<PaymentResultModel> getStatus(String reference);
+
+  /// `POST /tuition/pay` — pays [amount] towards the tuition balance of
+  /// [studentId] (the token's own student when null). Any sum the parent
+  /// chose; the server applies it to the schedule and checks the limits.
+  Future<PaymentSessionModel> startTuitionPayment({
+    required double amount,
+    int? studentId,
+  });
+
+  /// `GET /tuition/payment/status` — the tuition twin of [getStatus]: same
+  /// `pending | success | failed`, plus the receipt number and the tuition
+  /// balance after the payment.
+  Future<PaymentResultModel> getTuitionStatus(String reference);
 }
 
 class PaymentServiceImpl implements PaymentService {
@@ -106,6 +120,64 @@ class PaymentServiceImpl implements PaymentService {
     try {
       final response = await dio.get(
         '/payment/status',
+        queryParameters: {'reference': reference},
+      );
+
+      final data = response.data;
+
+      if (response.statusCode == 200 && data is Map<String, dynamic>) {
+        return PaymentResultModel.fromJson(data);
+      }
+
+      throw ServerException(_messageFrom(data, L.s.paymentStatusUnavailable));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e, L.s.paymentStatusUnavailable));
+    }
+  }
+
+  @override
+  Future<PaymentSessionModel> startTuitionPayment({
+    required double amount,
+    int? studentId,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/tuition/pay',
+        data: {
+          'amount': double.parse(amount.toStringAsFixed(2)),
+          'student_id': ?studentId,
+          // Unlike the older routes this one takes the app's own language
+          // for the bank page, under `lang`.
+          'lang': L.s.localeName,
+        },
+      );
+
+      final data = response.data;
+
+      if (response.statusCode == 200 &&
+          data is Map<String, dynamic> &&
+          data['success'] != false) {
+        try {
+          // Same shape as the other checkouts: payment_url, reference and
+          // return_urls. `reused` (an unfinished attempt handed back) needs
+          // nothing different here — the page and reference are what count.
+          return PaymentSessionModel.fromJson(data);
+        } on FormatException {
+          throw ServerException(L.s.errPaymentLink);
+        }
+      }
+
+      throw ServerException(_messageFrom(data, L.s.paymentCouldNotStart));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e, L.s.errPaymentGateway));
+    }
+  }
+
+  @override
+  Future<PaymentResultModel> getTuitionStatus(String reference) async {
+    try {
+      final response = await dio.get(
+        '/tuition/payment/status',
         queryParameters: {'reference': reference},
       );
 

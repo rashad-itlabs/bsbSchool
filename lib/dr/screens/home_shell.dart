@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/push/push_router.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../core/l10n/l10n.dart';
+import '../theme/dr_colors.dart';
 import '../widgets/dr_bottom_nav.dart';
 import 'dashboard_screen.dart';
 import 'food_card_screen.dart';
@@ -18,7 +20,16 @@ class _Tab {
   /// Tuition is parent-only — a student account never sees it.
   final bool parentOnly;
 
-  const _Tab(this.destination, this.screen, {this.parentOnly = false});
+  /// Shown in the bar, but a tap only explains it isn't ready yet; the
+  /// screen is not opened, nor built in the background.
+  final bool underConstruction;
+
+  const _Tab(
+    this.destination,
+    this.screen, {
+    this.parentOnly = false,
+    this.underConstruction = false,
+  });
 }
 
 /// Hosts the primary tabs behind the persistent [DrBottomNav].
@@ -55,9 +66,11 @@ class _HomeShellState extends State<HomeShell> {
 
     final isParent = context.read<AuthBloc>().state.user?.isParent ?? false;
     final tabs = _tabsFor(isParent);
-    var index = tabs.indexWhere((t) => t.destination.label == _labelOf(target));
+    var index = tabs.indexWhere((t) =>
+        t.destination.label == _labelOf(target) && !t.underConstruction);
     // Tuition is parent-only, so a student can be sent to a tab they don't
-    // have. The feed lists the message either way.
+    // have — and while it is under construction nobody has it. The feed lists
+    // the message either way.
     if (index < 0) {
       index = tabs.indexWhere(
         (t) => t.destination.label == DrNavLabel.notifications,
@@ -87,7 +100,8 @@ class _HomeShellState extends State<HomeShell> {
     _Tab(
       DrNavDestination(Icons.receipt_long_outlined, DrNavLabel.tuition),
       TuitionScreen(),
-      parentOnly: true,
+      parentOnly: false,
+      underConstruction: true, // bu hissede odenisler yigima getmelidir
     ),
     _Tab(
       DrNavDestination(Icons.notifications_none_rounded, DrNavLabel.notifications),
@@ -98,6 +112,37 @@ class _HomeShellState extends State<HomeShell> {
       PassScreen(),
     ),
   ];
+
+  /// The popup a tap on an unfinished tab gets instead of the tab.
+  Future<void> _showUnderConstruction() {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.dr.bgSurface,
+        icon: Icon(Icons.construction_rounded,
+            size: 40, color: context.dr.accent),
+        title: Text(
+          context.l10n.underConstructionTitle,
+          textAlign: TextAlign.center,
+        ),
+        content: Text(
+          context.l10n.underConstructionSubtitle,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.dr.textMuted, height: 1.4),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              context.l10n.commonClose,
+              style: TextStyle(color: context.dr.accent),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,12 +174,21 @@ class _HomeShellState extends State<HomeShell> {
         body: IndexedStack(
           key: ValueKey(activeChildId),
           index: index,
-          children: [for (final t in tabs) t.screen],
+          children: [
+            for (final t in tabs)
+              t.underConstruction ? const SizedBox.shrink() : t.screen,
+          ],
         ),
         bottomNavigationBar: DrBottomNav(
           currentIndex: index,
           items: [for (final t in tabs) t.destination],
-          onTap: (i) => setState(() => _index = i),
+          onTap: (i) {
+            if (tabs[i].underConstruction) {
+              _showUnderConstruction();
+              return;
+            }
+            setState(() => _index = i);
+          },
         ),
       ),
     );

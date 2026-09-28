@@ -91,10 +91,19 @@ class DrBottomNav extends StatelessWidget {
                     children: [
                       Icon(items[i].icon, size: 22, color: color),
                       const SizedBox(height: 5),
+                      // One line cut with "…" when it doesn't fit: letting it
+                      // wrap showed only the first word ("ANA" for "ANA
+                      // SƏHİFƏ"). The system text size is followed only up to
+                      // 1.3×, as iOS's own tab bars do not grow with it —
+                      // beyond that five labels leave two letters each. The
+                      // full label still reaches VoiceOver.
                       Text(
                         items[i].label.of(context.l10n).toUpperCase(),
                         maxLines: 1,
-                        overflow: TextOverflow.visible,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textScaler: MediaQuery.textScalerOf(context)
+                            .clamp(maxScaleFactor: 1.3),
                         style: TextStyle(
                           fontSize: 9,
                           letterSpacing: 0.4,

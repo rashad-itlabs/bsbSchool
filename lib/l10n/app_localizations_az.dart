@@ -1542,14 +1542,8 @@ class AppL10nAz extends AppL10n {
   String get tuitionAmountInvalid => 'Məbləği düzgün daxil edin';
 
   @override
-  String get tuitionAmountOther => 'Başqa məbləğ';
-
-  @override
-  String get tuitionAmountOtherHint => 'İstədiyiniz məbləği yazın';
-
-  @override
-  String get tuitionAmountSheetHint =>
-      'Təklif olunan məbləği seçin və ya özünüz yazın.';
+  String get tuitionAmountSheetEditHint =>
+      'Borcun hamısını və ya istədiyiniz hissəsini ödəyə bilərsiniz. Məbləği dəyişmək üçün yuxarıdakı xanaya yazın.';
 
   @override
   String get tuitionAmountSheetTitle => 'Ödəniş məbləği';
@@ -1600,6 +1594,9 @@ class AppL10nAz extends AppL10n {
   String get tuitionNoDate => 'Tarix yoxdur';
 
   @override
+  String get tuitionOutstandingDebt => 'Qalıq borc';
+
+  @override
   String get tuitionNoDebt => 'Borc yoxdur. Öncədən ödəniş edə bilərsiniz.';
 
   @override
@@ -1607,18 +1604,6 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get tuitionNothingDueYet => 'Vaxtı çatmış borc yoxdur.';
-
-  @override
-  String get tuitionPayDueNow => 'İndi ödənilməli';
-
-  @override
-  String get tuitionPayDueNowHint => 'Vaxtı çatmış borc';
-
-  @override
-  String get tuitionPayFull => 'Tam borc';
-
-  @override
-  String get tuitionPayFullHint => 'Bütün qalıq borc';
 
   @override
   String get tuitionPaySection => 'Ödəniş bölməsi';

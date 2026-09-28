@@ -162,7 +162,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
             children: [
               Flexible(
                 child: Text(
-                  AppDates.month(context, _visibleMonth.month),
+                  AppDates.monthTitle(context, _visibleMonth.month),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

@@ -18,4 +18,11 @@ abstract class PaymentRepository {
   /// `GET /payment/status` — the only source of truth for an outcome. Safe to
   /// call repeatedly: the balance is credited once, server side.
   Future<Either<Failure, PaymentResult>> getStatus(String reference);
+
+  /// `POST /tuition/pay` — a checkout link for [amount] towards the active
+  /// student's tuition.
+  Future<Either<Failure, PaymentSession>> startTuitionPayment(double amount);
+
+  /// `GET /tuition/payment/status` — the outcome of a tuition checkout.
+  Future<Either<Failure, PaymentResult>> getTuitionStatus(String reference);
 }

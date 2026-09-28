@@ -47,8 +47,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.itDevStidio.BritishSchool"
+        // The Play listing's id: this build ships as an update to the app already
+        // in production there. Deliberately not the same as [namespace], which
+        // only names the Kotlin/Java package and never reaches the store.
+        applicationId = "com.british.school_in_baku"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

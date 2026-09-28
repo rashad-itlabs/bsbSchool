@@ -9,10 +9,10 @@ class CafeteriaScreen extends StatelessWidget {
   const CafeteriaScreen({super.key});
 
   static const _bars = <List<dynamic>>[
-    ['B.e', 0.40, false],
-    ['Ç.a', 0.70, false],
+    ['Be', 0.40, false],
+    ['Ça', 0.70, false],
     ['Ç', 0.25, true],
-    ['C.a', 0.0, false],
+    ['Ca', 0.0, false],
     ['C', 0.0, false],
   ];
 

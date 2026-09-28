@@ -1,15 +1,13 @@
-import 'package:bsbschool/dr/screens/under_constructor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/l10n/l10n.dart';
-import '../../features/auth/domain/entities/child_account.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/extra_fees/domain/entities/extra_fee.dart';
 import '../../features/extra_fees/presentation/bloc/extra_fees_bloc.dart';
 import '../../features/payment/domain/entities/payment_result.dart';
+import '../../features/payment/domain/entities/payment_session.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
 import '../../features/payment/presentation/pages/payment_webview_page.dart';
 import '../../features/payment/presentation/widgets/payment_result_sheet.dart';
@@ -19,7 +17,6 @@ import '../../features/tuition/presentation/bloc/tuition_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_ring.dart';
 import '../widgets/dr_widgets.dart';
-import 'topup_screen.dart';
 
 /// Port of `schedule.html`, backed by `GET /tuition` and `GET /extra_fees` —
 /// the outstanding totals, the instalment schedule, the payment ledger and the
@@ -29,17 +26,6 @@ class TuitionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The section is still being built, so only the accounts in
-    // [_paymentsPreview] reach it. Decided before the blocs are made: a parent
-    // who gets the placeholder has no reason to call `/tuition` or
-    // `/extra_fees`.
-    final email = context.select<AuthBloc, String>(
-      (bloc) => bloc.state.user?.email ?? '',
-    );
-    if (!_paymentsPreview.contains(email.trim().toLowerCase())) {
-      return const _PaymentsPlaceholder();
-    }
-
     // Both load up front: the tab badge has to say how many extra fees are
     // waiting before the parent ever opens that tab.
     return MultiBlocProvider(
@@ -57,32 +43,6 @@ class TuitionScreen extends StatelessWidget {
   }
 }
 
-/// The accounts that reach the payment section while it is under construction.
-///
-/// Held lower-case — the address is folded before the lookup, so a login typed
-/// with capitals still matches. The switch fails closed: a session whose email
-/// the API never sent reads as `''` and stays on the placeholder.
-const _paymentsPreview = {'mr.ealiyev@gmail.com'};
-
-/// What the tab shows until the section opens: the usual header over the
-/// under-construction card, and no blocs behind it.
-class _PaymentsPlaceholder extends StatelessWidget {
-  const _PaymentsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return DrScaffold(
-      child: ListView(
-        children: [
-          DrBackHeader(title: context.l10n.tuitionTitle, showBack: false),
-          const UnderConstructor(),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-}
-
 class _TuitionView extends StatefulWidget {
   const _TuitionView();
 
@@ -95,38 +55,56 @@ class _TuitionViewState extends State<_TuitionView> {
   /// looking for.
   _TuitionTab _tab = _TuitionTab.tuition;
 
-  /// Asks how much to pay — the server's suggestion by default, any other sum
-  /// on request — then hands that amount to the top-up form.
+  /// Opens the amount sheet (the remaining debt, editable) and, once the
+  /// parent confirms, goes straight to the bank page for that sum through
+  /// `POST /tuition/pay`.
   Future<void> _startTuitionPayment(TuitionState state) async {
+    final payment = context.read<PaymentCubit>();
+    if (payment.state.isBusy) return;
+
     final amount = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _PayAmountSheet(state: state),
+      builder: (_) => _TuitionPaySheet(state: state),
     );
 
     // Sheet dismissed without confirming.
     if (amount == null || !mounted) return;
 
-    // No tuition equivalent of `/pay/{id}` exists yet, so this still hands the
-    // amount to the top-up form rather than minting a bank link.
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => TopUpScreen(initialAmount: amount)),
+    await _checkout(
+      amount: amount,
+      tuition: true,
+      start: () => payment.startTuition(amount),
     );
   }
 
-  /// Runs one extra-fee payment end to end: mint the link with
-  /// `POST /pay/{feeId}`, open the bank page, then read the outcome back from
-  /// `/payment/status`.
+  /// Pays one extra fee through `POST /pay/{feeId}`.
+  Future<void> _payFee({required int feeId, required double amount}) async {
+    if (amount <= 0) return;
+    final payment = context.read<PaymentCubit>();
+    await _checkout(
+      amount: amount,
+      start: () => payment.startFees(feeId: feeId, amount: amount),
+    );
+  }
+
+  /// Runs one payment end to end: [start] mints the link, the bank page
+  /// opens, then the outcome is read back from the status route — the tuition
+  /// one when [tuition] is set.
   ///
   /// Card details never touch the app — it only carries a reference around.
   /// The debt is cleared by the gateway's server-to-server callback, so both
   /// tabs are reloaded from the API rather than adjusted locally.
-  Future<void> _payFee({required int feeId, required double amount}) async {
+  Future<void> _checkout({
+    required double amount,
+    required Future<PaymentSession?> Function() start,
+    bool tuition = false,
+  }) async {
     final payment = context.read<PaymentCubit>();
-    if (payment.state.isBusy || amount <= 0) return;
+    if (payment.state.isBusy) return;
 
-    final session = await payment.startFees(feeId: feeId, amount: amount);
+    final session = await start();
     if (!mounted) return;
 
     if (session == null) {
@@ -144,6 +122,7 @@ class _TuitionViewState extends State<_TuitionView> {
     final result = await payment.confirm(
       session.reference,
       bankSaidSuccess: signal == PaymentReturn.success,
+      tuition: tuition,
     );
     if (!mounted) return;
 
@@ -178,8 +157,8 @@ class _TuitionViewState extends State<_TuitionView> {
         context: context,
         backgroundColor: Colors.transparent,
         isDismissible: !result.isPending,
-        // `balance` on the status payload is the buffet wallet, which says
-        // nothing about a tuition debt — the refreshed tabs show that instead.
+        // The refreshed tabs show where the debt now stands; the status
+        // payload's `balance` is the buffet wallet on the fee route.
         builder: (_) => PaymentResultSheet(result: result, showBalance: false),
       );
     }
@@ -231,8 +210,6 @@ class _TuitionViewState extends State<_TuitionView> {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 DrBackHeader(title: context.l10n.tuitionTitle, showBack: false),
-                // Only reached by an account on the preview list — everyone
-                // else is turned back in `TuitionScreen.build`.
                 _Body(
                   state: state,
                   tab: _tab,
@@ -299,7 +276,7 @@ class _Body extends StatelessWidget {
             state: state,
             onPay: onPayTuition,
           ),
-          _TuitionTab.extra => _ExtraFeesTabBody(onPayFee: onPayFee),
+           _TuitionTab.extra => _ExtraFeesTabBody(onPayFee: onPayFee),
         },
       ],
     );
@@ -1474,79 +1451,54 @@ class _PaymentTile extends StatelessWidget {
   }
 }
 
-/// Amount picker: the suggested sums as one-tap options, plus a free-form
-/// field for a parent who wants to pay more or less.
-class _PayAmountSheet extends StatefulWidget {
+/// What "Pay" opens: the remaining debt, already written in as the amount,
+/// which the parent can change to pay part of it — or, with nothing owed, any
+/// sum ahead. The button goes straight to the bank page.
+class _TuitionPaySheet extends StatefulWidget {
   final TuitionState state;
-  const _PayAmountSheet({required this.state});
+  const _TuitionPaySheet({required this.state});
 
   @override
-  State<_PayAmountSheet> createState() => _PayAmountSheetState();
+  State<_TuitionPaySheet> createState() => _TuitionPaySheetState();
 }
 
-class _PayAmountSheetState extends State<_PayAmountSheet> {
-  final _custom = TextEditingController();
-
-  /// Index into [_options]; equal to their length when "other" is chosen.
-  int _selected = 0;
-  List<_AmountOption> _options = const [];
+class _TuitionPaySheetState extends State<_TuitionPaySheet> {
+  late final _amount = TextEditingController(text: _debtText);
+  final _focus = FocusNode();
 
   String? _error;
 
+  double get _debt => widget.state.summary.balance;
+  String get _debtText => _debt > 0 ? _debt.toStringAsFixed(2) : '';
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Rebuilt here rather than in initState so the labels follow a language
-    // switch, and because they are translated through the context.
-    _options = _buildOptions(context);
-    _selected = _selected.clamp(0, _options.length);
+  void initState() {
+    super.initState();
+    // Tapping the prefilled sum selects it, so typing replaces it instead of
+    // appending to it.
+    _focus.addListener(() {
+      if (!_focus.hasFocus) return;
+      _amount.selection =
+          TextSelection(baseOffset: 0, extentOffset: _amount.text.length);
+    });
   }
-
-  /// The sums worth one tap, largest intent first and never the same figure
-  /// twice — a schedule where the next instalment *is* the whole balance
-  /// should not offer it as two separate choices.
-  List<_AmountOption> _buildOptions(BuildContext context) {
-    final state = widget.state;
-    final summary = state.summary;
-
-    final options = <_AmountOption>[];
-    void add(String label, String hint, double amount) {
-      if (amount <= 0) return;
-      if (options.any((o) => o.amount == amount)) return;
-      options.add(_AmountOption(label: label, hint: hint, amount: amount));
-    }
-
-    add(context.l10n.tuitionPayFull, context.l10n.tuitionPayFullHint, state.payableAmount);
-    // if (next != null) {
-    //   final date = next.dueDate;
-    //   add(
-    //     'Növbəti taksit',
-    //     date == null ? 'Cədvəl üzrə' : DateFormat('dd/MM/yyyy').format(date),
-    //     next.amount,
-    //   );
-    // }
-    add(context.l10n.tuitionPayDueNow, context.l10n.tuitionPayDueNowHint, summary.dueNow);
-
-    return options;
-  }
-
-  bool get _isOther => _selected == _options.length;
 
   @override
   void dispose() {
-    _custom.dispose();
+    _amount.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (!_isOther) {
-      Navigator.of(context).pop(_options[_selected].amount);
-      return;
-    }
+  /// Puts the whole debt back after the parent has typed something else.
+  void _fillDebt() {
+    _amount.text = _debtText;
+    setState(() => _error = null);
+  }
 
+  void _submit() {
     // Parents type `12,50` as readily as `12.50`.
-    final text = _custom.text.trim().replaceAll(',', '.');
-    final amount = double.tryParse(text);
+    final amount = double.tryParse(_amount.text.trim().replaceAll(',', '.'));
 
     if (amount == null) {
       setState(() => _error = context.l10n.tuitionAmountInvalid);
@@ -1565,7 +1517,7 @@ class _PayAmountSheetState extends State<_PayAmountSheet> {
     final currency = widget.state.currency;
 
     return Padding(
-      // Lifts the sheet clear of the keyboard while the custom field is open.
+      // Lifts the sheet clear of the keyboard.
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -1594,54 +1546,62 @@ class _PayAmountSheetState extends State<_PayAmountSheet> {
               const SizedBox(height: 20),
               Text(
                 context.l10n.tuitionAmountSheetTitle,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
-              const SizedBox(height: 6),
-              Text(
-                context.l10n.tuitionAmountSheetHint,
-                style: TextStyle(fontSize: 13, color: context.dr.textMuted),
-              ),
-              const SizedBox(height: 20),
-              for (var i = 0; i < _options.length; i++) ...[
-                _OptionRow(
-                  label: _options[i].label,
-                  hint: _options[i].hint,
-                  trailing: _money(_options[i].amount, currency),
-                  selected: _selected == i,
-                  onTap: () => setState(() {
-                    _selected = i;
-                    _error = null;
-                  }),
-                ),
-                const SizedBox(height: 10),
-              ],
-              _OptionRow(
-                label: context.l10n.tuitionAmountOther,
-                hint: context.l10n.tuitionAmountOtherHint,
-                trailing: null,
-                selected: _isOther,
-                onTap: () => setState(() {
-                  _selected = _options.length;
-                  _error = null;
-                }),
-              ),
-              if (_isOther) ...[
-                const SizedBox(height: 14),
-                DrTextField(
-                  hint: '0.00',
-                  icon: Icons.payments_outlined,
-                  controller: _custom,
-                  autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+              const SizedBox(height: 16),
+              // The debt, tappable to put it back into the field.
+              GestureDetector(
+                onTap: _debt > 0 ? _fillDebt : null,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: context.dr.bgSurfaceLight,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: context.dr.border),
                   ),
-                  textInputAction: TextInputAction.done,
-                  onChanged: (_) {
-                    if (_error != null) setState(() => _error = null);
-                  },
-                  onSubmitted: (_) => _submit(),
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_balance_wallet_rounded,
+                          size: 20, color: context.dr.accent),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          context.l10n.tuitionOutstandingDebt,
+                          style: TextStyle(
+                              fontSize: 13, color: context.dr.textMuted),
+                        ),
+                      ),
+                      Text(
+                        _money(_debt, currency),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
+              const SizedBox(height: 16),
+              DrTextField(
+                hint: '0.00',
+                icon: Icons.payments_outlined,
+                controller: _amount,
+                focusNode: _focus,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textInputAction: TextInputAction.done,
+                onChanged: (_) {
+                  if (_error != null) setState(() => _error = null);
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.tuitionAmountSheetEditHint,
+                style: TextStyle(fontSize: 12, color: context.dr.textMuted),
+              ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(
@@ -1654,123 +1614,13 @@ class _PayAmountSheetState extends State<_PayAmountSheet> {
               ],
               const SizedBox(height: 24),
               DrPrimaryButton(
-                label: context.l10n.commonContinue,
-                trailingIcon: Icons.arrow_forward,
+                label: context.l10n.payNow,
+                trailingIcon: Icons.lock_outline_rounded,
                 onTap: _submit,
               ),
               const SizedBox(height: 12),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// One preset sum on the payment sheet.
-class _AmountOption {
-  final String label;
-  final String hint;
-  final double amount;
-
-  const _AmountOption({
-    required this.label,
-    required this.hint,
-    required this.amount,
-  });
-}
-
-/// Selectable row on the payment sheet — the accent ring is what marks the
-/// choice, so it reads the same on both themes.
-class _OptionRow extends StatelessWidget {
-  final String label;
-  final String hint;
-  final String? trailing;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _OptionRow({
-    required this.label,
-    required this.hint,
-    required this.trailing,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: selected ? context.dr.accentSoft : context.dr.bgDark,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? context.dr.accent : context.dr.border,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: selected ? context.dr.accent : context.dr.border,
-                  width: 2,
-                ),
-              ),
-              child: selected
-                  ? Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: context.dr.accent,
-                        shape: BoxShape.circle,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    hint,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: context.dr.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (trailing != null) ...[
-              const SizedBox(width: 10),
-              Text(
-                trailing!,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

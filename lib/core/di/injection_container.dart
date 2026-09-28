@@ -142,6 +142,8 @@ import '../../features/payment/domain/repositories/payment_repository.dart';
 import '../../features/payment/domain/usecases/get_payment_status.dart';
 import '../../features/payment/domain/usecases/start_fee_payment.dart';
 import '../../features/payment/domain/usecases/start_top_up.dart';
+import '../../features/payment/domain/usecases/start_tuition_payment.dart';
+import '../../features/payment/domain/usecases/get_tuition_payment_status.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
 import '../../features/weekly_feedback/data/repositories/weekly_feedback_repository_impl.dart';
 import '../../features/weekly_feedback/data/services/weekly_feedback_service.dart';
@@ -236,17 +238,24 @@ void _initPayment() {
   sl.registerFactory(() => PaymentCubit(
         startTopUp: sl(),
         startFeePayment: sl(),
+        startTuitionPayment: sl(),
         getPaymentStatus: sl(),
+        getTuitionPaymentStatus: sl(),
       ));
 
   // Use cases
   sl.registerLazySingleton(() => StartTopUp(sl()));
   sl.registerLazySingleton(() => StartFeePayment(sl()));
+  sl.registerLazySingleton(() => StartTuitionPayment(sl()));
   sl.registerLazySingleton(() => GetPaymentStatus(sl()));
+  sl.registerLazySingleton(() => GetTuitionPaymentStatus(sl()));
 
   // Repository
   sl.registerLazySingleton<PaymentRepository>(
-      () => PaymentRepositoryImpl(service: sl()));
+      () => PaymentRepositoryImpl(
+            service: sl(),
+            authRepository: sl(), // reuses the Auth singleton for `student_id`
+          ));
 
   // Service
   sl.registerLazySingleton<PaymentService>(() => PaymentServiceImpl(sl()));

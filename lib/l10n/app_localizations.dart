@@ -2955,23 +2955,11 @@ abstract class AppL10n {
   /// **'Məbləği düzgün daxil edin'**
   String get tuitionAmountInvalid;
 
-  /// No description provided for @tuitionAmountOther.
+  /// No description provided for @tuitionAmountSheetEditHint.
   ///
   /// In az, this message translates to:
-  /// **'Başqa məbləğ'**
-  String get tuitionAmountOther;
-
-  /// No description provided for @tuitionAmountOtherHint.
-  ///
-  /// In az, this message translates to:
-  /// **'İstədiyiniz məbləği yazın'**
-  String get tuitionAmountOtherHint;
-
-  /// No description provided for @tuitionAmountSheetHint.
-  ///
-  /// In az, this message translates to:
-  /// **'Təklif olunan məbləği seçin və ya özünüz yazın.'**
-  String get tuitionAmountSheetHint;
+  /// **'Borcun hamısını və ya istədiyiniz hissəsini ödəyə bilərsiniz. Məbləği dəyişmək üçün yuxarıdakı xanaya yazın.'**
+  String get tuitionAmountSheetEditHint;
 
   /// No description provided for @tuitionAmountSheetTitle.
   ///
@@ -3057,6 +3045,12 @@ abstract class AppL10n {
   /// **'Tarix yoxdur'**
   String get tuitionNoDate;
 
+  /// No description provided for @tuitionOutstandingDebt.
+  ///
+  /// In az, this message translates to:
+  /// **'Qalıq borc'**
+  String get tuitionOutstandingDebt;
+
   /// No description provided for @tuitionNoDebt.
   ///
   /// In az, this message translates to:
@@ -3074,30 +3068,6 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Vaxtı çatmış borc yoxdur.'**
   String get tuitionNothingDueYet;
-
-  /// No description provided for @tuitionPayDueNow.
-  ///
-  /// In az, this message translates to:
-  /// **'İndi ödənilməli'**
-  String get tuitionPayDueNow;
-
-  /// No description provided for @tuitionPayDueNowHint.
-  ///
-  /// In az, this message translates to:
-  /// **'Vaxtı çatmış borc'**
-  String get tuitionPayDueNowHint;
-
-  /// No description provided for @tuitionPayFull.
-  ///
-  /// In az, this message translates to:
-  /// **'Tam borc'**
-  String get tuitionPayFull;
-
-  /// No description provided for @tuitionPayFullHint.
-  ///
-  /// In az, this message translates to:
-  /// **'Bütün qalıq borc'**
-  String get tuitionPayFullHint;
 
   /// No description provided for @tuitionPaySection.
   ///

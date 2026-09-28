@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/payment_result.dart';
 import '../../domain/entities/payment_session.dart';
 import '../../domain/usecases/get_payment_status.dart';
+import '../../domain/usecases/get_tuition_payment_status.dart';
 import '../../domain/usecases/start_fee_payment.dart';
 import '../../domain/usecases/start_top_up.dart';
+import '../../domain/usecases/start_tuition_payment.dart';
 
 part 'payment_state.dart';
 
@@ -19,12 +21,16 @@ part 'payment_state.dart';
 class PaymentCubit extends Cubit<PaymentState> {
   final StartTopUp startTopUp;
   final StartFeePayment startFeePayment;
+  final StartTuitionPayment startTuitionPayment;
   final GetPaymentStatus getPaymentStatus;
+  final GetTuitionPaymentStatus getTuitionPaymentStatus;
 
   PaymentCubit({
     required this.startTopUp,
     required this.startFeePayment,
+    required this.startTuitionPayment,
     required this.getPaymentStatus,
+    required this.getTuitionPaymentStatus,
   }) : super(const PaymentState());
 
   /// How long to keep asking while the gateway still says `pending`.
@@ -75,6 +81,25 @@ class PaymentCubit extends Cubit<PaymentState> {
     );
   }
 
+  /// Same as [start], for a tuition payment of any [amount] the parent chose
+  /// (`POST /tuition/pay`). Confirm it with `tuition: true`.
+  Future<PaymentSession?> startTuition(double amount) async {
+    emit(const PaymentState(stage: PaymentStage.starting));
+
+    final result = await startTuitionPayment(amount);
+
+    return result.fold(
+      (failure) {
+        emit(PaymentState(errorMessage: failure.message));
+        return null;
+      },
+      (session) {
+        emit(PaymentState(stage: PaymentStage.atBank, session: session));
+        return session;
+      },
+    );
+  }
+
   /// Reads the real outcome of [reference] from the API.
   ///
   /// [bankSaidSuccess] is the signal the return URL carried: when the bank
@@ -82,10 +107,14 @@ class PaymentCubit extends Cubit<PaymentState> {
   /// couple of tries is enough to catch a payment that went through anyway
   /// (e.g. the parent closed the page after paying).
   ///
+  /// [tuition] reads it from the tuition status route, which also knows the
+  /// receipt number and the tuition balance.
+  ///
   /// Returns null when every attempt failed to reach the API.
   Future<PaymentResult?> confirm(
     String reference, {
     required bool bankSaidSuccess,
+    bool tuition = false,
   }) async {
     emit(state.copyWithStage(PaymentStage.checking));
 
@@ -96,7 +125,9 @@ class PaymentCubit extends Cubit<PaymentState> {
       if (attempt > 0) await Future.delayed(_pollDelay);
       if (isClosed) return null;
 
-      final outcome = await getPaymentStatus(reference);
+      final outcome = tuition
+          ? await getTuitionPaymentStatus(reference)
+          : await getPaymentStatus(reference);
       if (isClosed) return null;
 
       final result = outcome.fold<PaymentResult?>(
