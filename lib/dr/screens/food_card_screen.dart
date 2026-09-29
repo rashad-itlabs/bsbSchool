@@ -8,6 +8,7 @@ import '../../features/buffet_cart/domain/entities/buffet_card.dart';
 import '../../features/buffet_cart/domain/entities/buffet_top_up.dart';
 import '../../features/buffet_cart/domain/entities/buffet_transaction.dart';
 import '../../features/buffet_cart/presentation/bloc/buffet_card_bloc.dart';
+import '../../features/buffet_cart/presentation/widgets/no_buffet_card_view.dart';
 import '../../features/buffet_cart/presentation/widgets/top_up_receipt_sheet.dart';
 import '../../features/payment/domain/entities/payment_result.dart';
 import '../../features/payment/presentation/cubit/payment_cubit.dart';
@@ -244,7 +245,13 @@ class _FoodCardViewState extends State<_FoodCardView> {
     }
 
     if (card == null) {
-      return [_Message(text: context.l10n.foodCardEmpty)];
+      return [
+        NoBuffetCardView(
+          onRefresh: () => context
+              .read<BuffetCardBloc>()
+              .add(const BuffetCardRefreshed()),
+        ),
+      ];
     }
 
     final allTransactions = state.recentTransactions;

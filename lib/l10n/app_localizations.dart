@@ -1101,11 +1101,23 @@ abstract class AppL10n {
   /// **'Faylı yüklə'**
   String get fileDownload;
 
-  /// No description provided for @foodCardEmpty.
+  /// No description provided for @foodCardNoneRefresh.
   ///
   /// In az, this message translates to:
-  /// **'Bufet kartı tapılmadı'**
-  String get foodCardEmpty;
+  /// **'Yenilə'**
+  String get foodCardNoneRefresh;
+
+  /// No description provided for @foodCardNoneText.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu şagird üçün bufet kartı verilməyib. Kart verildikdən sonra burada avtomatik görünəcək.'**
+  String get foodCardNoneText;
+
+  /// No description provided for @foodCardNoneTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Hal-hazırda bufet kartı yoxdur'**
+  String get foodCardNoneTitle;
 
   /// No description provided for @foodCardTitle.
   ///

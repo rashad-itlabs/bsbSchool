@@ -560,7 +560,14 @@ class AppL10nEn extends AppL10n {
   String get fileDownload => 'Download file';
 
   @override
-  String get foodCardEmpty => 'No canteen card found';
+  String get foodCardNoneRefresh => 'Refresh';
+
+  @override
+  String get foodCardNoneText =>
+      'No buffet card has been issued for this student yet. It will appear here automatically once it is.';
+
+  @override
+  String get foodCardNoneTitle => 'No buffet card yet';
 
   @override
   String get foodCardTitle => 'My canteen card';

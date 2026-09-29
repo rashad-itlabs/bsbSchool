@@ -559,7 +559,14 @@ class AppL10nAz extends AppL10n {
   String get fileDownload => 'Faylı yüklə';
 
   @override
-  String get foodCardEmpty => 'Bufet kartı tapılmadı';
+  String get foodCardNoneRefresh => 'Yenilə';
+
+  @override
+  String get foodCardNoneText =>
+      'Bu şagird üçün bufet kartı verilməyib. Kart verildikdən sonra burada avtomatik görünəcək.';
+
+  @override
+  String get foodCardNoneTitle => 'Hal-hazırda bufet kartı yoxdur';
 
   @override
   String get foodCardTitle => 'Bufet Kartım';

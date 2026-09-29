@@ -561,7 +561,14 @@ class AppL10nRu extends AppL10n {
   String get fileDownload => 'Скачать файл';
 
   @override
-  String get foodCardEmpty => 'Карта питания не найдена';
+  String get foodCardNoneRefresh => 'Обновить';
+
+  @override
+  String get foodCardNoneText =>
+      'Карта буфета для этого ученика ещё не выдана. Как только её выдадут, она автоматически появится здесь.';
+
+  @override
+  String get foodCardNoneTitle => 'Карты буфета пока нет';
 
   @override
   String get foodCardTitle => 'Продуктовая карта';
