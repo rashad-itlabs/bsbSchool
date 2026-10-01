@@ -36,6 +36,14 @@ abstract class AuthRepository {
     required String newPassword,
   });
 
+  /// Permanently deletes the signed-in parent's account. Right carries the
+  /// server's confirmation message, if it sent one. The local session is
+  /// left alone — signing out afterwards is the caller's move.
+  ///
+  /// Fails with a [FieldValidationFailure] (`password`) when the password is
+  /// missing or wrong.
+  Future<Either<Failure, String?>> deleteAccount({required String password});
+
   /// Changes the login e-mail of one student on the account, and caches the
   /// result so the credentials card shows the new address.
   ///

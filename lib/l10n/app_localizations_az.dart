@@ -1228,6 +1228,26 @@ class AppL10nAz extends AppL10n {
       'Bu e-mail və şifrə ilə övladınız tətbiqə öz hesabı ilə daxil ola bilər. Kopyalayıb ona göndərə bilərsiniz.';
 
   @override
+  String get settingsAccountDeleted => 'Hesabınız silindi';
+
+  @override
+  String get settingsDeleteAccount => 'Hesabı sil';
+
+  @override
+  String get settingsDeleteAccountCheck => 'Başa düşürəm, hesabım silinsin';
+
+  @override
+  String get settingsDeleteAccountPasswordText =>
+      'Silməni təsdiqləmək üçün hesabınızın şifrəsini daxil edin.';
+
+  @override
+  String get settingsDeleteAccountText =>
+      'Hesabınız həmişəlik silinəcək və bu hesabla tətbiqə daxil ola bilməyəcəksiniz. Övladınız da tətbiqdən istifadə edə bilməyəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil.';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Hesab silinsin?';
+
+  @override
   String get settingsLanguage => 'Dil';
 
   @override

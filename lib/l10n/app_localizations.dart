@@ -2349,6 +2349,42 @@ abstract class AppL10n {
   /// **'Bu e-mail və şifrə ilə övladınız tətbiqə öz hesabı ilə daxil ola bilər. Kopyalayıb ona göndərə bilərsiniz.'**
   String get settingsChildCredentials;
 
+  /// No description provided for @settingsAccountDeleted.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesabınız silindi'**
+  String get settingsAccountDeleted;
+
+  /// No description provided for @settingsDeleteAccount.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesabı sil'**
+  String get settingsDeleteAccount;
+
+  /// No description provided for @settingsDeleteAccountCheck.
+  ///
+  /// In az, this message translates to:
+  /// **'Başa düşürəm, hesabım silinsin'**
+  String get settingsDeleteAccountCheck;
+
+  /// No description provided for @settingsDeleteAccountPasswordText.
+  ///
+  /// In az, this message translates to:
+  /// **'Silməni təsdiqləmək üçün hesabınızın şifrəsini daxil edin.'**
+  String get settingsDeleteAccountPasswordText;
+
+  /// No description provided for @settingsDeleteAccountText.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesabınız həmişəlik silinəcək və bu hesabla tətbiqə daxil ola bilməyəcəksiniz. Övladınız da tətbiqdən istifadə edə bilməyəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil.'**
+  String get settingsDeleteAccountText;
+
+  /// No description provided for @settingsDeleteAccountTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Hesab silinsin?'**
+  String get settingsDeleteAccountTitle;
+
   /// No description provided for @settingsLanguage.
   ///
   /// In az, this message translates to:

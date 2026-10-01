@@ -36,6 +36,8 @@ import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/cubit/otp_cubit.dart';
 import '../../features/auth/presentation/cubit/profile_cubit.dart';
 import '../../features/auth/presentation/bloc/register_bloc.dart';
+import '../../features/auth/domain/usecases/delete_account.dart';
+import '../../features/auth/presentation/bloc/delete_account_bloc.dart';
 
 // Balance
 import '../../features/balance/data/datasources/balance_local_data_source.dart';
@@ -322,6 +324,7 @@ void _initAuth() {
 
   // Bloc — new instance per sign-up screen.
   sl.registerFactory(() => RegisterBloc(registerParent: sl()));
+  sl.registerFactory(() => DeleteAccountBloc(deleteAccount: sl()));
 
   // Cubit — new instance per e-mail confirmation screen; the address being
   // confirmed is only known once the sign-up form is submitted.
@@ -337,6 +340,7 @@ void _initAuth() {
   sl.registerLazySingleton(() => UpdateProfile(sl()));
   sl.registerLazySingleton(() => UpdateChildEmail(sl()));
   sl.registerLazySingleton(() => UpdatePassword(sl()));
+  sl.registerLazySingleton(() => DeleteAccount(sl()));
   sl.registerLazySingleton(() => RegisterParent(sl()));
   sl.registerLazySingleton(() => VerifyOtp(sl()));
   sl.registerLazySingleton(() => ResendOtp(sl()));

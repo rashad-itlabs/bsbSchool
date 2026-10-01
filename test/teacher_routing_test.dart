@@ -91,6 +91,12 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, String?>> deleteAccount({
+    required String password,
+  }) async =>
+      const Right(null);
+
+  @override
   Future<Either<Failure, Unit>> updatePassword({
     required String currentPassword,
     required String newPassword,

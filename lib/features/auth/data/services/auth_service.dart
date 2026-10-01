@@ -60,6 +60,15 @@ abstract class AuthService {
     required String newPassword,
   });
 
+  /// Permanently deletes the signed-in parent's own account, proving it is
+  /// them with [password]. Returns the server's confirmation message, if any.
+  ///
+  /// Throws a [FieldValidationException] when the password is missing or
+  /// wrong (422, under `password`), and a [ServerException] when the account
+  /// may not be deleted (403 — not a parent) or deleting failed (500; the
+  /// server rolls back, so the account is untouched).
+  Future<String?> deleteAccount({required String password});
+
   /// Changes the login e-mail of one student on the account.
   ///
   /// Same return contract as [updateProfile]: the refreshed user (whose `info`
@@ -128,6 +137,9 @@ class AuthServiceImpl implements AuthService {
 
   /// Backend route that changes the signed-in account's own password.
   static const String updatePasswordPath = '/updatePassword';
+
+  /// Backend route that deletes the signed-in parent's account.
+  static const String deleteAccountPath = '/deleteAccount';
 
   /// Backend route that re-points the account at another of its students.
   static const String selectChildPath = '/selectChild';
@@ -362,6 +374,38 @@ class AuthServiceImpl implements AuthService {
         _profileMessageFrom(data, status),
       );
     } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
+  Future<String?> deleteAccount({required String password}) async {
+    try {
+      final response = await dio.post(
+        deleteAccountPath,
+        data: {'password': password},
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if (status == 200 && !(data is Map && data['success'] == false)) {
+        return data is Map ? data['message']?.toString() : null;
+      }
+
+      // 422 — the password is missing or wrong; shown under the field.
+      if (status == 422) {
+        throw FieldValidationException(
+          _fieldErrorsFrom(data),
+          _profileMessageFrom(data, status),
+        );
+      }
+
+      // 403 — only a parent account can be deleted.
+      throw ServerException(_profileMessageFrom(data, status));
+    } on DioException catch (e) {
+      // 500 lands here (validateStatus lets only 4xx through): deleting failed
+      // and was rolled back, and the body says so.
       throw ServerException(_dioMessage(e));
     }
   }

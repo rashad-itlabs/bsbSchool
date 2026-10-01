@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../notification_prefs.dart';
 
 /// The "Bildiriş parametrləri" card — one row per [NotificationKind]. Shared by
@@ -11,9 +13,22 @@ import '../notification_prefs.dart';
 class NotificationSettingsCard extends StatelessWidget {
   const NotificationSettingsCard({super.key});
 
+  /// Each account sees only its own kinds: homework is the student's, while
+  /// arrivals, canteen spending and exam results are about the child and are
+  /// the parent's.
+  static const _studentKinds = [NotificationKind.homework];
+  static const _parentKinds = [
+    NotificationKind.attendance,
+    NotificationKind.cafeteria,
+    NotificationKind.exam,
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final kinds = NotificationKind.values;
+    final isParent = context.select<AuthBloc, bool>(
+      (bloc) => bloc.state.user?.isParent ?? false,
+    );
+    final kinds = isParent ? _parentKinds : _studentKinds;
 
     return AnimatedBuilder(
       animation: NotificationPrefs.instance,

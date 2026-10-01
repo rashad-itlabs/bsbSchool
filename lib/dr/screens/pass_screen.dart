@@ -7,6 +7,7 @@ import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/domain/entities/child_account.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/cubit/profile_cubit.dart';
+import '../../features/auth/presentation/bloc/delete_account_bloc.dart';
 import '../../features/notifications/presentation/widgets/notification_settings_card.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/l10n/locale_controller.dart';
@@ -102,6 +103,41 @@ class _PassScreenState extends State<PassScreen> {
 
     // Clears the token; AuthGate reacts to `unauthenticated` and shows login.
     context.read<AuthBloc>().add(const AuthLogoutRequested());
+  }
+
+  /// Three deliberate steps, because deleting can't be undone: a dialog whose
+  /// button stays off until the parent ticks that they understand, then the
+  /// account password, and only then the deletion itself.
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const _DeleteAccountDialog(),
+    );
+    if (confirmed != true || !mounted) return;
+
+    // Pops with the server's confirmation once the account is gone.
+    final message = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider(
+        create: (_) => sl<DeleteAccountBloc>(),
+        child: const _DeleteAccountPasswordSheet(),
+      ),
+    );
+    if (message == null || !mounted) return;
+
+    // Read before the sign-out swaps this screen for the login form; the
+    // messenger belongs to the app, so the note outlives the switch.
+    final messenger = ScaffoldMessenger.of(context);
+
+    // The token died with the account. Same exit as "Çıxış": clears the stored
+    // session, and AuthGate shows the login form.
+    context.read<AuthBloc>().add(const AuthLogoutRequested());
+
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -290,6 +326,13 @@ class _PassScreenState extends State<PassScreen> {
               ),
             ],
           ),
+          // Parent-only, and deliberately quiet: small grey text at the very
+          // bottom, where it is findable but never tapped on the way to
+          // something else.
+          if (isParent) ...[
+            const SizedBox(height: 18),
+            Center(child: _DeleteAccountLink(onTap: _deleteAccount)),
+          ],
           const SizedBox(height: 20),
         ],
       ),
@@ -740,6 +783,257 @@ class _CredentialRow extends StatelessWidget {
             icon: Icon(Icons.copy_rounded, size: 18, color: context.dr.accent),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The quiet way into deleting the account: small, grey, no card around it.
+class _DeleteAccountLink extends StatelessWidget {
+  final VoidCallback onTap;
+  const _DeleteAccountLink({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: context.dr.textMuted,
+        textStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500),
+      ),
+      icon: const Icon(Icons.delete_outline_rounded, size: 16),
+      label: Text(context.l10n.settingsDeleteAccount),
+    );
+  }
+}
+
+/// Confirms an account deletion. Pops `true` only through the red button,
+/// which stays disabled until the parent ticks that they understand it is
+/// permanent — one stray tap can't get through.
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog();
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  bool _understood = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: context.dr.bgSurface,
+      icon: const Icon(
+        Icons.warning_amber_rounded,
+        size: 40,
+        color: DrColors.redStrong,
+      ),
+      title: Text(
+        context.l10n.settingsDeleteAccountTitle,
+        textAlign: TextAlign.center,
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.settingsDeleteAccountText,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.dr.textMuted, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          CheckboxListTile(
+            value: _understood,
+            onChanged: (v) => setState(() => _understood = v ?? false),
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: DrColors.redStrong,
+            dense: true,
+            title: Text(
+              context.l10n.settingsDeleteAccountCheck,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(
+            context.l10n.commonCancel,
+            style: TextStyle(color: context.dr.textMuted),
+          ),
+        ),
+        TextButton(
+          onPressed: _understood ? () => Navigator.of(context).pop(true) : null,
+          style: TextButton.styleFrom(
+            foregroundColor: DrColors.redStrong,
+            disabledForegroundColor:
+                DrColors.redStrong.withValues(alpha: 0.35),
+          ),
+          child: Text(
+            context.l10n.settingsDeleteAccount,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The last step of deleting the account: the account password, sent through
+/// [DeleteAccountBloc]. The sheet stays open, busy, while the request runs and
+/// shows what went wrong in place — a wrong password is retyped here rather
+/// than starting over. Pops with the confirmation message once deleted.
+class _DeleteAccountPasswordSheet extends StatefulWidget {
+  const _DeleteAccountPasswordSheet();
+
+  @override
+  State<_DeleteAccountPasswordSheet> createState() =>
+      _DeleteAccountPasswordSheetState();
+}
+
+class _DeleteAccountPasswordSheetState
+    extends State<_DeleteAccountPasswordSheet> {
+  final _password = TextEditingController();
+  bool _obscured = true;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    FocusScope.of(context).unfocus();
+    context.read<DeleteAccountBloc>().add(
+          DeleteAccountSubmitted(_password.text),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<DeleteAccountBloc, DeleteAccountState>(
+      listenWhen: (prev, curr) =>
+          curr.status == DeleteAccountStatus.deleted &&
+          prev.status != DeleteAccountStatus.deleted,
+      listener: (context, state) => Navigator.of(context).pop(
+        state.message ?? context.l10n.settingsAccountDeleted,
+      ),
+      builder: (context, state) {
+        final busy = state.isSubmitting;
+
+        return _EditSheetFrame(
+          icon: Icons.delete_outline_rounded,
+          title: context.l10n.settingsDeleteAccount,
+          busy: busy,
+          children: [
+            Text(
+              context.l10n.settingsDeleteAccountPasswordText,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.45,
+                color: context.dr.textMuted,
+              ),
+            ),
+            const SizedBox(height: 18),
+            DrTextField(
+              label: context.l10n.loginPassword,
+              hint: '••••••••',
+              icon: Icons.lock_outline,
+              obscure: _obscured,
+              controller: _password,
+              enabled: !busy,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onChanged: (_) => context
+                  .read<DeleteAccountBloc>()
+                  .add(const DeleteAccountInputChanged()),
+              onSubmitted: (_) => _submit(),
+              trailing: GestureDetector(
+                onTap: () => setState(() => _obscured = !_obscured),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 13),
+                  child: Semantics(
+                    button: true,
+                    label: _obscured
+                        ? context.l10n.registerPasswordShow
+                        : context.l10n.registerPasswordHide,
+                    child: Icon(
+                      _obscured
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: 20,
+                      color: context.dr.textMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (state.passwordError != null) _FieldError(state.passwordError!),
+            if (state.formError != null) _FieldError(state.formError!),
+            const SizedBox(height: 20),
+            _DangerButton(
+              label: context.l10n.settingsDeleteAccount,
+              loading: busy,
+              onTap: _submit,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// [DrPrimaryButton]'s shape in red, for the one action on this screen that
+/// can't be taken back.
+class _DangerButton extends StatelessWidget {
+  final String label;
+  final bool loading;
+  final VoidCallback onTap;
+
+  const _DangerButton({
+    required this.label,
+    required this.loading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: !loading,
+      child: GestureDetector(
+        onTap: loading ? null : onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: double.infinity,
+          height: 60,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: DrColors.redStrong,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: loading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+        ),
       ),
     );
   }

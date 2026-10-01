@@ -1230,6 +1230,26 @@ class AppL10nRu extends AppL10n {
       'С этим e-mail и паролем ваш ребёнок может войти в приложение под своей учётной записью. Можно скопировать и отправить.';
 
   @override
+  String get settingsAccountDeleted => 'Ваш аккаунт удалён';
+
+  @override
+  String get settingsDeleteAccount => 'Удалить аккаунт';
+
+  @override
+  String get settingsDeleteAccountCheck => 'Я понимаю, удалите мой аккаунт';
+
+  @override
+  String get settingsDeleteAccountPasswordText =>
+      'Введите пароль от аккаунта, чтобы подтвердить удаление.';
+
+  @override
+  String get settingsDeleteAccountText =>
+      'Ваш аккаунт будет удалён навсегда, и вы больше не сможете войти с ним в приложение. Ваш ребёнок тоже больше не сможет пользоваться приложением. Это действие нельзя отменить.';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Удалить аккаунт?';
+
+  @override
   String get settingsLanguage => 'Язык';
 
   @override

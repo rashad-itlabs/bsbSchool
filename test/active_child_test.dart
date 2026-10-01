@@ -134,6 +134,9 @@ class _FakeAuthService implements AuthService {
   }
 
   @override
+  Future<String?> deleteAccount({required String password}) async => null;
+
+  @override
   Future<void> updatePassword({
     required String currentPassword,
     required String newPassword,

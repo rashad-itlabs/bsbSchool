@@ -200,6 +200,27 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// No `NetworkInfo` pre-flight: that probe pings a third party, and an
+  /// offline device already surfaces as a connection error from the service.
+  @override
+  Future<Either<Failure, String?>> deleteAccount({
+    required String password,
+  }) async {
+    try {
+      return Right(await service.deleteAccount(password: password));
+    } on FieldValidationException catch (e) {
+      // Before ValidationException — it is a subclass, and the plain branch
+      // would drop the per-field message.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
   @override
   Future<Either<Failure, Unit>> updateChildEmail({
     required int childId,

@@ -1229,6 +1229,26 @@ class AppL10nEn extends AppL10n {
       'With this e-mail and password your child can sign in to the app with their own account. You can copy and send it to them.';
 
   @override
+  String get settingsAccountDeleted => 'Your account has been deleted';
+
+  @override
+  String get settingsDeleteAccount => 'Delete account';
+
+  @override
+  String get settingsDeleteAccountCheck => 'I understand, delete my account';
+
+  @override
+  String get settingsDeleteAccountPasswordText =>
+      'Enter your account password to confirm the deletion.';
+
+  @override
+  String get settingsDeleteAccountText =>
+      'Your account will be permanently deleted and you will no longer be able to sign in with it. Your child will no longer be able to use the app either. This cannot be undone.';
+
+  @override
+  String get settingsDeleteAccountTitle => 'Delete your account?';
+
+  @override
   String get settingsLanguage => 'Language';
 
   @override
