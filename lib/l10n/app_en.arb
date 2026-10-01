@@ -188,6 +188,7 @@
   "foodCardNoneText": "No buffet card has been issued for this student yet. It will appear here automatically once it is.",
   "foodCardNoneTitle": "No buffet card yet",
   "foodCardTitle": "My canteen card",
+  "foodCardUpperGradesOnly": "The buffet card will be active in the upper grades",
   "filterFrom": "From",
   "filterTo": "To",
   "forgotBackToCode": "Re-enter the code",

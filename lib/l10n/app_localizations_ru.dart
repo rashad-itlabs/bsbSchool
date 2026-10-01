@@ -574,6 +574,10 @@ class AppL10nRu extends AppL10n {
   String get foodCardTitle => 'Продуктовая карта';
 
   @override
+  String get foodCardUpperGradesOnly =>
+      'Карта буфета станет активной в старших классах';
+
+  @override
   String get filterFrom => 'С';
 
   @override

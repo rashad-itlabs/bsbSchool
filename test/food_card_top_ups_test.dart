@@ -7,6 +7,8 @@ import 'package:bsbschool/features/buffet_cart/data/models/buffet_card_content_m
 import 'package:bsbschool/features/buffet_cart/data/services/buffet_card_service.dart';
 import 'package:bsbschool/features/buffet_cart/presentation/widgets/top_up_receipt_sheet.dart';
 import 'package:bsbschool/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bsbschool/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,7 +81,12 @@ Widget _app() => MaterialApp(
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppL10n.supportedLocales,
-      home: const FoodCardScreen(),
+      // The app provides AuthBloc at its root; the tab reads the active
+      // child's section from it.
+      home: BlocProvider<AuthBloc>(
+        create: (_) => sl<AuthBloc>(),
+        child: const FoodCardScreen(),
+      ),
     );
 
 /// The screen is a lazy [ListView] and the section sits below the card, so a

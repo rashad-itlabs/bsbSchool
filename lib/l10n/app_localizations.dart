@@ -1125,6 +1125,12 @@ abstract class AppL10n {
   /// **'Bufet Kartım'**
   String get foodCardTitle;
 
+  /// No description provided for @foodCardUpperGradesOnly.
+  ///
+  /// In az, this message translates to:
+  /// **'Bufet kartı yuxarı siniflərdə aktiv olacaq'**
+  String get foodCardUpperGradesOnly;
+
   /// No description provided for @filterFrom.
   ///
   /// In az, this message translates to:

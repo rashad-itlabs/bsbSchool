@@ -572,6 +572,10 @@ class AppL10nAz extends AppL10n {
   String get foodCardTitle => 'Bufet Kartım';
 
   @override
+  String get foodCardUpperGradesOnly =>
+      'Bufet kartı yuxarı siniflərdə aktiv olacaq';
+
+  @override
   String get filterFrom => 'Başlanğıc';
 
   @override

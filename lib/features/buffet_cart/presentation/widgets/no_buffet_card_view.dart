@@ -3,21 +3,36 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../dr/theme/dr_colors.dart';
 
-/// What the buffet card screen shows when the student has no card yet: a
-/// faded, dashed outline of the card that will be there — same crest strip,
-/// blank bars where the number and balance go — with a "no card" mark on it,
-/// a short line saying it appears here once issued, and a refresh.
+/// What the buffet card screen shows in place of a card: a faded, dashed
+/// outline of the card — same crest strip, blank bars where the number and
+/// balance go — with a "no card" mark on it, a heading, an optional line under
+/// it, and an optional refresh.
 ///
-/// Worded for either account type: a student can open this tab too, so it
-/// says "this student", not "your child".
+/// By default it says the card hasn't been issued yet, worded for either
+/// account type: a student can open this tab too, so it says "this student",
+/// not "your child".
 class NoBuffetCardView extends StatelessWidget {
-  /// Asks the server again — the card may have been issued since.
-  final VoidCallback onRefresh;
+  /// Asks the server again — the card may have been issued since. No button
+  /// when null.
+  final VoidCallback? onRefresh;
 
-  const NoBuffetCardView({super.key, required this.onRefresh});
+  /// Override the default "not issued yet" heading and line. A null [message]
+  /// with a [title] given shows the heading alone.
+  final String? title;
+  final String? message;
+
+  const NoBuffetCardView({
+    super.key,
+    this.onRefresh,
+    this.title,
+    this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final heading = title ?? context.l10n.foodCardNoneTitle;
+    final line = title == null ? context.l10n.foodCardNoneText : message;
+
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Column(
@@ -26,7 +41,7 @@ class NoBuffetCardView extends StatelessWidget {
           const ExcludeSemantics(child: _GhostCard()),
           const SizedBox(height: 32),
           Text(
-            context.l10n.foodCardNoneTitle,
+            heading,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
@@ -34,18 +49,22 @@ class NoBuffetCardView extends StatelessWidget {
               color: context.dr.textMain,
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            context.l10n.foodCardNoneText,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: context.dr.textMuted,
+          if (line != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              line,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: context.dr.textMuted,
+              ),
             ),
-          ),
-          const SizedBox(height: 28),
-          Center(child: _RefreshButton(onTap: onRefresh)),
+          ],
+          if (onRefresh != null) ...[
+            const SizedBox(height: 28),
+            Center(child: _RefreshButton(onTap: onRefresh!)),
+          ],
         ],
       ),
     );

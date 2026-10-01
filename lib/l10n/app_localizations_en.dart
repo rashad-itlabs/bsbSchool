@@ -573,6 +573,10 @@ class AppL10nEn extends AppL10n {
   String get foodCardTitle => 'My canteen card';
 
   @override
+  String get foodCardUpperGradesOnly =>
+      'The buffet card will be active in the upper grades';
+
+  @override
   String get filterFrom => 'From';
 
   @override

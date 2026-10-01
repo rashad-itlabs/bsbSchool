@@ -5,6 +5,7 @@ class ChildAccountModel extends ChildAccount {
     super.childId,
     super.classId,
     super.username,
+    super.categories,
     super.className,
     super.childName,
     super.childSurname,
@@ -19,6 +20,7 @@ class ChildAccountModel extends ChildAccount {
       childId: child.childId,
       classId: child.classId,
       username: child.username,
+      categories: child.categories,
       className: child.className,
       childName: child.childName,
       childSurname: child.childSurname,
@@ -33,6 +35,7 @@ class ChildAccountModel extends ChildAccount {
       childId: _asInt(json['child_id']),
       classId: _asInt(json['class_id']),
       username: _asString(json['username']),
+      categories: _asString(json['categories']),
       className: _asString(json['class_name']),
       childName: _asString(json['child_name']),
       childSurname: _asString(json['child_surname']),
@@ -46,6 +49,9 @@ class ChildAccountModel extends ChildAccount {
         'child_id': childId,
         'class_id': classId,
         'username': username,
+        // Stored with the session, so a restored login still knows which
+        // children the buffet card is for.
+        'categories': categories,
         'class_name': className,
         'child_name': childName,
         'child_surname': childSurname,

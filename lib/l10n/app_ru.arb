@@ -188,6 +188,7 @@
   "foodCardNoneText": "Карта буфета для этого ученика ещё не выдана. Как только её выдадут, она автоматически появится здесь.",
   "foodCardNoneTitle": "Карты буфета пока нет",
   "foodCardTitle": "Продуктовая карта",
+  "foodCardUpperGradesOnly": "Карта буфета станет активной в старших классах",
   "filterFrom": "С",
   "filterTo": "По",
   "forgotBackToCode": "Ввести код заново",

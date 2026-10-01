@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/l10n/app_dates.dart';
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/buffet_cart/domain/entities/buffet_card.dart';
 import '../../features/buffet_cart/domain/entities/buffet_top_up.dart';
 import '../../features/buffet_cart/domain/entities/buffet_transaction.dart';
@@ -26,6 +27,19 @@ class FoodCardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The buffet card starts in the secondary section. Decided before the
+    // blocs are made: a younger child has no card to fetch. A parent's
+    // section is the active child's (switching remounts this tab, so the
+    // check follows); a student signed in on their own has no children list,
+    // so it is their own.
+    final belowBuffetAge = context.select<AuthBloc, bool>((bloc) {
+      final state = bloc.state;
+      return state.activeChild?.isBelowBuffetAge ??
+          state.user?.isBelowBuffetAge ??
+          false;
+    });
+    if (belowBuffetAge) return const _UpperGradesOnly();
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -34,6 +48,25 @@ class FoodCardScreen extends StatelessWidget {
         BlocProvider(create: (_) => sl<PaymentCubit>()),
       ],
       child: const _FoodCardView(),
+    );
+  }
+}
+
+/// The tab for a child below the secondary section: the card's outline and
+/// a line saying it opens in the upper grades.
+class _UpperGradesOnly extends StatelessWidget {
+  const _UpperGradesOnly();
+
+  @override
+  Widget build(BuildContext context) {
+    return DrScaffold(
+      child: ListView(
+        children: [
+          DrBackHeader(title: context.l10n.foodCardTitle, showBack: false),
+          NoBuffetCardView(title: context.l10n.foodCardUpperGradesOnly),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 }

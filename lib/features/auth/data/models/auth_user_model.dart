@@ -13,6 +13,7 @@ class AuthUserModel extends AuthUser {
     super.phone,
     super.classId,
     super.className,
+    super.categories,
     super.children,
   });
 
@@ -42,6 +43,8 @@ class AuthUserModel extends AuthUser {
       phone: _asNullableString(json['phone']),
       classId: _asInt(json['class_id']),
       className: _asNullableString(json['className'] ?? json['class_name']),
+      // A student login's own section, next to its class.
+      categories: _asNullableString(json['categories']) ?? '',
       // `info` — the students linked to a parent account, with the login the
       // school issued for each. Absent for teacher / student logins.
       children: _asChildren(json['info']),
@@ -61,6 +64,7 @@ class AuthUserModel extends AuthUser {
         'phone': phone,
         'class_id': classId,
         'className': className,
+        'categories': categories,
         'info':
             children.map((c) => ChildAccountModel.from(c).toJson()).toList(),
       };

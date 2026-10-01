@@ -284,6 +284,7 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: phone.isEmpty ? null : phone,
       classId: user.classId,
       className: user.className,
+      categories: user.categories,
       children: user.children,
     );
   }
@@ -305,6 +306,7 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: user.phone,
       classId: user.classId,
       className: user.className,
+      categories: user.categories,
       children: [
         for (final child in user.children)
           if (child.childId == childId)
@@ -312,6 +314,7 @@ class AuthRepositoryImpl implements AuthRepository {
               childId: child.childId,
               classId: child.classId,
               username: child.username,
+              categories: child.categories,
               className: child.className,
               childName: child.childName,
               childSurname: child.childSurname,
@@ -352,6 +355,7 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: user.phone,
       classId: user.classId,
       className: user.className,
+      categories: user.categories,
       children: user.children,
     );
   }
@@ -385,6 +389,9 @@ class AuthRepositoryImpl implements AuthRepository {
       phone: incoming.phone ?? current.phone,
       classId: incoming.classId ?? current.classId,
       className: incoming.className ?? current.className,
+      categories: incoming.categories.isNotEmpty
+          ? incoming.categories
+          : current.categories,
       children:
           incoming.children.isNotEmpty ? incoming.children : current.children,
     );

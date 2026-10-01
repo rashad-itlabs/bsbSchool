@@ -171,6 +171,7 @@
   "foodCardNoneText": "Bu şagird üçün bufet kartı verilməyib. Kart verildikdən sonra burada avtomatik görünəcək.",
   "foodCardNoneTitle": "Hal-hazırda bufet kartı yoxdur",
   "foodCardTitle": "Bufet Kartım",
+  "foodCardUpperGradesOnly": "Bufet kartı yuxarı siniflərdə aktiv olacaq",
   "filterFrom": "Başlanğıc",
   "filterTo": "Son",
   "forgotBackToCode": "Kodu yenidən daxil et",

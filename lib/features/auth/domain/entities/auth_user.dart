@@ -44,6 +44,11 @@ class AuthUser extends Equatable {
   final int? classId;
   final String? className;
 
+  /// The student's school section (`categories`, e.g. `secondary`) on a
+  /// student's own login. A parent's children each carry theirs in
+  /// [children]. Empty when the response predates the field.
+  final String categories;
+
   /// Every student linked to this account (the login response's `info`), each
   /// with the credentials the school issued for them. Empty for a teacher or a
   /// student account — only a parent login carries it.
@@ -60,6 +65,7 @@ class AuthUser extends Equatable {
     this.phone,
     this.classId,
     this.className,
+    this.categories = '',
     this.children = const [],
   });
 
@@ -77,6 +83,11 @@ class AuthUser extends Equatable {
   bool get isTeacher => role.trim().toLowerCase() == 'teacher';
 
   bool get isParent => role.trim().toLowerCase() == 'parent';
+
+  /// Whether the buffet card is not for this student yet — the same rule as
+  /// [ChildAccount.isBelowBuffetAge], for a student signed in on their own.
+  bool get isBelowBuffetAge =>
+      ChildAccount.sectionBelowBuffetAge(categories);
 
   /// A parent can log in before the school has linked a student to their
   /// account — the response then carries `user_id: null` and the app has no
@@ -125,6 +136,7 @@ class AuthUser extends Equatable {
         phone,
         classId,
         className,
+        categories,
         children,
       ];
 }

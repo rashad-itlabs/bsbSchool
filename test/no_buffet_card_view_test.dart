@@ -5,6 +5,8 @@ import 'package:bsbschool/features/buffet_cart/data/models/buffet_card_content_m
 import 'package:bsbschool/features/buffet_cart/data/services/buffet_card_service.dart';
 import 'package:bsbschool/features/buffet_cart/presentation/widgets/no_buffet_card_view.dart';
 import 'package:bsbschool/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bsbschool/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,7 +38,12 @@ Widget _app(Locale locale, ThemeData theme, double textScale) => MaterialApp(
             .copyWith(textScaler: TextScaler.linear(textScale)),
         child: child!,
       ),
-      home: const FoodCardScreen(),
+      // The app provides AuthBloc at its root; the tab reads the active
+      // child's section from it.
+      home: BlocProvider<AuthBloc>(
+        create: (_) => sl<AuthBloc>(),
+        child: const FoodCardScreen(),
+      ),
     );
 
 void main() {
