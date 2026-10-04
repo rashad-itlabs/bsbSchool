@@ -546,6 +546,9 @@ class AppL10nRu extends AppL10n {
   String get featureLiveLessons => 'Онлайн-уроки';
 
   @override
+  String get featureNotActiveYet => 'Этот раздел сейчас неактивен.';
+
+  @override
   String get featureTimetable => 'Расписание уроков';
 
   @override

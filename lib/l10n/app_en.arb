@@ -179,6 +179,7 @@
   "featureHomework": "Homework",
   "featureLibrary": "Library",
   "featureLiveLessons": "Online lessons",
+  "featureNotActiveYet": "This section is not active at the moment.",
   "featureTimetable": "Class timetable",
   "featureWeeklyPlan": "Weekly plan",
   "featureWeeklyFeedback": "Weekly feedback",

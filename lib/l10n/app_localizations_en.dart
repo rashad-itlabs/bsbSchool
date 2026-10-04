@@ -545,6 +545,9 @@ class AppL10nEn extends AppL10n {
   String get featureLiveLessons => 'Online lessons';
 
   @override
+  String get featureNotActiveYet => 'This section is not active at the moment.';
+
+  @override
   String get featureTimetable => 'Class timetable';
 
   @override

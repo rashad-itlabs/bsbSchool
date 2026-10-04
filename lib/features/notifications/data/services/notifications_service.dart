@@ -22,7 +22,12 @@ class NotificationsServiceImpl implements NotificationsService {
     try {
       final response = await dio.get(
         '/notifications',
-        queryParameters: {'class_id': ?classId},
+        queryParameters: {
+          'class_id': ?classId,
+          // The backend stores the automatic homework entries in Azerbaijani
+          // and rebuilds them in this language; without it they stay `az`.
+          'lang': L.s.localeName,
+        },
       );
 
       final status = response.statusCode ?? 0;

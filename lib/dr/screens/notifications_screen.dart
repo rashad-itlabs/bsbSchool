@@ -19,9 +19,43 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<NotificationsBloc>()..add(const NotificationsFetched()),
-      child: const _NotificationsView(),
+      child: const _RefetchOnLanguageChange(child: _NotificationsView()),
     );
   }
+}
+
+/// Asks for the feed again when the app language changes.
+///
+/// The server writes the titles and texts in the language the request names
+/// (`lang`), and this tab stays mounted behind the bottom bar — without this,
+/// a parent who switched language would keep reading the feed in the old one
+/// until they pulled to refresh. The tab keeps building while hidden, so the
+/// new feed is usually in before they open it.
+class _RefetchOnLanguageChange extends StatefulWidget {
+  final Widget child;
+  const _RefetchOnLanguageChange({required this.child});
+
+  @override
+  State<_RefetchOnLanguageChange> createState() =>
+      _RefetchOnLanguageChangeState();
+}
+
+class _RefetchOnLanguageChangeState extends State<_RefetchOnLanguageChange> {
+  String? _language;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final language = Localizations.localeOf(context).languageCode;
+    // The first pass only records it — the bloc's own first fetch is running.
+    if (_language != null && _language != language) {
+      context.read<NotificationsBloc>().add(const NotificationsRefreshed());
+    }
+    _language = language;
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _NotificationsView extends StatelessWidget {

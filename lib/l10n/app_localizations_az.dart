@@ -544,6 +544,9 @@ class AppL10nAz extends AppL10n {
   String get featureLiveLessons => 'Onlayn dərslər';
 
   @override
+  String get featureNotActiveYet => 'Bu bölmə hal-hazırda aktiv deyil.';
+
+  @override
   String get featureTimetable => 'Dərs cədvəli';
 
   @override

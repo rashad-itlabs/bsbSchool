@@ -19,7 +19,6 @@ import 'attendance_screen.dart';
 import 'examinations_screen.dart';
 import 'homework_screen.dart';
 import 'library_screen.dart';
-import 'live_lessons_screen.dart';
 import 'news_detail_screen.dart';
 import 'timetable_screen.dart';
 import 'weekly_feedback.dart';
@@ -280,7 +279,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         else
           _action(context.l10n.featureLiveLessons,
               Icons.video_camera_front_outlined, false,
-              () => _push(const LiveLessonsScreen())),
+              _showLiveLessonsInactive),
         _action(context.l10n.featureTimetable, Icons.calendar_today_outlined, false,
             () => _push(const TimetableScreen())),
       ],
@@ -368,6 +367,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
               state.status == EventsStatus.error ? state.errorMessage : null,
           onRetry: () => context.read<EventsBloc>().add(const EventsRefreshed()),
         ),
+      ),
+    );
+  }
+
+  /// Online lessons aren't running yet, so the tile explains that rather than
+  /// opening a screen with nothing real on it.
+  Future<void> _showLiveLessonsInactive() {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.dr.bgSurface,
+        icon: Icon(Icons.video_camera_front_outlined,
+            size: 40, color: context.dr.accent),
+        title: Text(
+          context.l10n.featureLiveLessons,
+          textAlign: TextAlign.center,
+        ),
+        content: Text(
+          context.l10n.featureNotActiveYet,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: context.dr.textMuted, height: 1.4),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              context.l10n.commonClose,
+              style: TextStyle(color: context.dr.accent),
+            ),
+          ),
+        ],
       ),
     );
   }

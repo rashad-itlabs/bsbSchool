@@ -1071,6 +1071,12 @@ abstract class AppL10n {
   /// **'Onlayn dərslər'**
   String get featureLiveLessons;
 
+  /// No description provided for @featureNotActiveYet.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu bölmə hal-hazırda aktiv deyil.'**
+  String get featureNotActiveYet;
+
   /// No description provided for @featureTimetable.
   ///
   /// In az, this message translates to:
