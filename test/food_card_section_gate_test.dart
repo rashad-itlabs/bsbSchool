@@ -86,6 +86,7 @@ Future<Widget> _tab(String categories, {bool student = false}) async {
           childId: 3789,
           childName: 'Said',
           categories: categories,
+          isActive: '',
         ));
   final auth = AuthBloc(
     loginUser: LoginUser(repository),
@@ -144,7 +145,7 @@ void main() {
     });
 
     test('only a known section other than secondary is below buffet age', () {
-      bool below(String c) => ChildAccount(categories: c).isBelowBuffetAge;
+      bool below(String c) => ChildAccount(categories: c, isActive: '').isBelowBuffetAge;
       expect(below('secondary'), isFalse);
       expect(below(' Secondary '), isFalse);
       expect(below('primary'), isTrue);

@@ -151,6 +151,12 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> resendOtp({required String email}) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, AuthUser>> refreshUser() {
+    // TODO: implement refreshUser
+    throw UnimplementedError();
+  }
 }
 
 AuthUser _user({required String role, int? id = 4108}) => AuthUser(

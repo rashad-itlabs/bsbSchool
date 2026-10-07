@@ -36,6 +36,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthChildSelected>(_onChildSelected);
     on<AuthChildAdded>(_onChildAdded);
     on<AuthSessionRefreshed>(_onSessionRefreshed);
+    on<AuthChildStatusCheckRequested>(_onChildStatusCheck);
+    on<AuthUserReloadRequested>(_onUserReload);
     on<AuthLogoutRequested>(_onLogout);
   }
 
@@ -54,7 +56,60 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // reinstalled app has no external id at all. No permission prompt here:
     // the parent is looking at a launch screen, not at a reason to say yes.
     _bindPush();
+
+    if (loggedIn) add(const AuthChildStatusCheckRequested());
   }
+
+
+  ///
+  bool _reloading = false;
+
+  Future<void> _onUserReload(
+      AuthUserReloadRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    if (_reloading || state.status != AuthStatus.authenticated) return;
+    _reloading = true;
+    try {
+      final result = await repository.refreshUser();
+      result.fold(
+            (_) {}, // şəbəkə xətası: mövcud state qalsın
+            (_) {
+          emit(state.copyWith(
+            user: repository.currentUser,
+            activeChild: repository.activeChild,
+          ));
+          // 2 uşaq varsa və seçilmiş deaktivdirsə, aktivə keçir
+          add(const AuthChildStatusCheckRequested());
+        },
+      );
+    } finally {
+      _reloading = false;
+    }
+  }
+  ///
+
+  /// Cari uşaq `isActive == 'no'`-dursa, aktiv olan başqa uşağa keçir.
+  /// Aktiv uşaq yoxdursa, heç nə etmir; UI bloklayıcı modal göstərir.
+  Future<void> _onChildStatusCheck(
+      AuthChildStatusCheckRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    final current = state.activeChild;
+    if (current == null || current.isActive != 'no') return;
+
+    final children = state.user?.children ?? const <ChildAccount>[];
+    final replacement = children.cast<ChildAccount?>().firstWhere(
+          (c) => c!.isActive != 'no' && c.childId != null,
+      orElse: () => null,
+    );
+    if (replacement == null) return;
+
+    // Mövcud mexanizm: serverə /selectChild göndərir, push tag-ları yeniləyir
+    add(AuthChildSelected(replacement.childId!));
+  }
+
+
 
   Future<void> _onLogin(
     AuthLoginRequested event,
@@ -77,10 +132,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           user: session.user,
           activeChild: repository.activeChild,
         ));
-        // The one moment worth asking for the notification permission: the
-        // parent has just signed in and the dashboard is about to appear, so
-        // the system dialog arrives with something behind it.
         _bindPush(prompt: true);
+
+        // Aktiv olmayan uşaq seçilibsə, aktiv olana keç
+        add(const AuthChildStatusCheckRequested());
       },
     );
   }

@@ -17,6 +17,9 @@
     }
   },
   "@@locale": "ru",
+  "attention": "Внимание",
+  "childIsNotActive": "Этот ребенок неактивен.",
+  "close": "Закрыть",
   "addChildAdded": "Ученик добавлен к вашей учётной записи",
   "addChildAnotherText": "Введите номер зачисления ребёнка — ученик будет привязан к вашей учётной записи, и вы сможете следить за всем отсюда.",
   "addChildEnterNumber": "Введите номер зачисления",
@@ -561,6 +564,7 @@
   "weeklyFeedbackUnavailable": "Отзывы за неделю пока недоступны",
   "weeklyFeedbackHas": "Есть отзыв",
   "weeklyFeedbackAboutStudent": "Об ученике: {name}",
+  "weeklyDocument": "Еженедельный документ",
   "weeklyFeedbackCurrent": "Текущая неделя",
   "weeklyFeedbackFiles": "Файлы",
   "weeklyLessonCount": "{count} уроков",

@@ -187,6 +187,12 @@ class _FakeAuthService implements AuthService {
   Future<void> resendOtp({
     required String email,
   }) async {}
+
+  @override
+  Future<Map<int, bool>> fetchChildStatuses(int childId) {
+    // TODO: implement fetchChildStatuses
+    throw UnimplementedError();
+  }
 }
 
 class _OfflineNetworkInfo implements NetworkInfo {

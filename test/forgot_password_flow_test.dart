@@ -122,6 +122,12 @@ class _RecordingRepository implements AuthRepository {
     String? relation,
   }) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, AuthUser>> refreshUser() {
+    // TODO: implement refreshUser
+    throw UnimplementedError();
+  }
 }
 
 (ForgotPasswordCubit, _RecordingRepository) _cubit({

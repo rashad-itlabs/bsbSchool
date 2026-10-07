@@ -6,6 +6,7 @@ import 'core/di/injection_container.dart';
 import 'core/l10n/l10n.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/push/push_service.dart';
+import 'dr/widgets/child_blocked_gate.dart';
 import 'features/app_update/presentation/cubit/app_update_cubit.dart';
 import 'features/app_update/presentation/widgets/update_gate.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -17,6 +18,7 @@ import 'dr/screens/login_screen.dart';
 import 'dr/screens/teacher/teacher_shell.dart';
 import 'dr/theme/dr_theme.dart';
 import 'dr/theme/theme_controller.dart';
+import 'dart:async';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,13 +110,20 @@ class AuthGate extends StatelessWidget {
           p.user?.needsChild != c.user?.needsChild,
       builder: (context, state) {
         switch (state.status) {
+          // case AuthStatus.authenticated:
+          //   final user = state.user;
+          //   if (user?.isTeacher ?? false) return const TeacherShell();
+          //   // A parent with no student linked yet has nothing to show in the
+          //   // dashboard — collect an admission number first.
+          //   if (user?.needsChild ?? false) return const AddChildScreen();
+          //   return const HomeShell();
           case AuthStatus.authenticated:
             final user = state.user;
             if (user?.isTeacher ?? false) return const TeacherShell();
-            // A parent with no student linked yet has nothing to show in the
-            // dashboard — collect an admission number first.
             if (user?.needsChild ?? false) return const AddChildScreen();
-            return const HomeShell();
+            return const _ChildStatusPoller(
+              child: ChildBlockedGate(child: HomeShell()),
+            );
           case AuthStatus.unknown:
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
@@ -126,6 +135,50 @@ class AuthGate extends StatelessWidget {
       },
     );
   }
+}
+
+/// Login olmuş valideyn ekranı açıq olduqca uşağın statusunu serverdən
+/// dövri yoxlayır, tətbiq arxa fondan qayıdanda isə dərhal.
+class _ChildStatusPoller extends StatefulWidget {
+  final Widget child;
+  const _ChildStatusPoller({required this.child});
+
+  @override
+  State<_ChildStatusPoller> createState() => _ChildStatusPollerState();
+}
+
+
+class _ChildStatusPollerState extends State<_ChildStatusPoller>
+    with WidgetsBindingObserver {
+  static const _interval = Duration(seconds: 5);
+  Timer? _timer;
+
+  void _reload() {
+    if (!mounted) return;
+    context.read<AuthBloc>().add(const AuthUserReloadRequested());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _timer = Timer.periodic(_interval, (_) => _reload());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _reload();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Stands between a signed-out app and its login form on a fresh install.

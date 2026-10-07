@@ -1,5 +1,8 @@
 {
   "@@locale": "az",
+  "attention": "Diqqət",
+  "childIsNotActive": "Bu uşaq aktiv deyil.",
+  "close": "Bağla",
   "addChildAdded": "Şagird hesabınıza əlavə edildi",
   "addChildAnotherText": "Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.",
   "addChildEnterNumber": "Qəbul nömrəsini daxil edin",
@@ -544,6 +547,7 @@
   "weeklyFeedbackUnavailable": "Həftəlik rəylər hələ əlçatan deyil",
   "weeklyFeedbackHas": "Rəy var",
   "weeklyFeedbackAboutStudent": "{name} haqqında",
+  "weeklyDocument": "Weekly Document",
   "weeklyFeedbackCurrent": "Cari həftə",
   "weeklyFeedbackFiles": "Fayllar",
   "weeklyLessonCount": "{count} dərs",

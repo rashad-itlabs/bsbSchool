@@ -99,6 +99,24 @@ abstract class AppL10n {
     Locale('ru'),
   ];
 
+  /// No description provided for @attention.
+  ///
+  /// In az, this message translates to:
+  /// **'Diqqət'**
+  String get attention;
+
+  /// No description provided for @childIsNotActive.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu uşaq aktiv deyil.'**
+  String get childIsNotActive;
+
+  /// No description provided for @close.
+  ///
+  /// In az, this message translates to:
+  /// **'Bağla'**
+  String get close;
+
   /// No description provided for @addChildAdded.
   ///
   /// In az, this message translates to:
@@ -3362,6 +3380,12 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'{name} haqqında'**
   String weeklyFeedbackAboutStudent(String name);
+
+  /// No description provided for @weeklyDocument.
+  ///
+  /// In az, this message translates to:
+  /// **'Weekly Document'**
+  String get weeklyDocument;
 
   /// No description provided for @weeklyFeedbackCurrent.
   ///

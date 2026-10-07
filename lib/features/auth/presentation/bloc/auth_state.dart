@@ -71,6 +71,21 @@ class AuthState extends Equatable {
     return name.isNotEmpty ? name : (user?.childName ?? '');
   }
 
+  /// Cari uşaq deaktivdirsə və keçə biləcəyi aktiv uşaq yoxdursa, həmin uşaq.
+  /// Null olmayanda UI bağlanmayan bloklayıcı modal göstərir.
+  ChildAccount? get blockedChild {
+    final current = activeChild;
+    if (current == null || current.isActive != 'no') return null;
+
+    final hasActiveOther = children.any(
+          (c) => c.isActive != 'no' && c.childId != current.childId,
+    );
+    if (hasActiveOther) return null;
+
+    return current;
+  }
+  bool get isChildBlocked => blockedChild != null;
+
   AuthState copyWith({
     AuthStatus? status,
     AuthUser? user,

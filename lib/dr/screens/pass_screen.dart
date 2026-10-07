@@ -612,7 +612,25 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
     );
 
     return GestureDetector(
-      onTap: switching ? null : widget.onSelect,
+      onTap: widget.child.isActive != 'no'
+          ? switching ? null : widget.onSelect
+      : (){
+        showDialog(
+            context: context,
+            builder: (context){
+              return AlertDialog(
+                title: Text(context.l10n.attention),
+                content: Text(context.l10n.childIsNotActive),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(context.l10n.close),
+                  ),
+                ],
+              );
+            }
+        );
+      },
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 10),

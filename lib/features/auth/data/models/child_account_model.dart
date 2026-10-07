@@ -3,6 +3,7 @@ import '../../domain/entities/child_account.dart';
 class ChildAccountModel extends ChildAccount {
   const ChildAccountModel({
     super.childId,
+    required super.isActive,
     super.classId,
     super.username,
     super.categories,
@@ -18,6 +19,7 @@ class ChildAccountModel extends ChildAccount {
   factory ChildAccountModel.from(ChildAccount child) {
     return ChildAccountModel(
       childId: child.childId,
+      isActive: child.isActive,
       classId: child.classId,
       username: child.username,
       categories: child.categories,
@@ -33,6 +35,7 @@ class ChildAccountModel extends ChildAccount {
   factory ChildAccountModel.fromJson(Map<String, dynamic> json) {
     return ChildAccountModel(
       childId: _asInt(json['child_id']),
+      isActive: _asString(json['is_active']),
       classId: _asInt(json['class_id']),
       username: _asString(json['username']),
       categories: _asString(json['categories']),
@@ -47,6 +50,7 @@ class ChildAccountModel extends ChildAccount {
 
   Map<String, dynamic> toJson() => {
         'child_id': childId,
+        'is_active': isActive,
         'class_id': classId,
         'username': username,
         // Stored with the session, so a restored login still knows which

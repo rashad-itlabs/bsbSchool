@@ -59,6 +59,18 @@ class AuthSessionRefreshed extends AuthEvent {
   const AuthSessionRefreshed();
 }
 
+///
+class AuthChildStatusCheckRequested extends AuthEvent {
+  const AuthChildStatusCheckRequested();
+}
+
+///
+class AuthUserReloadRequested extends AuthEvent {
+  const AuthUserReloadRequested();
+}
+
+
+
 /// User tapped "log out".
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();

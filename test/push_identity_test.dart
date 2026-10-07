@@ -160,6 +160,12 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> resendOtp({required String email}) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, AuthUser>> refreshUser() {
+    // TODO: implement refreshUser
+    throw UnimplementedError();
+  }
 }
 
 /// The login response verbatim, trimmed to one student.
@@ -191,8 +197,8 @@ const _loginBody = '''
 ''';
 
 const _children = [
-  ChildAccount(childId: 3139, classId: 94, childName: 'Rashad'),
-  ChildAccount(childId: 2570, classId: 97, childName: 'Fakhraddin'),
+  ChildAccount(childId: 3139, classId: 94, childName: 'Rashad', isActive: ''),
+  ChildAccount(childId: 2570, classId: 97, childName: 'Fakhraddin', isActive: ''),
 ];
 
 AuthUserModel _parent({int? accountId, int? userId = 2570, String? pushId}) =>

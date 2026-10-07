@@ -15,6 +15,9 @@ abstract class AuthRepository {
   /// Revokes the token on the server (best-effort) and clears it locally.
   Future<Either<Failure, Unit>> logout();
 
+  ///
+  Future<Either<Failure, AuthUser>> refreshUser();
+
   /// Updates the signed-in account's own details and caches the result, so
   /// the profile shows the new values without a re-login.
   ///

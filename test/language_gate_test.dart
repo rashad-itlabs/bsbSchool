@@ -118,6 +118,12 @@ class _SignedOutRepository implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> resendOtp({required String email}) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, AuthUser>> refreshUser() {
+    // TODO: implement refreshUser
+    throw UnimplementedError();
+  }
 }
 
 /// The real app root minus `main()`'s bootstrapping: the locale is driven by

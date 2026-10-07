@@ -9,6 +9,15 @@ class AppL10nAz extends AppL10n {
   AppL10nAz([String locale = 'az']) : super(locale);
 
   @override
+  String get attention => 'Diqqət';
+
+  @override
+  String get childIsNotActive => 'Bu uşaq aktiv deyil.';
+
+  @override
+  String get close => 'Bağla';
+
+  @override
   String get addChildAdded => 'Şagird hesabınıza əlavə edildi';
 
   @override
@@ -1770,6 +1779,9 @@ class AppL10nAz extends AppL10n {
   String weeklyFeedbackAboutStudent(String name) {
     return '$name haqqında';
   }
+
+  @override
+  String get weeklyDocument => 'Weekly Document';
 
   @override
   String get weeklyFeedbackCurrent => 'Cari həftə';

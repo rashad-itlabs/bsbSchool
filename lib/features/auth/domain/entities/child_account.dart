@@ -7,6 +7,7 @@ class ChildAccount extends Equatable {
   final int? childId;
   final int? classId;
   final String username;
+  final String isActive;
 
   /// The school section the child is in (`categories`), e.g. `secondary`.
   /// Empty when the login response predates the field.
@@ -24,6 +25,7 @@ class ChildAccount extends Equatable {
 
   const ChildAccount({
     this.childId,
+    required this.isActive,
     this.classId,
     this.username = '',
     this.categories = '',
@@ -54,6 +56,7 @@ class ChildAccount extends Equatable {
   @override
   List<Object?> get props => [
         childId,
+        isActive,
         classId,
         categories,
         username,

@@ -9,6 +9,15 @@ class AppL10nEn extends AppL10n {
   AppL10nEn([String locale = 'en']) : super(locale);
 
   @override
+  String get attention => 'Attention';
+
+  @override
+  String get childIsNotActive => 'This child is not active.';
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get addChildAdded => 'The student has been added to your account';
 
   @override
@@ -1770,6 +1779,9 @@ class AppL10nEn extends AppL10n {
   String weeklyFeedbackAboutStudent(String name) {
     return 'About $name';
   }
+
+  @override
+  String get weeklyDocument => 'Weekly Document';
 
   @override
   String get weeklyFeedbackCurrent => 'This week';

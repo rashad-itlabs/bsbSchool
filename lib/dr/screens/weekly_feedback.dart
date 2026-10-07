@@ -291,6 +291,8 @@ class _FeedbackCard extends StatelessWidget {
     // kinds keep the server's own label.
     final title = feedback.kind == 'student' && studentName != null
         ? context.l10n.weeklyFeedbackAboutStudent(studentName!)
+        : feedback.kind == 'files'
+        ? context.l10n.weeklyDocument
         : feedback.kindLabel ?? feedback.teacher;
 
     return DrCard(

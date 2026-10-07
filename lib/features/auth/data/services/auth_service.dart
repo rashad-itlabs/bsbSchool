@@ -25,6 +25,9 @@ abstract class AuthService {
   /// as the login body), null when it only reports success.
   Future<AuthUserModel?> selectChild(int childId);
 
+  Future<Map<int, bool>> fetchChildStatuses(int childId);
+  
+
   /// Links one more student to the signed-in parent account, by the same
   /// admission code registration asks for.
   ///
@@ -230,6 +233,8 @@ class AuthServiceImpl implements AuthService {
       throw ServerException(_dioMessage(e));
     }
   }
+  
+  
 
   /// The user object hides in one of three places depending on how the
   /// endpoint answers; anything without a `user_id` is an acknowledgement, not
@@ -781,5 +786,65 @@ class AuthServiceImpl implements AuthService {
       return L.s.errNoConnection;
     }
     return _messageFrom(e.response?.data, e.response?.statusCode ?? 0);
+  }
+
+
+
+  @override
+  Future<Map<int, bool>> fetchChildStatuses(int childId) async {
+    try {
+      final response = await dio.post(
+        selectChildPath,
+        data: {'child_id': childId},
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if ((status == 200 || status == 201) && data is Map<String, dynamic>) {
+        if (data['success'] == false) {
+          throw ValidationException(_messageFrom(data, status));
+        }
+        return _statusesFrom(data);
+      }
+
+      throw ValidationException(_selectChildMessage(data, status));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  /// `child_status.children` siyahısı və `child_status`-un öz `child_id` /
+  /// `is_active` sahələri. `true/false`, `1/0`, `"yes"/"no"` qəbul edilir.
+  Map<int, bool> _statusesFrom(Map<String, dynamic> data) {
+    bool? asBool(dynamic v) {
+      if (v is bool) return v;
+      if (v is num) return v != 0;
+      if (v is String) {
+        final s = v.toLowerCase();
+        if (s == 'yes' || s == 'true' || s == '1') return true;
+        if (s == 'no' || s == 'false' || s == '0') return false;
+      }
+      return null;
+    }
+
+    final result = <int, bool>{};
+    void put(dynamic id, dynamic active) {
+      final childId = int.tryParse(id?.toString() ?? '');
+      final value = asBool(active);
+      if (childId != null && value != null) result[childId] = value;
+    }
+
+    final block = data['child_status'];
+    if (block is Map) {
+      put(block['child_id'], block['is_active']);
+      final list = block['children'];
+      if (list is List) {
+        for (final item in list) {
+          if (item is Map) put(item['child_id'], item['is_active']);
+        }
+      }
+    }
+    return result;
   }
 }

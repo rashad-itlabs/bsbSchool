@@ -17,6 +17,9 @@
     }
   },
   "@@locale": "en",
+  "attention": "Attention",
+  "childIsNotActive": "This child is not active.",
+  "close": "Close",
   "addChildAdded": "The student has been added to your account",
   "addChildAnotherText": "Enter your child's admission number — the student will be linked to your account and you can follow everything from here.",
   "addChildEnterNumber": "Enter the admission number",
@@ -561,6 +564,7 @@
   "weeklyFeedbackUnavailable": "Weekly feedback is not available yet",
   "weeklyFeedbackHas": "Has feedback",
   "weeklyFeedbackAboutStudent": "About {name}",
+  "weeklyDocument": "Weekly Document",
   "weeklyFeedbackCurrent": "This week",
   "weeklyFeedbackFiles": "Files",
   "weeklyLessonCount": "{count} lessons",

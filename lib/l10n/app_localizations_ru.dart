@@ -9,6 +9,15 @@ class AppL10nRu extends AppL10n {
   AppL10nRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get attention => 'Внимание';
+
+  @override
+  String get childIsNotActive => 'Этот ребенок неактивен.';
+
+  @override
+  String get close => 'Закрыть';
+
+  @override
   String get addChildAdded => 'Ученик добавлен к вашей учётной записи';
 
   @override
@@ -1771,6 +1780,9 @@ class AppL10nRu extends AppL10n {
   String weeklyFeedbackAboutStudent(String name) {
     return 'Об ученике: $name';
   }
+
+  @override
+  String get weeklyDocument => 'Еженедельный документ';
 
   @override
   String get weeklyFeedbackCurrent => 'Текущая неделя';

@@ -312,6 +312,7 @@ class AuthRepositoryImpl implements AuthRepository {
           if (child.childId == childId)
             ChildAccountModel(
               childId: child.childId,
+              isActive: child.isActive,
               classId: child.classId,
               username: child.username,
               categories: child.categories,
@@ -548,5 +549,74 @@ class AuthRepositoryImpl implements AuthRepository {
     await userStorage.clear();
     await selectedChildStorage.clear();
     return const Right(unit);
+  }
+
+  /// `child_status`-dakı is_active dəyərlərini keşlənmiş uşaqlara tətbiq edir.
+  AuthUserModel _withChildStatuses(
+      AuthUserModel user,
+      Map<int, bool> activeById,
+      ) {
+    return AuthUserModel(
+      id: user.id,
+      accountId: user.accountId,
+      pushId: user.pushId,
+      name: user.name,
+      childName: user.childName,
+      role: user.role,
+      email: user.email,
+      phone: user.phone,
+      classId: user.classId,
+      className: user.className,
+      categories: user.categories,
+      children: [
+        for (final child in user.children)
+          if (child.childId != null && activeById.containsKey(child.childId))
+            ChildAccountModel(
+              childId: child.childId,
+              isActive: activeById[child.childId]! ? 'yes' : 'no',
+              classId: child.classId,
+              username: child.username,
+              categories: child.categories,
+              className: child.className,
+              childName: child.childName,
+              childSurname: child.childSurname,
+              email: child.email,
+              password: child.password,
+              paymentId: child.paymentId,
+            )
+          else
+            ChildAccountModel.from(child),
+      ],
+    );
+  }
+
+  @override
+  Future<Either<Failure, AuthUser>> refreshUser() async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    final childId = activeChild?.childId;
+    if (childId == null) {
+      return const Left(ServerFailure());
+    }
+
+    try {
+      final statuses = await service.fetchChildStatuses(childId);
+
+      final user = userStorage.cachedUser;
+      if (user == null) return const Left(ServerFailure());
+      if (statuses.isEmpty) return Right(user);
+
+      final updated = _withChildStatuses(user, statuses);
+      await userStorage.saveUser(updated);
+      return Right(updated);
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
   }
 }
