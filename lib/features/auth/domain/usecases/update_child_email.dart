@@ -16,6 +16,7 @@ class UpdateChildEmail implements UseCase<Unit, UpdateChildEmailParams> {
     return repository.updateChildEmail(
       childId: params.childId,
       email: params.email,
+      otp: params.otp,
     );
   }
 }
@@ -24,8 +25,15 @@ class UpdateChildEmailParams extends Equatable {
   final int childId;
   final String email;
 
-  const UpdateChildEmailParams({required this.childId, required this.email});
+  /// The code mailed to [email] — only when it differs from the current one.
+  final String? otp;
+
+  const UpdateChildEmailParams({
+    required this.childId,
+    required this.email,
+    this.otp,
+  });
 
   @override
-  List<Object?> get props => [childId, email];
+  List<Object?> get props => [childId, email, otp];
 }

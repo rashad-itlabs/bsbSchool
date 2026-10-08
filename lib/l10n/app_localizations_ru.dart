@@ -15,6 +15,14 @@ class AppL10nRu extends AppL10n {
   String get childIsNotActive => 'Этот ребенок неактивен.';
 
   @override
+  String get childBlockedText => 'Ваш ребёнок заблокирован.';
+
+  @override
+  String childBlockedTextNamed(String name) {
+    return 'Ученик $name заблокирован.';
+  }
+
+  @override
   String get close => 'Закрыть';
 
   @override
@@ -1052,8 +1060,12 @@ class AppL10nRu extends AppL10n {
   String get profileEditSubtitle => 'Имя, e-mail и телефон';
 
   @override
+  String get profileEmailCodeNote =>
+      'Адрес e-mail изменится только после подтверждения кода.';
+
+  @override
   String get profileEmailNote =>
-      'Если вы измените адрес e-mail, вход будет выполняться по новому адресу.';
+      'Если вы измените адрес e-mail, на новый адрес будет отправлен код подтверждения. После подтверждения кода вход будет выполняться по новому адресу.';
 
   @override
   String get profileName => 'Имя и фамилия';

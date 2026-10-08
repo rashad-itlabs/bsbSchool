@@ -111,6 +111,18 @@ abstract class AppL10n {
   /// **'Bu uşaq aktiv deyil.'**
   String get childIsNotActive;
 
+  /// No description provided for @childBlockedText.
+  ///
+  /// In az, this message translates to:
+  /// **'Sizin uşaq bloklanıb.'**
+  String get childBlockedText;
+
+  /// No description provided for @childBlockedTextNamed.
+  ///
+  /// In az, this message translates to:
+  /// **'{name} bloklanıb.'**
+  String childBlockedTextNamed(String name);
+
   /// No description provided for @close.
   ///
   /// In az, this message translates to:
@@ -2013,10 +2025,16 @@ abstract class AppL10n {
   /// **'Ad, e-mail və telefon'**
   String get profileEditSubtitle;
 
+  /// No description provided for @profileEmailCodeNote.
+  ///
+  /// In az, this message translates to:
+  /// **'E-mail ünvanı yalnız kod təsdiqləndikdən sonra dəyişəcək.'**
+  String get profileEmailCodeNote;
+
   /// No description provided for @profileEmailNote.
   ///
   /// In az, this message translates to:
-  /// **'E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.'**
+  /// **'E-mail ünvanını dəyişsəniz, yeni ünvana təsdiq kodu göndəriləcək. Kodu təsdiqlədikdən sonra tətbiqə yeni ünvanla daxil olacaqsınız.'**
   String get profileEmailNote;
 
   /// No description provided for @profileName.

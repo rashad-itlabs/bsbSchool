@@ -15,6 +15,14 @@ class AppL10nEn extends AppL10n {
   String get childIsNotActive => 'This child is not active.';
 
   @override
+  String get childBlockedText => 'Your child has been blocked.';
+
+  @override
+  String childBlockedTextNamed(String name) {
+    return '$name has been blocked.';
+  }
+
+  @override
   String get close => 'Close';
 
   @override
@@ -1052,8 +1060,12 @@ class AppL10nEn extends AppL10n {
   String get profileEditSubtitle => 'Name, e-mail and phone';
 
   @override
+  String get profileEmailCodeNote =>
+      'The e-mail address changes only once the code is confirmed.';
+
+  @override
   String get profileEmailNote =>
-      'If you change your e-mail address, you will sign in with the new one.';
+      'If you change your e-mail address, a verification code will be sent to the new one. Once the code is confirmed, you will sign in with the new address.';
 
   @override
   String get profileName => 'Full name';

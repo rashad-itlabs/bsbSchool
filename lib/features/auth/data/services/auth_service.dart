@@ -47,11 +47,26 @@ abstract class AuthService {
   ///
   /// Throws a [FieldValidationException] when the backend rejects one of the
   /// inputs, so the form can show each message under its own field.
+  ///
+  /// A new [email] only lands with the [otp] that [sendEmailChangeOtp] mailed
+  /// to it; without one, or with a wrong one, nothing is saved — a rejected
+  /// code comes back under `otp`.
   Future<AuthUserModel?> updateProfile({
     required String name,
     required String email,
     required String phone,
+    String? otp,
   });
+
+  /// Mails a 6-digit code to [email], the address the account (or, with
+  /// [childId], one of its students) is about to sign in with. The change
+  /// itself is made by [updateProfile] / [updateChildEmail], carrying the code.
+  ///
+  /// Returns how many seconds to wait before asking for another one.
+  ///
+  /// Throws a [FieldValidationException] when the address is malformed,
+  /// already taken or unchanged — the message belongs under `email`.
+  Future<int> sendEmailChangeOtp({required String email, int? childId});
 
   /// Replaces the signed-in account's own password, proving ownership with
   /// [currentPassword] rather than a mailed code — the parent is already in.
@@ -76,10 +91,15 @@ abstract class AuthService {
   ///
   /// Same return contract as [updateProfile]: the refreshed user (whose `info`
   /// carries the student's new address) when the endpoint echoes one, null
-  /// when it only acknowledges.
+  /// when it only acknowledges. Same [otp] rule as well — the code
+  /// [sendEmailChangeOtp] mailed to the new address, sent with [childId].
+  ///
+  /// Throws a [FieldValidationException], so a rejected code can be told
+  /// apart from a rejected address.
   Future<AuthUserModel?> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   });
 
   /// Mails a 6-digit code to [email] so its password can be replaced.
@@ -137,6 +157,13 @@ class AuthServiceImpl implements AuthService {
 
   /// Backend route that changes one student's login e-mail.
   static const String updateChildEmailPath = '/updateChildEmail';
+
+  /// Backend route that mails the code a login e-mail change is made with.
+  static const String sendEmailChangeOtpPath = '/sendEmailChangeOtp';
+
+  /// What `/sendEmailChangeOtp` asks the app to wait before another code,
+  /// used when the body does not say.
+  static const int emailChangeResendSeconds = 60;
 
   /// Backend route that changes the signed-in account's own password.
   static const String updatePasswordPath = '/updatePassword';
@@ -304,6 +331,7 @@ class AuthServiceImpl implements AuthService {
     required String name,
     required String email,
     required String phone,
+    String? otp,
   }) async {
     try {
       final response = await dio.post(
@@ -312,6 +340,7 @@ class AuthServiceImpl implements AuthService {
           'name': name,
           'email': email,
           'phone': phone,
+          'otp': ?otp,
         },
       );
 
@@ -419,6 +448,7 @@ class AuthServiceImpl implements AuthService {
   Future<AuthUserModel?> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   }) async {
     try {
       final response = await dio.post(
@@ -426,6 +456,7 @@ class AuthServiceImpl implements AuthService {
         data: {
           'child_id': childId,
           'email': email,
+          'otp': ?otp,
         },
       );
 
@@ -435,7 +466,10 @@ class AuthServiceImpl implements AuthService {
       if (status == 200 || status == 201 || status == 204) {
         if (data is! Map<String, dynamic>) return null;
         if (data['success'] == false) {
-          throw ValidationException(_childEmailMessage(data, status));
+          throw FieldValidationException(
+            _fieldErrorsFrom(data),
+            _childEmailMessage(data, status),
+          );
         }
         final user = _userFrom(data);
         if (user != null) return AuthUserModel.fromJson(user);
@@ -449,9 +483,48 @@ class AuthServiceImpl implements AuthService {
             : AuthUserModel.fromJson({'info': roster});
       }
 
-      // 403 — the student isn't on this account. 422 — the address is taken.
-      throw ValidationException(_childEmailMessage(data, status));
+      // 403 — the student isn't on this account. 422 — the address is taken,
+      // or the code is missing or wrong (under `otp`).
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _childEmailMessage(data, status),
+      );
     } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
+  Future<int> sendEmailChangeOtp({required String email, int? childId}) async {
+    try {
+      final response = await dio.post(
+        sendEmailChangeOtpPath,
+        data: {
+          'email': email,
+          'child_id': ?childId,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      if ((status == 200 || status == 201) &&
+          !(data is Map && data['success'] == false)) {
+        final seconds = data is Map
+            ? int.tryParse(data['seconds_left']?.toString() ?? '')
+            : null;
+        return seconds ?? emailChangeResendSeconds;
+      }
+
+      // 422 — malformed, taken or unchanged address, or a resend asked for
+      // too early (all under `email`). 403 — the student is not on this
+      // account.
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _childEmailMessage(data, status),
+      );
+    } on DioException catch (e) {
+      // 500 lands here: the mail could not be sent, and the body says so.
       throw ServerException(_dioMessage(e));
     }
   }

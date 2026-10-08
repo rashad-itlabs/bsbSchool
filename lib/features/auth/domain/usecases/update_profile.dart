@@ -16,6 +16,7 @@ class UpdateProfile implements UseCase<Unit, UpdateProfileParams> {
       name: params.name,
       email: params.email,
       phone: params.phone,
+      otp: params.otp,
     );
   }
 }
@@ -25,12 +26,16 @@ class UpdateProfileParams extends Equatable {
   final String email;
   final String phone;
 
+  /// The code mailed to [email] — only when it differs from the current one.
+  final String? otp;
+
   const UpdateProfileParams({
     required this.name,
     required this.email,
     required this.phone,
+    this.otp,
   });
 
   @override
-  List<Object?> get props => [name, email, phone];
+  List<Object?> get props => [name, email, phone, otp];
 }

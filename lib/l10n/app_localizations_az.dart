@@ -15,6 +15,14 @@ class AppL10nAz extends AppL10n {
   String get childIsNotActive => 'Bu uşaq aktiv deyil.';
 
   @override
+  String get childBlockedText => 'Sizin uşaq bloklanıb.';
+
+  @override
+  String childBlockedTextNamed(String name) {
+    return '$name bloklanıb.';
+  }
+
+  @override
   String get close => 'Bağla';
 
   @override
@@ -1051,8 +1059,12 @@ class AppL10nAz extends AppL10n {
   String get profileEditSubtitle => 'Ad, e-mail və telefon';
 
   @override
+  String get profileEmailCodeNote =>
+      'E-mail ünvanı yalnız kod təsdiqləndikdən sonra dəyişəcək.';
+
+  @override
   String get profileEmailNote =>
-      'E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.';
+      'E-mail ünvanını dəyişsəniz, yeni ünvana təsdiq kodu göndəriləcək. Kodu təsdiqlədikdən sonra tətbiqə yeni ünvanla daxil olacaqsınız.';
 
   @override
   String get profileName => 'Ad, Soyad';

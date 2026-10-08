@@ -326,6 +326,113 @@ void main() {
       // A rejected save leaves the cache exactly as it was.
       expect(storage.cachedUser!.email, 'ceyhun@bsb.edu.az');
     });
+
+    test('a new address goes out with the code mailed to it', () async {
+      final (repository, adapter, _) = _repository();
+
+      await repository.updateProfile(
+        name: 'Ceyhun Alizade',
+        email: 'yeni@bsb.edu.az',
+        phone: '0555555555',
+        otp: '123456',
+      );
+
+      expect(_sent(adapter), {
+        'name': 'Ceyhun Alizade',
+        'email': 'yeni@bsb.edu.az',
+        'phone': '0555555555',
+        'otp': '123456',
+      });
+    });
+
+    test('a wrong code comes back under its own name, nothing cached',
+        () async {
+      final (repository, _, storage) = _repository(
+        statusCode: 422,
+        body: '''
+{"success": false, "message": "Məlumatlar yenilənmədi",
+ "errors": {"otp": ["Təsdiq kodu yanlışdır."]}}
+''',
+      );
+
+      final result = await repository.updateProfile(
+        name: 'Ceyhun Alizade',
+        email: 'yeni@bsb.edu.az',
+        phone: '0555555555',
+        otp: '000000',
+      );
+
+      final failure = result.fold((f) => f, (_) => null);
+      expect(failure, isA<FieldValidationFailure>());
+      expect(
+        (failure as FieldValidationFailure).fieldErrors['otp'],
+        'Təsdiq kodu yanlışdır.',
+      );
+      expect(storage.cachedUser!.email, 'ceyhun@bsb.edu.az');
+    });
+  });
+
+  group('the code for a new login address', () {
+    test('goes to the new address, and the wait comes back', () async {
+      final (repository, adapter, storage) = _repository(
+        body: '{"success": true, "message": "Kod göndərildi", '
+            '"seconds_left": 60, "expires_in": 600}',
+      );
+
+      final result = await repository.sendEmailChangeOtp(
+        email: 'yeni@bsb.edu.az',
+      );
+
+      expect(result.fold((_) => null, (seconds) => seconds), 60);
+      expect(adapter.request!.path, AuthServiceImpl.sendEmailChangeOtpPath);
+      expect(_sent(adapter), {'email': 'yeni@bsb.edu.az'});
+      // Asking for a code changes nothing yet.
+      expect(storage.cachedUser!.email, 'ceyhun@bsb.edu.az');
+    });
+
+    test("names the student when it is the student's address", () async {
+      final (repository, adapter, _) = _repository(
+        body: '{"success": true, "seconds_left": 60}',
+      );
+
+      await repository.sendEmailChangeOtp(
+        email: 'resad@bsb.edu.az',
+        childId: 3139,
+      );
+
+      expect(_sent(adapter), {'email': 'resad@bsb.edu.az', 'child_id': 3139});
+    });
+
+    test('is never asked for a student on another account', () async {
+      final (repository, adapter, _) = _repository();
+
+      final result = await repository.sendEmailChangeOtp(
+        email: 'resad@bsb.edu.az',
+        childId: 999,
+      );
+
+      expect(result.isLeft(), isTrue);
+      expect(adapter.request, isNull);
+    });
+
+    test('a refused address comes back under the e-mail field', () async {
+      final (repository, _, _) = _repository(
+        statusCode: 422,
+        body: '{"success": false, '
+            '"errors": {"email": ["Bu email artıq istifadə olunur."]}}',
+      );
+
+      final result = await repository.sendEmailChangeOtp(
+        email: 'artiq@bsb.edu.az',
+      );
+
+      final failure = result.fold((f) => f, (_) => null);
+      expect(failure, isA<FieldValidationFailure>());
+      expect(
+        (failure as FieldValidationFailure).fieldErrors['email'],
+        'Bu email artıq istifadə olunur.',
+      );
+    });
   });
 
   group('the parent changes their own password', () {
@@ -458,6 +565,45 @@ void main() {
       );
 
       expect(result.fold((f) => f.message, (_) => null), 'Bu şagird sizin deyil.');
+      expect(storage.cachedUser!.children.first.email, 'std_3139@bsb.edu.az');
+    });
+
+    test('the code rides along with the new address', () async {
+      final (repository, adapter, _) = _repository();
+
+      await repository.updateChildEmail(
+        childId: 3139,
+        email: 'resad@bsb.edu.az',
+        otp: '654321',
+      );
+
+      expect(_sent(adapter), {
+        'child_id': 3139,
+        'email': 'resad@bsb.edu.az',
+        'otp': '654321',
+      });
+    });
+
+    test('a wrong code is told apart from a refused address', () async {
+      final (repository, _, storage) = _repository(
+        statusCode: 422,
+        body: '{"success": false, '
+            '"errors": {"otp": ["Təsdiq kodu yanlışdır."]}}',
+      );
+
+      final result = await repository.updateChildEmail(
+        childId: 3139,
+        email: 'resad@bsb.edu.az',
+        otp: '000000',
+      );
+
+      final failure = result.fold((f) => f, (_) => null);
+      expect(failure, isA<FieldValidationFailure>());
+      expect(
+        (failure as FieldValidationFailure).fieldErrors['otp'],
+        'Təsdiq kodu yanlışdır.',
+      );
+      expect(failure.message, 'Təsdiq kodu yanlışdır.');
       expect(storage.cachedUser!.children.first.email, 'std_3139@bsb.edu.az');
     });
   });

@@ -290,6 +290,9 @@ class _FoodCardViewState extends State<_FoodCardView> {
     final allTransactions = state.recentTransactions;
     final transactions = allTransactions.where(_inRange).toList();
     final topUps = state.recentTopUps;
+    final isParent = context.select<AuthBloc, bool>(
+          (bloc) => bloc.state.user?.isParent ?? false,
+    );
 
     return [
       const SizedBox(height: 4),
@@ -331,16 +334,21 @@ class _FoodCardViewState extends State<_FoodCardView> {
       const SizedBox(height: 24),
       // The button carries the whole top-up: a spinner while the link is being
       // minted and again while the outcome is read back from the API.
-      BlocBuilder<PaymentCubit, PaymentState>(
-        builder: (context, payment) => DrPrimaryButton(
-          label: payment.stage == PaymentStage.checking
-              ? context.l10n.paymentChecking
-              : context.l10n.balanceTopUp,
-          trailingIcon: Icons.add_card_outlined,
-          loading: payment.isBusy,
-          onTap: _addBalanceBlocked, /// _addBalance,
-        ),
-      ),
+      isParent
+        ? BlocBuilder<PaymentCubit, PaymentState>(
+          builder: (context, payment) =>
+              DrPrimaryButton(
+                label: payment.stage == PaymentStage.checking
+                    ? context.l10n.paymentChecking
+                    : context.l10n.balanceTopUp,
+                trailingIcon: Icons.add_card_outlined,
+                loading: payment.isBusy,
+                onTap: _addBalanceBlocked,
+
+                /// _addBalance,
+              ),
+        )
+      : SizedBox(),
       const SizedBox(height: 28),
       DrSectionHeader(title: context.l10n.recentTransactions),
       Padding(

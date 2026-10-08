@@ -28,6 +28,7 @@ import '../../features/auth/domain/usecases/register_parent.dart';
 import '../../features/auth/domain/usecases/resend_otp.dart';
 import '../../features/auth/domain/usecases/reset_password.dart';
 import '../../features/auth/domain/usecases/update_child_email.dart';
+import '../../features/auth/domain/usecases/send_email_change_otp.dart';
 import '../../features/auth/domain/usecases/update_password.dart';
 import '../../features/auth/domain/usecases/update_profile.dart';
 import '../../features/auth/domain/usecases/verify_otp.dart';
@@ -320,6 +321,7 @@ void _initAuth() {
         updateProfile: sl(),
         updateChildEmail: sl(),
         updatePassword: sl(),
+        sendEmailChangeOtp: sl(),
       ));
 
   // Bloc — new instance per sign-up screen.
@@ -339,6 +341,7 @@ void _initAuth() {
   sl.registerLazySingleton(() => ResetPassword(sl()));
   sl.registerLazySingleton(() => UpdateProfile(sl()));
   sl.registerLazySingleton(() => UpdateChildEmail(sl()));
+  sl.registerLazySingleton(() => SendEmailChangeOtp(sl()));
   sl.registerLazySingleton(() => UpdatePassword(sl()));
   sl.registerLazySingleton(() => DeleteAccount(sl()));
   sl.registerLazySingleton(() => RegisterParent(sl()));

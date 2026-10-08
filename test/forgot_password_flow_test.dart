@@ -38,13 +38,22 @@ class _RecordingRepository implements AuthRepository {
     required String name,
     required String email,
     required String phone,
+    String? otp,
   }) async =>
       const Right(unit);
+
+  @override
+  Future<Either<Failure, int>> sendEmailChangeOtp({
+    required String email,
+    int? childId,
+  }) async =>
+      const Right(60);
 
   @override
   Future<Either<Failure, Unit>> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   }) async =>
       const Right(unit);
 

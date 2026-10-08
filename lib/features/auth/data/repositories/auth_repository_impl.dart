@@ -135,6 +135,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String email,
     required String phone,
+    String? otp,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
@@ -145,6 +146,7 @@ class AuthRepositoryImpl implements AuthRepository {
         name: name,
         email: email,
         phone: phone,
+        otp: otp,
       );
       final current = userStorage.cachedUser;
 
@@ -225,17 +227,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Unit>> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   }) async {
     if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure());
     }
 
-    // Rejected here as well as on the server: the id comes from the roster
-    // this account was handed, so one that isn't on it is the app's bug, not
-    // a round trip worth making.
-    final known = (currentUser?.children ?? const <ChildAccount>[])
-        .any((c) => c.childId == childId);
-    if (!known) {
+    if (!_isOwnChild(childId)) {
       return Left(ValidationFailure(L.s.errChildNotYoursShort));
     }
 
@@ -243,6 +241,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final refreshed = await service.updateChildEmail(
         childId: childId,
         email: email,
+        otp: otp,
       );
       final current = userStorage.cachedUser;
 
@@ -254,6 +253,10 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
       return const Right(unit);
+    } on FieldValidationException catch (e) {
+      // Caught before ValidationException — it is a subclass, and dropping to
+      // the plain branch would throw the per-field map away.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
     } on ValidationException catch (e) {
       return Left(ValidationFailure(e.message));
     } on ServerException catch (e) {
@@ -262,6 +265,43 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, int>> sendEmailChangeOtp({
+    required String email,
+    int? childId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure());
+    }
+
+    if (childId != null && !_isOwnChild(childId)) {
+      return Left(ValidationFailure(L.s.errChildNotYoursShort));
+    }
+
+    try {
+      return Right(
+        await service.sendEmailChangeOtp(email: email, childId: childId),
+      );
+    } on FieldValidationException catch (e) {
+      // Before ValidationException — it is a subclass, and the plain branch
+      // would drop the per-field message.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
+  /// Rejected here as well as on the server: the id comes from the roster
+  /// this account was handed, so one that isn't on it is the app's bug, not
+  /// a round trip worth making.
+  bool _isOwnChild(int childId) =>
+      (currentUser?.children ?? const <ChildAccount>[])
+          .any((c) => c.childId == childId);
 
   /// The cached user with the details the profile form just sent.
   ///

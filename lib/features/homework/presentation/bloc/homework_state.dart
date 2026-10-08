@@ -41,16 +41,47 @@ class HomeworkState extends Equatable {
 
   /// Homeworks of the selected [tab]. A missing deadline counts as active —
   /// nothing has expired yet.
+  ///
+  /// The past tab reads newest deadline first: what just closed is what the
+  /// parent comes looking for, not what ran out months ago. The active tab
+  /// keeps the order the API sent.
   List<Homework> get tabHomeworks {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    return homeworks.where((hw) {
+    final inTab = homeworks.where((hw) {
       final date = hw.submitDate;
       if (date == null) return tab == HomeworkTab.active;
       final due = DateTime(date.year, date.month, date.day);
       final expired = due.isBefore(today);
       return tab == HomeworkTab.active ? !expired : expired;
     }).toList();
+
+    return tab == HomeworkTab.past ? _newestFirst(inTab) : inTab;
+  }
+
+  /// Latest deadline first — the date the card shows. On the same deadline
+  /// the more recently assigned one leads, and anything still level keeps
+  /// the API's order: `List.sort` is not stable, so that is spelled out.
+  static List<Homework> _newestFirst(List<Homework> list) {
+    final sorted = list.indexed.toList()
+      ..sort((a, b) {
+        final byDue = _compareNewestFirst(a.$2.submitDate, b.$2.submitDate);
+        if (byDue != 0) return byDue;
+        final byAssigned =
+            _compareNewestFirst(a.$2.homeworkDate, b.$2.homeworkDate);
+        if (byAssigned != 0) return byAssigned;
+        return a.$1.compareTo(b.$1);
+      });
+    return [for (final (_, hw) in sorted) hw];
+  }
+
+  /// Later dates first; a missing date sorts after every known one.
+  static int _compareNewestFirst(DateTime? a, DateTime? b) {
+    if (a == null || b == null) {
+      if (a == b) return 0;
+      return a == null ? 1 : -1;
+    }
+    return b.compareTo(a);
   }
 
   /// Pill labels: "Hamısı" plus every subject present in the selected tab.

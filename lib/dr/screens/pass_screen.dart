@@ -14,6 +14,7 @@ import '../../core/l10n/locale_controller.dart';
 import '../../core/utils/az_phone.dart';
 import '../theme/dr_colors.dart';
 import '../theme/theme_controller.dart';
+import '../widgets/child_inactive_dialog.dart';
 import '../widgets/dr_widgets.dart';
 
 /// Port of `pass.html` — student photo + settings list.
@@ -614,23 +615,7 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
     return GestureDetector(
       onTap: widget.child.isActive != 'no'
           ? switching ? null : widget.onSelect
-      : (){
-        showDialog(
-            context: context,
-            builder: (context){
-              return AlertDialog(
-                title: Text(context.l10n.attention),
-                content: Text(context.l10n.childIsNotActive),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.close),
-                  ),
-                ],
-              );
-            }
-        );
-      },
+          : () => showChildInactiveDialog(context),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1563,6 +1548,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
       name: _nameController.text,
       email: _emailController.text,
       phone: _phoneController.text,
+      currentEmail: widget.user.email,
     );
   }
 
@@ -1588,6 +1574,17 @@ class _ProfileSheetState extends State<_ProfileSheet> {
       builder: (context, state) {
         final busy = state.isLoading;
         final formError = state.formError;
+
+        // A new address is mailed a code first; the form behind it is kept as
+        // typed, so going back to fix the address loses nothing.
+        if (state.awaitingCode) {
+          return _EditSheetFrame(
+            icon: Icons.mark_email_unread_outlined,
+            title: context.l10n.profileTitle,
+            busy: busy,
+            children: [_EmailCodeStep(state: state)],
+          );
+        }
 
         return _EditSheetFrame(
           icon: Icons.badge_outlined,
@@ -1686,6 +1683,7 @@ class _ChildEmailSheetState extends State<_ChildEmailSheet> {
     context.read<ProfileCubit>().saveChildEmail(
       childId: childId,
       email: _emailController.text,
+      currentEmail: widget.child.email,
     );
   }
 
@@ -1708,6 +1706,15 @@ class _ChildEmailSheetState extends State<_ChildEmailSheet> {
       builder: (context, state) {
         final busy = state.isLoading;
         final formError = state.formError;
+
+        if (state.awaitingCode) {
+          return _EditSheetFrame(
+            icon: Icons.mark_email_unread_outlined,
+            title: context.l10n.profileChildEmailTitle,
+            busy: busy,
+            children: [_EmailCodeStep(state: state)],
+          );
+        }
 
         return _EditSheetFrame(
           icon: Icons.alternate_email,
@@ -1748,6 +1755,179 @@ class _ChildEmailSheetState extends State<_ChildEmailSheet> {
           ],
         );
       },
+    );
+  }
+}
+
+/// The digits mailed to a new login address, shared by both e-mail sheets.
+///
+/// The address only changes once the backend accepts them — the save is held
+/// back by [ProfileCubit] until then, so closing the sheet here leaves the
+/// account exactly as it was.
+class _EmailCodeStep extends StatefulWidget {
+  final ProfileState state;
+
+  const _EmailCodeStep({required this.state});
+
+  @override
+  State<_EmailCodeStep> createState() => _EmailCodeStepState();
+}
+
+class _EmailCodeStepState extends State<_EmailCodeStep> {
+  final _codeController = TextEditingController();
+  final _codeFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _codeFocus.dispose();
+    super.dispose();
+  }
+
+  void _onCodeChanged(String value) {
+    // The boxes paint straight from the controller, so they need the frame.
+    setState(() {});
+    context.read<ProfileCubit>().inputChanged();
+    // Six digits is the whole input; asking for a button press after that is
+    // one tap too many.
+    if (value.length == ProfileCubit.codeLength) _confirm();
+  }
+
+  void _confirm() {
+    _codeFocus.unfocus();
+    context.read<ProfileCubit>().confirmCode(_codeController.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.state;
+    final busy = state.isLoading;
+    final complete = _codeController.text.length == ProfileCubit.codeLength;
+    final codeError = state.codeError;
+    // A fresh code's confirmation, in the muted tone a rejection is not.
+    final info = state.status != ProfileStatus.error ? state.message : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          context.l10n.otpSubtitle(state.pendingEmail ?? ''),
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.45,
+            color: context.dr.textMuted,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          context.l10n.profileEmailCodeNote,
+          style: TextStyle(
+            fontSize: 12,
+            height: 1.45,
+            color: context.dr.textMuted,
+          ),
+        ),
+        const SizedBox(height: 18),
+        DrCodeInput(
+          controller: _codeController,
+          focusNode: _codeFocus,
+          onChanged: _onCodeChanged,
+          length: ProfileCubit.codeLength,
+        ),
+        if (codeError != null) _FieldError(codeError),
+        if (info != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 15, color: context.dr.accent),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    info,
+                    style: TextStyle(fontSize: 12, color: context.dr.textMuted),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 20),
+        DrPrimaryButton(
+          label: context.l10n.otpVerify,
+          trailingIcon: Icons.check_rounded,
+          loading: busy,
+          onTap: complete ? _confirm : null,
+        ),
+        const SizedBox(height: 4),
+        Center(child: _resend(context, state)),
+        Center(
+          child: Text(
+            context.l10n.otpSpamHint,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: context.dr.textMuted),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Center(
+          child: TextButton(
+            onPressed:
+                busy ? null : () => context.read<ProfileCubit>().backToForm(),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, 44),
+              foregroundColor: context.dr.textMuted,
+            ),
+            child: Text(
+              context.l10n.forgotChangeEmail,
+              style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The cooldown reads as plain text; only once it runs out does the resend
+  /// become something to press.
+  Widget _resend(BuildContext context, ProfileState state) {
+    if (state.resendSeconds > 0) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          context.l10n.otpResendIn(state.resendSeconds),
+          style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+        ),
+      );
+    }
+
+    return TextButton(
+      onPressed: state.canResend
+          ? () => context.read<ProfileCubit>().resendCode()
+          : null,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        foregroundColor: context.dr.accent,
+      ),
+      child: state.isResending
+          ? SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: context.dr.accent,
+              ),
+            )
+          : Text(
+              context.l10n.otpResend,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color:
+                    state.canResend ? context.dr.accent : context.dr.textMuted,
+              ),
+            ),
     );
   }
 }

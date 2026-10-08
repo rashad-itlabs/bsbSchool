@@ -5,6 +5,7 @@ import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/domain/entities/child_account.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../theme/dr_colors.dart';
+import 'child_inactive_dialog.dart';
 
 /// The dashboard avatar, doubling as the student picker for a parent with more
 /// than one child. Tapping drops a menu of the account's students; choosing one
@@ -48,6 +49,13 @@ class ChildSwitcher extends StatelessWidget {
       ),
       onSelected: (childId) {
         if (childId == activeId) return;
+        // Same rule as the profile's student cards: an inactive student is
+        // not switched to — the parent is told why instead.
+        final picked = children.where((c) => c.childId == childId).firstOrNull;
+        if (picked?.isActive == 'no') {
+          showChildInactiveDialog(context);
+          return;
+        }
         context.read<AuthBloc>().add(AuthChildSelected(childId));
       },
       itemBuilder: (menuContext) => [

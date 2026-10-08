@@ -23,10 +23,25 @@ abstract class AuthRepository {
   ///
   /// Fails with a [FieldValidationFailure] when the backend rejects an input,
   /// so the form can put each message back under its own field.
+  ///
+  /// A changed [email] needs the [otp] that [sendEmailChangeOtp] mailed to
+  /// it; a wrong one comes back under `otp` and nothing is saved.
   Future<Either<Failure, Unit>> updateProfile({
     required String name,
     required String email,
     required String phone,
+    String? otp,
+  });
+
+  /// Mails the code a login e-mail change is confirmed with to the new
+  /// [email] — the account's own, or with [childId] one of its students'.
+  /// Right carries the seconds to wait before another code may be asked for.
+  ///
+  /// Fails with a [FieldValidationFailure] (`email`) when the address is
+  /// malformed, taken or unchanged.
+  Future<Either<Failure, int>> sendEmailChangeOtp({
+    required String email,
+    int? childId,
   });
 
   /// Replaces the signed-in account's own password. Nothing is cached: the
@@ -51,10 +66,12 @@ abstract class AuthRepository {
   /// result so the credentials card shows the new address.
   ///
   /// Fails with a [ValidationFailure] when the student is on another account
-  /// or the address is already taken.
+  /// or the address is already taken — a [FieldValidationFailure] when the
+  /// backend named the field, `otp` for a missing or wrong code.
   Future<Either<Failure, Unit>> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   });
 
   /// Mails a 6-digit code to [email] so its password can be replaced.

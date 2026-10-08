@@ -100,7 +100,7 @@ class _HomeShellState extends State<HomeShell> {
     _Tab(
       DrNavDestination(Icons.receipt_long_outlined, DrNavLabel.tuition),
       TuitionScreen(),
-      parentOnly: false,
+      parentOnly: true,
       underConstruction: true, // bu hissede odenisler yigima getmelidir
     ),
     _Tab(

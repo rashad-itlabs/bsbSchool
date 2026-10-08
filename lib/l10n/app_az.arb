@@ -2,6 +2,8 @@
   "@@locale": "az",
   "attention": "Diqqət",
   "childIsNotActive": "Bu uşaq aktiv deyil.",
+  "childBlockedText": "Sizin uşaq bloklanıb.",
+  "childBlockedTextNamed": "{name} bloklanıb.",
   "close": "Bağla",
   "addChildAdded": "Şagird hesabınıza əlavə edildi",
   "addChildAnotherText": "Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.",
@@ -319,7 +321,8 @@
   "profileCurrentPasswordRequired": "Cari şifrənizi daxil edin",
   "profileEdit": "Məlumatlarımı redaktə et",
   "profileEditSubtitle": "Ad, e-mail və telefon",
-  "profileEmailNote": "E-mail ünvanınızı dəyişsəniz, tətbiqə yeni ünvanla daxil olacaqsınız.",
+  "profileEmailCodeNote": "E-mail ünvanı yalnız kod təsdiqləndikdən sonra dəyişəcək.",
+  "profileEmailNote": "E-mail ünvanını dəyişsəniz, yeni ünvana təsdiq kodu göndəriləcək. Kodu təsdiqlədikdən sonra tətbiqə yeni ünvanla daxil olacaqsınız.",
   "profileName": "Ad, Soyad",
   "profileNameRequired": "Adınızı daxil edin",
   "profilePassword": "Şifrəni dəyiş",
@@ -608,6 +611,13 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@childBlockedTextNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

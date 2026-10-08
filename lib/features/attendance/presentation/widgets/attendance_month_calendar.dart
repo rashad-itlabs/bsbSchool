@@ -14,15 +14,19 @@ import '../../../../core/l10n/l10n.dart';
 ///
 /// Today and past days are tappable and report through [onDaySelected]; the
 /// [selectedDay] cell is filled so the list below it reads as "this day".
+/// Whenever the user walks to another month, [onMonthChanged] reports the
+/// first day of the newly shown month.
 class AttendanceMonthCalendar extends StatefulWidget {
   final List<AttendanceRecord> records;
   final DateTime? selectedDay;
   final ValueChanged<DateTime>? onDaySelected;
+  final ValueChanged<DateTime>? onMonthChanged; // YENİ
   const AttendanceMonthCalendar({
     super.key,
     required this.records,
     this.selectedDay,
     this.onDaySelected,
+    this.onMonthChanged, // YENİ
   });
 
   @override
@@ -66,6 +70,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
     final target = DateTime(_visibleMonth.year, _visibleMonth.month + months);
     if (target.isBefore(_firstMonth) || target.isAfter(_lastMonth)) return;
     setState(() => _month = target);
+    widget.onMonthChanged?.call(target); // YENİ: valideynə xəbər ver
   }
 
   @override
@@ -109,7 +114,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
                     AppDates.weekdayShort(context, weekday),
                     textAlign: TextAlign.center,
                     style:
-                        TextStyle(fontSize: 10, color: context.dr.textMuted),
+                    TextStyle(fontSize: 10, color: context.dr.textMuted),
                   ),
                 ),
             ],
@@ -180,8 +185,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
     final fill = isMixed
         ? null
         : isSelected
-            ? (color ?? context.dr.accent).withValues(alpha: alpha)
-            : color?.withValues(alpha: alpha);
+        ? (color ?? context.dr.accent).withValues(alpha: alpha)
+        : color?.withValues(alpha: alpha);
 
     final cell = Padding(
       padding: const EdgeInsets.all(3),
@@ -302,8 +307,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
       _DayStatus.present => context.dr.accent,
       _DayStatus.late => DrColors.teal,
       _DayStatus.absent => DrColors.red,
-      // Only used where a single colour is unavoidable; cells and the legend
-      // dot paint [_mixedGradient] instead.
+    // Only used where a single colour is unavoidable; cells and the legend
+    // dot paint [_mixedGradient] instead.
       _DayStatus.mixed => DrColors.red,
     };
   }

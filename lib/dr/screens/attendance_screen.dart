@@ -11,8 +11,8 @@ import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
 import '../../core/l10n/l10n.dart';
 
-/// Port of `attendance.html`, backed by `GET /attendance` — summary stat cards
-/// and the recent session log for the logged-in student.
+/// Port of `attendance.html`, backed by `GET /attendance` — stat cards for the
+/// month shown in the calendar and the session log of the selected day.
 class AttendanceScreen extends StatelessWidget {
   const AttendanceScreen({super.key});
 
@@ -64,6 +64,9 @@ class _BodyState extends State<_Body> {
   /// The calendar day whose sessions are listed; opens on today.
   late DateTime _selectedDay = _today();
 
+  /// The month shown in the calendar; the stat cards are computed from it.
+  late DateTime _visibleMonth = DateTime(_selectedDay.year, _selectedDay.month);
+
   static DateTime _today() {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
@@ -77,9 +80,46 @@ class _BodyState extends State<_Body> {
         d.day == _selectedDay.day;
   }
 
+  bool _inVisibleMonth(AttendanceRecord record) {
+    final d = record.date;
+    return d != null &&
+        d.year == _visibleMonth.year &&
+        d.month == _visibleMonth.month;
+  }
+
+  ({int present, int absent, int late, int rate}) _monthStats(
+      List<AttendanceRecord> records) {
+    var present = 0, absent = 0, late = 0;
+    for (final r in records.where(_inVisibleMonth)) {
+      if (r.isAbsent) {
+        absent++;
+      } else if (r.isLate) {
+        late++;
+      } else if (r.isPresent) {
+        present++;
+      }
+    }
+    final total = present + absent + late;
+    final rate = total == 0 ? 0 : (((present + late) / total) * 100).round();
+    return (present: present, absent: absent, late: late, rate: rate);
+  }
+
+  void _onMonthChanged(DateTime month) {
+    setState(() {
+      _visibleMonth = DateTime(month.year, month.month);
+      final today = _today();
+      final isCurrentMonth =
+          month.year == today.year && month.month == today.month;
+      // Back on the current month -> today; a past month -> its 1st.
+      _selectedDay =
+      isCurrentMonth ? today : DateTime(month.year, month.month, 1);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+
     if (state.isLoading && state.records.isEmpty) {
       return const Padding(
         padding: EdgeInsets.only(top: 80),
@@ -95,8 +135,8 @@ class _BodyState extends State<_Body> {
       );
     }
 
-    final summary = state.summary;
     final records = state.recentRecords;
+    final stats = _monthStats(records);
     final dayRecords = records.where(_isSelected).toList();
 
     return Column(
@@ -105,13 +145,13 @@ class _BodyState extends State<_Body> {
         Row(
           children: [
             Expanded(
-              child: _stat(context, '${summary.attendanceRate}%', context.l10n.attendanceRate,
-                  context.dr.accent),
+              child: _stat(context, '${stats.rate}%',
+                  context.l10n.attendanceRate, context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
-              child: _stat(
-                  context, '${summary.absent}', context.l10n.attendanceAbsent, DrColors.red),
+              child: _stat(context, '${stats.absent}',
+                  context.l10n.attendanceAbsent, DrColors.red),
             ),
           ],
         ),
@@ -119,13 +159,13 @@ class _BodyState extends State<_Body> {
         Row(
           children: [
             Expanded(
-              child: _stat(context, '${summary.present}', context.l10n.attendancePresent,
-                  context.dr.accent),
+              child: _stat(context, '${stats.present}',
+                  context.l10n.attendancePresent, context.dr.accent),
             ),
             const SizedBox(width: 15),
             Expanded(
-              child:
-                  _stat(context, '${summary.late}', context.l10n.attendanceLate, DrColors.teal),
+              child: _stat(context, '${stats.late}',
+                  context.l10n.attendanceLate, DrColors.teal),
             ),
           ],
         ),
@@ -134,6 +174,7 @@ class _BodyState extends State<_Body> {
           records: records,
           selectedDay: _selectedDay,
           onDaySelected: (day) => setState(() => _selectedDay = day),
+          onMonthChanged: _onMonthChanged,
         ),
         const SizedBox(height: 30),
         DrSectionHeader(title: AppDates.full(context, _selectedDay)),
@@ -169,7 +210,8 @@ class _BodyState extends State<_Body> {
   Widget _log(BuildContext context, AttendanceRecord record,
       {bool divider = true}) {
     final tag = _statusTag(context, record);
-    final title = record.section ?? record.subject ?? context.l10n.attendanceLesson;
+    final title =
+        record.section ?? record.subject ?? context.l10n.attendanceLesson;
     final subtitle = [
       if (record.date != null) DateFormat('dd MMM yyyy').format(record.date!),
       if (record.teacher != null) record.teacher!,
@@ -184,8 +226,8 @@ class _BodyState extends State<_Body> {
       title: title,
       subtitle: subtitle.isEmpty ? '—' : subtitle,
       divider: divider,
-      trailing: Text(tag.label,
-          style: TextStyle(fontSize: 12, color: tag.color)),
+      trailing:
+      Text(tag.label, style: TextStyle(fontSize: 12, color: tag.color)),
     );
   }
 }
@@ -206,7 +248,8 @@ class _Message extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
+            TextButton(
+                onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
         ],
       ),
@@ -224,8 +267,14 @@ class _StatusTag {
 /// Takes a [context] because the "present" tag paints the brand accent as a dot
 /// and as text, both of which need the light theme's darker variant.
 _StatusTag _statusTag(BuildContext context, AttendanceRecord record) {
-  if (record.isAbsent) return _StatusTag(context.l10n.attendanceAbsent, DrColors.red);
-  if (record.isLate) return _StatusTag(context.l10n.attendanceLateTag, DrColors.teal);
-  if (record.isPresent) return _StatusTag(context.l10n.attendancePresent, context.dr.accent);
+  if (record.isAbsent) {
+    return _StatusTag(context.l10n.attendanceAbsent, DrColors.red);
+  }
+  if (record.isLate) {
+    return _StatusTag(context.l10n.attendanceLateTag, DrColors.teal);
+  }
+  if (record.isPresent) {
+    return _StatusTag(context.l10n.attendancePresent, context.dr.accent);
+  }
   return _StatusTag(record.status, context.dr.accent);
 }

@@ -76,15 +76,15 @@ class _BlockedCardState extends State<_BlockedCard> {
               color: DrColors.redStrong,
             ),
             const SizedBox(height: 14),
-            const Text(
-              'Diqqət',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            Text(
+              context.l10n.attention,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 10),
             Text(
               widget.childName.isEmpty
-                  ? 'Sizin uşaq bloklanıb.'
-                  : '${widget.childName} bloklanıb.',
+                  ? context.l10n.childBlockedText
+                  : context.l10n.childBlockedTextNamed(widget.childName),
               textAlign: TextAlign.center,
               style: TextStyle(color: context.dr.textMuted, height: 1.4),
             ),
@@ -155,7 +155,7 @@ class _BlockedCardState extends State<_BlockedCard> {
               onPressed: () =>
                   context.read<AuthBloc>().add(const AuthLogoutRequested()),
               child: Text(
-                'Çıxış',
+                context.l10n.settingsLogout,
                 style: TextStyle(color: context.dr.textMuted),
               ),
             ),

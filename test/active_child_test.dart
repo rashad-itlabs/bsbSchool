@@ -147,13 +147,19 @@ class _FakeAuthService implements AuthService {
     required String name,
     required String email,
     required String phone,
+    String? otp,
   }) async =>
       null;
+
+  @override
+  Future<int> sendEmailChangeOtp({required String email, int? childId}) async =>
+      60;
 
   @override
   Future<AuthUserModel?> updateChildEmail({
     required int childId,
     required String email,
+    String? otp,
   }) async =>
       null;
 
