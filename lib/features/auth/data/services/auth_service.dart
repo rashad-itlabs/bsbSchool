@@ -39,6 +39,18 @@ abstract class AuthService {
     String? relation,
   });
 
+  /// Unlinks one student from the signed-in parent account, proving it is
+  /// them with the account [password] — the same proof [deleteAccount] asks
+  /// for, checked on the server in the same request.
+  ///
+  /// Throws a [FieldValidationException] when the password is missing or
+  /// wrong (422, under `password`) or the student is not on this account
+  /// (403).
+  Future<void> detachChild({
+    required int childId,
+    required String password,
+  });
+
   /// Updates the signed-in account's own details.
   ///
   /// Returns the refreshed user when the endpoint echoes one back (same shape
@@ -176,6 +188,9 @@ class AuthServiceImpl implements AuthService {
 
   /// Backend route that links one more student to the account.
   static const String attachChildPath = '/attachChild';
+
+  /// Backend route that unlinks a student from the account.
+  static const String detachChildPath = '/detachChild';
 
   /// Backend route behind `AuthController::registerParent`. Kept here so a
   /// rename on the Laravel side is a one-line change.
@@ -321,6 +336,42 @@ class AuthServiceImpl implements AuthService {
 
       // 422 — unknown code, or already on this account. 403 — not a parent.
       throw ValidationException(_attachChildMessage(data, status));
+    } on DioException catch (e) {
+      throw ServerException(_dioMessage(e));
+    }
+  }
+
+  @override
+  Future<void> detachChild({
+    required int childId,
+    required String password,
+  }) async {
+    try {
+      final response = await dio.post(
+        detachChildPath,
+        data: {
+          'child_id': childId,
+          'password': password,
+        },
+      );
+
+      final status = response.statusCode ?? 0;
+      final data = response.data;
+
+      // Nothing in the body is used: the repository drops the student from
+      // the cached roster itself — see `AuthRepositoryImpl.detachChild`.
+      if ((status == 200 || status == 201 || status == 204) &&
+          !(data is Map && data['success'] == false)) {
+        return;
+      }
+
+      // 422 — the password is missing or wrong (under `password`). 403 — the
+      // student isn't on this account. Not 401: that one signs the parent out
+      // (see AuthInterceptor).
+      throw FieldValidationException(
+        _fieldErrorsFrom(data),
+        _childEmailMessage(data, status),
+      );
     } on DioException catch (e) {
       throw ServerException(_dioMessage(e));
     }

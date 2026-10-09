@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../../../core/push/push_service.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/auth_user.dart';
@@ -35,6 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLogin);
     on<AuthChildSelected>(_onChildSelected);
     on<AuthChildAdded>(_onChildAdded);
+    on<AuthChildRemoved>(_onChildRemoved);
     on<AuthSessionRefreshed>(_onSessionRefreshed);
     on<AuthChildStatusCheckRequested>(_onChildStatusCheck);
     on<AuthUserReloadRequested>(_onUserReload);
@@ -210,6 +212,60 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _bindPush();
       },
     );
+  }
+
+  /// Unlinks a student once the backend has checked the parent's password.
+  ///
+  /// When the student removed is the one on screen, `/selectChild` moves the
+  /// backend over to the next one before anything is emitted — same reason as
+  /// in [_onChildSelected]: the screens refetch on the emit, and must not
+  /// reload the student who is gone. With none left the account is
+  /// [AuthUser.needsChild], and AuthGate swaps in `AddChildScreen` on its own.
+  Future<void> _onChildRemoved(
+    AuthChildRemoved event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state.isRemovingChild) return;
+    emit(state.copyWith(isRemovingChild: true));
+
+    final wasActive = state.activeChild?.childId == event.childId;
+    final result = await repository.detachChild(
+      childId: event.childId,
+      password: event.password,
+    );
+
+    final failure = result.fold((failure) => failure, (_) => null);
+    if (failure != null) {
+      emit(state.copyWith(
+        isRemovingChild: false,
+        // A wrong password comes back under its field, worded more precisely
+        // than the form-wide message.
+        removeChildError: failure is FieldValidationFailure
+            ? failure.fieldErrors['password'] ?? failure.message
+            : failure.message,
+      ));
+      return;
+    }
+
+    final nextId = repository.activeChild?.childId;
+    if (wasActive && nextId != null) {
+      // Best effort: the status poller's next `/selectChild` names the same
+      // student, so a failure here only delays the move.
+      await repository.selectChild(nextId);
+    }
+
+    // Built afresh: copyWith can't clear [AuthState.activeChild], and after
+    // the last student it has to be null.
+    emit(AuthState(
+      status: state.status,
+      user: repository.currentUser,
+      activeChild: repository.activeChild,
+      isSwitchingChild: state.isSwitchingChild,
+      isAddingChild: state.isAddingChild,
+    ));
+    _bindPush();
+    // The student moved to may be one the school has made inactive.
+    add(const AuthChildStatusCheckRequested());
   }
 
   /// Re-reads the user the repository just cached. Nothing is fetched here —

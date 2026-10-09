@@ -122,6 +122,13 @@ class _RecordingRepository implements AuthRepository {
       const Right(unit);
 
   @override
+  Future<Either<Failure, Unit>> detachChild({
+    required int childId,
+    required String password,
+  }) async =>
+      const Right(unit);
+
+  @override
   Future<Either<Failure, Unit>> registerParent({
     required String name,
     required String email,

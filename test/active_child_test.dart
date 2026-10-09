@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:bsbschool/core/error/exceptions.dart';
+import 'package:bsbschool/core/error/failures.dart';
 import 'package:bsbschool/core/network/network_info.dart';
 import 'package:bsbschool/core/storage/selected_child_storage.dart';
 import 'package:bsbschool/core/storage/token_storage.dart';
@@ -99,6 +100,12 @@ class _FakeAuthService implements AuthService {
   /// Thrown instead of answering, to stand in for a rejected admission code.
   Exception? attachError;
 
+  /// Every `/detachChild` call the repository made, by student id.
+  final List<int> detachCalls = [];
+
+  /// Thrown instead of answering, to stand in for a wrong password.
+  Exception? detachError;
+
   _FakeAuthService({
     this.selectChildError,
     this.selectChildResponse,
@@ -131,6 +138,15 @@ class _FakeAuthService implements AuthService {
     attachCalls.add(admissionNo);
     if (attachError != null) throw attachError!;
     return attachChildResponse;
+  }
+
+  @override
+  Future<void> detachChild({
+    required int childId,
+    required String password,
+  }) async {
+    detachCalls.add(childId);
+    if (detachError != null) throw detachError!;
   }
 
   @override
@@ -503,6 +519,85 @@ void main() {
 
       expect(result.isLeft(), isTrue);
       expect(repository.currentUser?.children, hasLength(2));
+    });
+  });
+
+  group('POST /detachChild', () {
+    test('drops a student the account does not point at', () async {
+      await build();
+
+      final result = await repository.detachChild(
+        childId: 3139,
+        password: 'secret',
+      );
+
+      expect(result.isRight(), isTrue);
+      expect(service.detachCalls, [3139]);
+      expect(repository.currentUser?.children.map((c) => c.childId), [2570]);
+      expect(repository.currentUser?.id, 2570);
+      expect(repository.activeChild?.childId, 2570);
+    });
+
+    // `user_id` named the student who is gone: the account moves on to the
+    // one left, class and all, and a pick naming the removed one is dropped.
+    test('moves the account off the student it removed', () async {
+      await build();
+      await repository.selectChild(2570);
+
+      await repository.detachChild(childId: 2570, password: 'secret');
+
+      expect(repository.currentUser?.id, 3139);
+      expect(repository.currentUser?.classId, 94);
+      expect(childStorage.selectedChildId, isNull);
+      expect(repository.activeChild?.childId, 3139);
+    });
+
+    // What sends the parent to AddChildScreen.
+    test('removing the last student leaves the account needing one', () async {
+      await build();
+
+      await repository.detachChild(childId: 3139, password: 'secret');
+      await repository.detachChild(childId: 2570, password: 'secret');
+
+      expect(repository.currentUser?.children, isEmpty);
+      expect(repository.currentUser?.id, isNull);
+      expect(repository.currentUser?.needsChild, isTrue);
+      expect(repository.activeChild, isNull);
+    });
+
+    test('a wrong password fails under its field and keeps the student',
+        () async {
+      await build();
+      service.detachError = const FieldValidationException(
+        {'password': 'Şifrə yanlışdır'},
+        'Şifrə yanlışdır',
+      );
+
+      final result = await repository.detachChild(
+        childId: 3139,
+        password: 'wrong',
+      );
+
+      result.fold(
+        (failure) => expect(
+          (failure as FieldValidationFailure).fieldErrors['password'],
+          'Şifrə yanlışdır',
+        ),
+        (_) => fail('a wrong password should not remove the student'),
+      );
+      expect(repository.currentUser?.children, hasLength(2));
+    });
+
+    test('ignores a student who is not on the account', () async {
+      await build();
+
+      final result = await repository.detachChild(
+        childId: 9999,
+        password: 'secret',
+      );
+
+      expect(result.isLeft(), isTrue);
+      expect(service.detachCalls, isEmpty);
     });
   });
 }

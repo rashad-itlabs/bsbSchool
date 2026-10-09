@@ -163,4 +163,19 @@ abstract class AuthRepository {
     required String admissionNo,
     String? relation,
   });
+
+  /// Unlinks one student from the account, once the backend has checked the
+  /// account [password]. On success the student is dropped from the cached
+  /// [currentUser]; removing the last one leaves the account with `id: null`,
+  /// which is [AuthUser.needsChild].
+  ///
+  /// Does not tell the backend which student to show next — that is
+  /// [selectChild]'s job, and the caller's call.
+  ///
+  /// Fails with a [FieldValidationFailure] (`password`) when the password is
+  /// missing or wrong.
+  Future<Either<Failure, Unit>> detachChild({
+    required int childId,
+    required String password,
+  });
 }

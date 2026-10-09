@@ -26,6 +26,21 @@ class AppL10nEn extends AppL10n {
   String get close => 'Close';
 
   @override
+  String get childDeleteTitle => 'Remove student from account';
+
+  @override
+  String childDeleteText(String name) {
+    return '$name will be removed from your account. Enter your account password to confirm.';
+  }
+
+  @override
+  String get childDeleted => 'The student has been removed from your account';
+
+  @override
+  String get addChildRequiredText =>
+      'Add a student to continue: enter your child\'s admission number.';
+
+  @override
   String get addChildAdded => 'The student has been added to your account';
 
   @override

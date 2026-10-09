@@ -129,6 +129,30 @@ abstract class AppL10n {
   /// **'Bağla'**
   String get close;
 
+  /// No description provided for @childDeleteTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagirdi hesabdan sil'**
+  String get childDeleteTitle;
+
+  /// No description provided for @childDeleteText.
+  ///
+  /// In az, this message translates to:
+  /// **'{name} hesabınızdan silinəcək. Təsdiqləmək üçün hesabınızın şifrəsini daxil edin.'**
+  String childDeleteText(String name);
+
+  /// No description provided for @childDeleted.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagird hesabınızdan silindi'**
+  String get childDeleted;
+
+  /// No description provided for @addChildRequiredText.
+  ///
+  /// In az, this message translates to:
+  /// **'Davam etmək üçün şagird əlavə edin: övladınızın qəbul nömrəsini daxil edin.'**
+  String get addChildRequiredText;
+
   /// No description provided for @addChildAdded.
   ///
   /// In az, this message translates to:

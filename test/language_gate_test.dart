@@ -58,6 +58,13 @@ class _SignedOutRepository implements AuthRepository {
       const Right(unit);
 
   @override
+  Future<Either<Failure, Unit>> detachChild({
+    required int childId,
+    required String password,
+  }) async =>
+      const Right(unit);
+
+  @override
   Future<Either<Failure, String?>> deleteAccount({
     required String password,
   }) async =>

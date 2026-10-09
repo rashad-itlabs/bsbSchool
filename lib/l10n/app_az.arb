@@ -5,6 +5,10 @@
   "childBlockedText": "Sizin uşaq bloklanıb.",
   "childBlockedTextNamed": "{name} bloklanıb.",
   "close": "Bağla",
+  "childDeleteTitle": "Şagirdi hesabdan sil",
+  "childDeleteText": "{name} hesabınızdan silinəcək. Təsdiqləmək üçün hesabınızın şifrəsini daxil edin.",
+  "childDeleted": "Şagird hesabınızdan silindi",
+  "addChildRequiredText": "Davam etmək üçün şagird əlavə edin: övladınızın qəbul nömrəsini daxil edin.",
   "addChildAdded": "Şagird hesabınıza əlavə edildi",
   "addChildAnotherText": "Övladınızın qəbul nömrəsini daxil edin — şagird hesabınıza bağlanacaq və bütün məlumatlarını buradan izləyəcəksiniz.",
   "addChildEnterNumber": "Qəbul nömrəsini daxil edin",
@@ -611,6 +615,13 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "@childDeleteText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },

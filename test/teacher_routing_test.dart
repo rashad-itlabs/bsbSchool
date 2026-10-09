@@ -76,6 +76,14 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> detachChild({
+    required int childId,
+    required String password,
+  }) async {
+    return const Right(unit);
+  }
+
+  @override
   Future<Either<Failure, AuthSession>> login({
     required String email,
     required String password,

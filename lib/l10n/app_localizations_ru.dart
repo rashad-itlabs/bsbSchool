@@ -26,6 +26,21 @@ class AppL10nRu extends AppL10n {
   String get close => 'Закрыть';
 
   @override
+  String get childDeleteTitle => 'Удалить ученика из учётной записи';
+
+  @override
+  String childDeleteText(String name) {
+    return 'Ученик $name будет удалён из вашей учётной записи. Для подтверждения введите пароль учётной записи.';
+  }
+
+  @override
+  String get childDeleted => 'Ученик удалён из вашей учётной записи';
+
+  @override
+  String get addChildRequiredText =>
+      'Чтобы продолжить, добавьте ученика: введите номер зачисления ребёнка.';
+
+  @override
   String get addChildAdded => 'Ученик добавлен к вашей учётной записи';
 
   @override

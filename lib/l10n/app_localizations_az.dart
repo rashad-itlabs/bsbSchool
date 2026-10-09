@@ -26,6 +26,21 @@ class AppL10nAz extends AppL10n {
   String get close => 'Bağla';
 
   @override
+  String get childDeleteTitle => 'Şagirdi hesabdan sil';
+
+  @override
+  String childDeleteText(String name) {
+    return '$name hesabınızdan silinəcək. Təsdiqləmək üçün hesabınızın şifrəsini daxil edin.';
+  }
+
+  @override
+  String get childDeleted => 'Şagird hesabınızdan silindi';
+
+  @override
+  String get addChildRequiredText =>
+      'Davam etmək üçün şagird əlavə edin: övladınızın qəbul nömrəsini daxil edin.';
+
+  @override
   String get addChildAdded => 'Şagird hesabınıza əlavə edildi';
 
   @override

@@ -45,6 +45,13 @@ class AuthState extends Equatable {
   /// [childSwitchError]: one form's failure must not surface in another.
   final String? addChildError;
 
+  /// True while `/detachChild` is in flight.
+  final bool isRemovingChild;
+
+  /// Set when removing a student was rejected — most often a wrong password,
+  /// shown under the password field of the delete sheet.
+  final String? removeChildError;
+
   const AuthState({
     this.status = AuthStatus.unknown,
     this.user,
@@ -54,6 +61,8 @@ class AuthState extends Equatable {
     this.childSwitchError,
     this.isAddingChild = false,
     this.addChildError,
+    this.isRemovingChild = false,
+    this.removeChildError,
   });
 
   bool get isLoading => status == AuthStatus.loading;
@@ -95,6 +104,8 @@ class AuthState extends Equatable {
     String? childSwitchError,
     bool? isAddingChild,
     String? addChildError,
+    bool? isRemovingChild,
+    String? removeChildError,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -102,11 +113,13 @@ class AuthState extends Equatable {
       activeChild: activeChild ?? this.activeChild,
       isSwitchingChild: isSwitchingChild ?? this.isSwitchingChild,
       isAddingChild: isAddingChild ?? this.isAddingChild,
+      isRemovingChild: isRemovingChild ?? this.isRemovingChild,
       // The messages are intentionally not carried over: each state sets
       // them, so a stale failure can't resurface on the next emit.
       errorMessage: errorMessage,
       childSwitchError: childSwitchError,
       addChildError: addChildError,
+      removeChildError: removeChildError,
     );
   }
 
@@ -120,5 +133,7 @@ class AuthState extends Equatable {
         childSwitchError,
         isAddingChild,
         addChildError,
+        isRemovingChild,
+        removeChildError,
       ];
 }

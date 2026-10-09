@@ -50,6 +50,19 @@ class AuthChildAdded extends AuthEvent {
   List<Object?> get props => [admissionNo, relation];
 }
 
+/// Parent removed a student from their account, confirming with the account
+/// password — from the trash icon on that student's card in the profile.
+class AuthChildRemoved extends AuthEvent {
+  final int childId;
+  final String password;
+
+  const AuthChildRemoved({required this.childId, required this.password});
+
+  // The password is kept out of props so it never shows up in a printed event.
+  @override
+  List<Object?> get props => [childId];
+}
+
 /// The cached user changed underneath the bloc — the profile sheets edit it
 /// through their own cubit, and this is what puts the new values on screen.
 ///

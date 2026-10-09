@@ -130,6 +130,42 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// No `NetworkInfo` pre-flight, for the same reason as [deleteAccount].
+  @override
+  Future<Either<Failure, Unit>> detachChild({
+    required int childId,
+    required String password,
+  }) async {
+    if (!_isOwnChild(childId)) {
+      return Left(ValidationFailure(L.s.errChildNotYoursShort));
+    }
+
+    try {
+      await service.detachChild(childId: childId, password: password);
+
+      final current = userStorage.cachedUser;
+      if (current != null) {
+        await userStorage.saveUser(_withoutChild(current, childId));
+      }
+      // A pick naming a student who is gone would otherwise outlive them on
+      // this device.
+      if (selectedChildStorage.selectedChildId == childId) {
+        await selectedChildStorage.clear();
+      }
+      return const Right(unit);
+    } on FieldValidationException catch (e) {
+      // Before ValidationException — it is a subclass, and the plain branch
+      // would drop the per-field message.
+      return Left(FieldValidationFailure(e.fieldErrors, e.message));
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
+  }
+
   @override
   Future<Either<Failure, Unit>> updateProfile({
     required String name,
@@ -366,6 +402,57 @@ class AuthRepositoryImpl implements AuthRepository {
           else
             ChildAccountModel.from(child),
       ],
+    );
+  }
+
+  /// The cached user with one student taken off the roster.
+  ///
+  /// Built here rather than from the `/detachChild` response: [_merged] keeps
+  /// the cached roster when the incoming one is empty and the cached `id` when
+  /// the incoming one is null, so the last student removed would come
+  /// straight back.
+  ///
+  /// When the account's own student is the one removed, `id` moves to the
+  /// next one left — or to null once none is, which is [AuthUser.needsChild]
+  /// and sends the parent to `AddChildScreen`.
+  AuthUserModel _withoutChild(AuthUserModel user, int childId) {
+    final remaining = [
+      for (final child in user.children)
+        if (child.childId != childId) ChildAccountModel.from(child),
+    ];
+
+    // Still pointing at a student who is on the roster: only the list changes.
+    if (remaining.isNotEmpty && user.id != childId) {
+      return AuthUserModel(
+        id: user.id,
+        accountId: user.accountId,
+        pushId: user.pushId,
+        name: user.name,
+        childName: user.childName,
+        role: user.role,
+        email: user.email,
+        phone: user.phone,
+        classId: user.classId,
+        className: user.className,
+        categories: user.categories,
+        children: remaining,
+      );
+    }
+
+    final next = remaining.isEmpty ? null : remaining.first;
+    return AuthUserModel(
+      id: next?.childId,
+      accountId: user.accountId,
+      pushId: user.pushId,
+      name: user.name,
+      childName: next?.fullName ?? '',
+      role: user.role,
+      email: user.email,
+      phone: user.phone,
+      classId: next?.classId,
+      className: next?.className,
+      categories: next?.categories ?? '',
+      children: remaining,
     );
   }
 
