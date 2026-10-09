@@ -21,7 +21,12 @@ class NewsServiceImpl implements NewsService {
     try {
       final response = await dio.get(
         '/getNews',
-        queryParameters: {'page': page},
+        queryParameters: {
+          'page': page,
+          // `title` / `description` come in this language; `translations`
+          // carries all three, so a later switch needs no reload.
+          'lang': L.s.localeName,
+        },
       );
 
       final status = response.statusCode ?? 0;

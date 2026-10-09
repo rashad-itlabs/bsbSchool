@@ -5,6 +5,7 @@ class NewsItemModel extends NewsItem {
     required super.id,
     super.title,
     super.description,
+    super.translations,
     super.image,
     super.createdAt,
   });
@@ -14,6 +15,7 @@ class NewsItemModel extends NewsItem {
         id: _asInt(json['id']),
         title: _asString(json['title']) ?? '',
         description: _asString(json['description']) ?? '',
+        translations: _asTranslations(json['translations']),
         image: _asString(json['image']),
         createdAt: _asDate(json['created_at']),
       );
@@ -25,6 +27,23 @@ class NewsItemModel extends NewsItem {
   static String? _asString(dynamic value) {
     final text = value?.toString().trim();
     return (text == null || text.isEmpty) ? null : text;
+  }
+
+  /// `{"az": {"title": …, "description": …}, "en": {…}, "ru": {…}}`; anything
+  /// else (an older backend, a malformed entry) degrades to no translations.
+  static Map<String, NewsText> _asTranslations(dynamic value) {
+    if (value is! Map) return const {};
+
+    final out = <String, NewsText>{};
+    value.forEach((language, text) {
+      if (text is Map) {
+        out[language.toString()] = NewsText(
+          title: _asString(text['title']) ?? '',
+          description: _asString(text['description']) ?? '',
+        );
+      }
+    });
+    return out;
   }
 
   /// Dates come as `2026-07-23 12:54:33`, which [DateTime.tryParse] accepts;

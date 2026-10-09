@@ -18,7 +18,10 @@ class NewsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = stripHtmlTags(item.description);
+    // Read at build time, so a language switch re-renders the entry in the
+    // new language without reloading it.
+    final language = Localizations.localeOf(context).languageCode;
+    final body = stripHtmlTags(item.descriptionIn(language));
 
     return DrScaffold(
       child: ListView(
@@ -51,7 +54,7 @@ class NewsDetailScreen extends StatelessWidget {
             const SizedBox(height: 10),
           ],
           Text(
-            item.title,
+            item.titleIn(language),
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,

@@ -12,6 +12,7 @@ import '../../features/events/presentation/widgets/events_calendar_card.dart';
 import '../../features/news/domain/entities/news_item.dart';
 import '../../features/news/presentation/bloc/news_bloc.dart';
 import '../../features/news/presentation/widgets/news_image.dart';
+import '../../features/news/presentation/widgets/news_language_reload.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/child_switcher.dart';
 import '../widgets/dr_widgets.dart';
@@ -124,40 +125,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _newsSection() {
     return BlocProvider(
       create: (_) => sl<NewsBloc>()..add(const NewsFetched()),
-      child: BlocBuilder<NewsBloc, NewsState>(
-        builder: (context, state) {
-          // Nothing published yet — drop the whole block rather than leave a
-          // hole between the greeting and the action grid.
-          if (state.isEmpty) return const SizedBox.shrink();
+      child: NewsLanguageReload(
+        child: BlocBuilder<NewsBloc, NewsState>(
+          builder: (context, state) {
+            // Nothing published yet — drop the whole block rather than leave a
+            // hole between the greeting and the action grid.
+            if (state.isEmpty) return const SizedBox.shrink();
 
-          final Widget slider;
-          if (state.items.isNotEmpty) {
-            slider = _newsSlider(state.items);
-          } else if (state.status == NewsStatus.error) {
-            slider = _newsPlaceholder(
-              child: _newsError(context, state.errorMessage),
-            );
-          } else {
-            // initial / first load
-            slider = _newsPlaceholder(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(context.dr.accent),
-              ),
-            );
-          }
+            final Widget slider;
+            if (state.items.isNotEmpty) {
+              slider = _newsSlider(state.items);
+            } else if (state.status == NewsStatus.error) {
+              slider = _newsPlaceholder(
+                child: _newsError(context, state.errorMessage),
+              );
+            } else {
+              // initial / first load
+              slider = _newsPlaceholder(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(context.dr.accent),
+                ),
+              );
+            }
 
-          return Column(
-            children: [
-              slider,
-              if (state.items.length > 1) ...[
-                const SizedBox(height: 16),
-                _dots(state.items.length),
+            return Column(
+              children: [
+                slider,
+                if (state.items.length > 1) ...[
+                  const SizedBox(height: 16),
+                  _dots(state.items.length),
+                ],
+                const SizedBox(height: 30),
               ],
-              const SizedBox(height: 30),
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -418,9 +421,13 @@ class _NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Read at build time, so a language switch re-renders the slide in the
+    // new language without reloading the feed.
+    final language = Localizations.localeOf(context).languageCode;
     // The panel sends rich text; the preview shows the first lines of it as
     // plain text rather than raw `<p>` tags.
-    final preview = stripHtmlTags(item.description).replaceAll('\n', ' ');
+    final preview =
+        stripHtmlTags(item.descriptionIn(language)).replaceAll('\n', ' ');
 
     return GestureDetector(
       onTap: onTap,
@@ -453,7 +460,7 @@ class _NewsCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.title,
+                          item.titleIn(language),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
