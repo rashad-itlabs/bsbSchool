@@ -40,12 +40,6 @@ class OneSignalPushService implements PushService {
   /// to retry it. [_applyIdentity] reads the id back instead of assuming.
   String? _wantedExternalId;
 
-  /// The account and student the tags describe, kept so both can be replayed
-  /// when the SDK hands us a new user — it arrives empty, and the tags on the
-  /// old one do not come with it.
-  AuthUser? _user;
-  ChildAccount? _activeChild;
-
   /// Guards [_applyIdentity]. The observers below fire *because* of the
   /// `login` it makes, so without this the first binding re-enters itself.
   bool _binding = false;
@@ -70,9 +64,8 @@ class OneSignalPushService implements PushService {
     OneSignal.User.addObserver(_onUserChanged);
     OneSignal.User.pushSubscription.addObserver(_onSubscriptionChanged);
 
-    // A switch flipped on the profile screen has to reach the backend, which
-    // reads the choices as tags — see [NotificationPrefs].
-    NotificationPrefs.instance.addListener(_onPrefsChanged);
+    // A language picked in the app has to reach OneSignal, which chooses the
+    // version of a message by it — see [_syncLanguage].
     LocaleController.instance.addListener(_onLocaleChanged);
   }
 
@@ -82,8 +75,6 @@ class OneSignalPushService implements PushService {
     ChildAccount? activeChild,
     bool promptPermission = false,
   }) async {
-    _user = user;
-    _activeChild = activeChild;
     _wantedExternalId = user.pushExternalId;
 
     if (_wantedExternalId == null) {
@@ -97,7 +88,7 @@ class OneSignalPushService implements PushService {
     }
 
     await _applyIdentity();
-    await _applyTags();
+    await _syncLanguage();
 
     // `canRequest` covers the parent who never signed in on this build: an
     // update installs over a session that is simply restored, and on Android
@@ -119,11 +110,9 @@ class OneSignalPushService implements PushService {
   @override
   Future<void> signOut() async {
     _wantedExternalId = null;
-    _user = null;
-    _activeChild = null;
-    // Drops the external id and the tags with it, leaving an anonymous
-    // subscription: on a shared family device the next account to sign in
-    // starts clean instead of inheriting the previous parent's messages.
+    // Drops the external id, leaving an anonymous subscription: on a shared
+    // family device the next account to sign in starts clean instead of
+    // inheriting the previous parent's messages.
     await OneSignal.logout();
   }
 
@@ -181,15 +170,6 @@ class OneSignalPushService implements PushService {
     }
   }
 
-  /// Re-sends everything the backend segments on. Called on every binding and
-  /// again whenever the SDK hands over a new user, which arrives untagged.
-  Future<void> _applyTags() async {
-    final user = _user;
-    if (user == null) return;
-    await OneSignal.User.addTags(_tagsFor(user, _activeChild));
-    await _syncLanguage();
-  }
-
   /// The SDK swapped its user out from under us — a registration finishing on
   /// a fresh install, an identity the server rolled back. Anything that
   /// leaves the device anonymous while an account is signed in has to be
@@ -206,42 +186,31 @@ class OneSignalPushService implements PushService {
   void _onSubscriptionChanged(OSPushSubscriptionChangedState state) {
     final id = state.current.id;
     if (id == null || id.isEmpty || id == state.previous.id) return;
-    unawaited(_applyIdentity().then((_) => _applyTags()));
+    unawaited(_applyIdentity().then((_) => _syncLanguage()));
   }
-
-  /// What the backend can segment on when it doesn't target one external id.
-  ///
-  /// `email` is here because it is the only field that is unique per *account*
-  /// today: two parents of the same student share `user_id`, so until the
-  /// login response carries `parent_id` this is what tells them apart. See
-  /// [AuthUser.pushExternalId].
-  Map<String, dynamic> _tagsFor(AuthUser user, ChildAccount? activeChild) => {
-        'role': user.role.trim().toLowerCase(),
-        'email': user.email.trim().toLowerCase(),
-        'parent_id': user.accountId?.toString() ?? '',
-        // Both describe what the app is *showing*, not who the parent is
-        // responsible for: a switch moves them. Targeting a class through
-        // `class_id` would skip every parent whose other child is selected —
-        // address the account and let the backend name the student instead.
-        'student_id': (activeChild?.childId ?? user.id)?.toString() ?? '',
-        'class_id': (activeChild?.classId ?? user.classId)?.toString() ?? '',
-        ..._prefTags(),
-      };
-
-  /// The three delivery switches, as `notify_attendance: "1" | "0"`.
-  Map<String, String> _prefTags() => {
-        for (final kind in NotificationKind.values)
-          kind.prefsKey: NotificationPrefs.instance.isEnabled(kind) ? '1' : '0',
-      };
-
-  void _onPrefsChanged() => unawaited(OneSignal.User.addTags(_prefTags()));
 
   void _onLocaleChanged() => unawaited(_syncLanguage());
 
-  /// Lets OneSignal pick the right language version of a message.
+  /// Lets OneSignal pick the right language version of a message — on every
+  /// binding, on a new subscription, and whenever the parent switches.
+  ///
+  /// The language goes out ALONE and the app sends no tags (10.10.2026). It
+  /// used to ride with up to nine tags, and OneSignal's free plan keeps six
+  /// per user, so that write was refused. The SDK sends everything queued for
+  /// a user as ONE request (iOS 5.5.6 `OSPropertyOperationExecutor`, Android
+  /// 5.9.9 `UpdateUserOperationExecutor`) and drops it on a 4xx, so the
+  /// language was refused with the tags: parents got pushes in the phone's
+  /// language — `tr` on a Turkish iPhone — instead of the app's. Nothing read
+  /// those tags: the backend addresses an account by its external id. A tag
+  /// added back would have to fit the plan's per-user limit, and never be
+  /// sent beside the language.
+  ///
+  /// The language belongs to the OneSignal user, not to the device: a parent
+  /// signed in on two phones gets the language of the one opened last.
   Future<void> _syncLanguage() {
-    final locale = LocaleController.instance
-        .resolve(WidgetsBinding.instance.platformDispatcher.locales);
+    final locale = LocaleController.instance.resolve(
+      WidgetsBinding.instance.platformDispatcher.locales,
+    );
     return OneSignal.User.setLanguage(locale.languageCode);
   }
 
@@ -252,9 +221,9 @@ class OneSignalPushService implements PushService {
   }
 
   void _onWillDisplay(OSNotificationWillDisplayEvent event) {
-    // A kind the parent switched off must stay silent even when the backend
-    // still sent it — the tags it filters on may not have reached OneSignal
-    // yet, and the switch is the parent's answer either way.
+    // A kind the parent switched off must stay silent. The backend does not
+    // know the switches — they live on this device — so this is where they
+    // are honoured; the SDK only asks while the app is in the foreground.
     final kind = _kindOf(event.notification.additionalData);
     if (kind != null && !NotificationPrefs.instance.isEnabled(kind)) {
       event.preventDefault();
@@ -262,8 +231,10 @@ class OneSignalPushService implements PushService {
   }
 
   NotificationKind? _kindOf(Map<String, dynamic>? data) {
-    final raw =
-        (data?['kind'] ?? data?['type'] ?? '').toString().trim().toLowerCase();
+    final raw = (data?['kind'] ?? data?['type'] ?? '')
+        .toString()
+        .trim()
+        .toLowerCase();
 
     return switch (raw) {
       'attendance' => NotificationKind.attendance,

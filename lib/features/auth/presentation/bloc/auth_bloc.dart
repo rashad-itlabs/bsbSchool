@@ -53,8 +53,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ));
 
     // A restored session never passes through the login screen, so this is the
-    // only chance to re-bind the subscription — the tags may be stale (a class
-    // rolled over, a switch flipped while the app was closed), and a
+    // only chance to re-bind the subscription and re-send the app's language
+    // — the account's other phone may have written its own since, and a
     // reinstalled app has no external id at all. No permission prompt here:
     // the parent is looking at a launch screen, not at a reason to say yes.
     _bindPush();
@@ -169,8 +169,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // `child_name`); the repository cached it, so re-read it here.
           user: repository.currentUser,
         ));
-        // Same parent, different student: the external id stays put and only
-        // the `student_id` / `class_id` tags move.
+        // Same parent, different student: the external id stays put; this
+        // only re-asserts it and the language.
         _bindPush();
       },
     );

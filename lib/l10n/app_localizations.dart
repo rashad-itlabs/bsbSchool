@@ -1530,7 +1530,7 @@ abstract class AppL10n {
   /// No description provided for @languagePickTitle.
   ///
   /// In az, this message translates to:
-  /// **'Dilinizi seçin'**
+  /// **'Dil seçimi'**
   String get languagePickTitle;
 
   /// No description provided for @languageRu.

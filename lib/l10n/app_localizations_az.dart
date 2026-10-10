@@ -789,7 +789,7 @@ class AppL10nAz extends AppL10n {
       'Bunu sonra tənzimləmələrdən dəyişə bilərsiniz.';
 
   @override
-  String get languagePickTitle => 'Dilinizi seçin';
+  String get languagePickTitle => 'Dil seçimi';
 
   @override
   String get languageRu => 'Rus dili';

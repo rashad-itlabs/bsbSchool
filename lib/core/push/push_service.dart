@@ -13,10 +13,10 @@ abstract class PushService {
   Future<void> init();
 
   /// Binds this device to [user]: the external id the backend targets, plus
-  /// the tags it can segment on.
+  /// the app's language, by which OneSignal picks the version of a message.
   ///
-  /// Safe to call again for the same account — a repeat only refreshes the
-  /// tags, which is what a child switch needs.
+  /// Safe to call again for the same account — a repeat only re-sends the
+  /// language.
   ///
   /// [promptPermission] asks the OS for permission to show notifications. True
   /// only right after a sign-in, never on a cold start: the system dialog is

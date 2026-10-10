@@ -1,7 +1,11 @@
+import 'package:bsbschool/core/l10n/locale_controller.dart';
 import 'package:bsbschool/core/push/onesignal_push_service.dart';
 import 'package:bsbschool/features/auth/domain/entities/auth_user.dart';
+import 'package:bsbschool/features/notifications/presentation/notification_prefs.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Stands in for the native SDK, so the binding can be driven through the same
 /// method channels `onesignal_flutter` talks over.
@@ -18,6 +22,7 @@ class _FakeOneSignal {
   String? externalId;
   final List<String> logins = [];
   final List<Map<String, dynamic>> tags = [];
+  final List<String> languages = [];
   int permissionRequests = 0;
   bool canRequest = false;
 
@@ -25,7 +30,18 @@ class _FakeOneSignal {
   static const _user = MethodChannel('OneSignal#user');
   static const _notifications = MethodChannel('OneSignal#notifications');
 
+  /// Only answered so `init()` can run; nothing on them is asserted.
+  static const _quiet = [
+    MethodChannel('OneSignal#debug'),
+    MethodChannel('OneSignal#inappmessages'),
+    MethodChannel('OneSignal#pushsubscription'),
+  ];
+
   void install() {
+    for (final channel in _quiet) {
+      _handle(channel, (call) async => null);
+    }
+
     _handle(_core, (call) async {
       switch (call.method) {
         case 'OneSignal#login':
@@ -47,6 +63,9 @@ class _FakeOneSignal {
         case 'OneSignal#addTags':
           tags.add(Map<String, dynamic>.from(call.arguments as Map));
           return null;
+        case 'OneSignal#setLanguage':
+          languages.add((call.arguments as Map)['language'] as String);
+          return null;
       }
       return null;
     });
@@ -55,6 +74,8 @@ class _FakeOneSignal {
       switch (call.method) {
         case 'OneSignal#canRequest':
           return canRequest;
+        case 'OneSignal#permission':
+          return false;
         case 'OneSignal#requestPermission':
           permissionRequests++;
           return true;
@@ -64,7 +85,7 @@ class _FakeOneSignal {
   }
 
   void remove() {
-    for (final channel in [_core, _user, _notifications]) {
+    for (final channel in [_core, _user, _notifications, ..._quiet]) {
       _handle(channel, null);
     }
   }
@@ -98,14 +119,18 @@ void main() {
 
   tearDown(() => sdk.remove());
 
-  test('a sign-in binds the account and tags it', () async {
+  test('a sign-in binds the account and sends only the language', () async {
     final service = serviceFor(_FakeOneSignal());
 
     await service.signIn(_parent);
 
     expect(sdk.externalId, '66');
     expect(sdk.logins, ['66']);
-    expect(sdk.tags.single['parent_id'], '66');
+    expect(sdk.languages, ['en'], reason: 'the test device speaks en_US');
+    // 10.10.2026: nine tags rode in the same SDK request as the language;
+    // OneSignal's free plan keeps six per user, refused it, and the language
+    // was lost with them.
+    expect(sdk.tags, isEmpty);
   });
 
   test('a login the SDK swallows is retried until the id sticks', () async {
@@ -135,7 +160,7 @@ void main() {
     await service.signIn(_parent);
 
     expect(sdk.logins, isEmpty, reason: 're-resolving the user costs a round trip');
-    expect(sdk.tags, hasLength(1), reason: 'the tags still refresh');
+    expect(sdk.languages, hasLength(1), reason: 'the language still refreshes');
   });
 
   test('granting permission re-asserts the identity', () async {
@@ -176,12 +201,34 @@ void main() {
     expect(sdk.externalId, isNull);
   });
 
-  test('a child switch keeps the id and moves the tags', () async {
+  test('a child switch keeps the id and re-sends the language', () async {
     final service = serviceFor(_FakeOneSignal());
     await service.signIn(_parent);
     await service.signIn(_parent);
 
     expect(sdk.logins, ['66'], reason: 'the same account is bound once');
-    expect(sdk.tags, hasLength(2));
+    expect(sdk.languages, hasLength(2));
+  });
+
+  test('a language picked in the app reaches OneSignal alone', () async {
+    SharedPreferences.setMockInitialValues({});
+    final service = serviceFor(_FakeOneSignal());
+    await service.init();
+    await service.signIn(_parent);
+
+    await LocaleController.instance.setLocale(const Locale('ru'));
+    // The switches sit on the same screen as the language: a flip must not
+    // put a tag into the request the language goes out in.
+    await NotificationPrefs.instance
+        .setEnabled(NotificationKind.cafeteria, false);
+    await pumpEventQueue();
+
+    expect(sdk.languages.last, 'ru');
+    expect(sdk.tags, isEmpty);
+
+    // Both are singletons — hand the next test the defaults back.
+    await NotificationPrefs.instance.setEnabled(NotificationKind.cafeteria, true);
+    await LocaleController.instance.setLocale(null);
+    await pumpEventQueue();
   });
 }
