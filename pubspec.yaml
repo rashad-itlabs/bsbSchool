@@ -1,7 +1,7 @@
 name: bsbschool
 description: "A School application built with Clean Architecture."
 publish_to: 'none'
-version: 2.0.10+14
+version: 2.0.12+15
 
 environment:
   sdk: ^3.10.4
@@ -49,12 +49,14 @@ dependencies:
   # Pinned: a transitive dep of the pdf viewer. 12.4.0 calls the iOS 26.1-only
   # `isiOSAppOnVision`, which fails to compile against the iOS 26.0 SDK.
   device_info_plus: 12.1.0
-  onesignal_flutter: ^5.6.8
   package_info_plus: ^9.0.1
 
   # Builds the top-up receipt PDF on the phone. Pure Dart, so nothing is asked
   # of the server and the receipt works offline.
   pdf: ^3.12.0
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  flutter_local_notifications: ^22.3.1
 
 dev_dependencies:
   flutter_test:

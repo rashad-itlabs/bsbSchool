@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -20,6 +21,8 @@ import 'dr/theme/dr_theme.dart';
 import 'dr/theme/theme_controller.dart';
 import 'dart:async';
 
+import 'firebase_options.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Month and weekday names for every language the app ships.
@@ -28,9 +31,13 @@ Future<void> main() async {
   await ThemeController.instance.load();
   await LocaleController.instance.load();
   await NotificationPrefs.instance.load();
-  // After the prefs and the locale: the SDK reads both when it registers the
-  // device. The permission prompt is deliberately not here — [AuthBloc] asks
-  // once the parent has signed in, so the dialog has a reason on screen.
+  // Firebase before the push service, which talks to it from `init`; both
+  // after the prefs and the locale, which the push service reads. The
+  // permission prompt is deliberately not here — [AuthBloc] asks once the
+  // parent has signed in, so the dialog has a reason on screen.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await sl<PushService>().init();
   runApp(const BsbSchoolApp());
 }

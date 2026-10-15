@@ -555,17 +555,17 @@ class _ChildCredentialsCardState extends State<_ChildCredentialsCard> {
               onCopy: () => _copy(child.paymentId, 'Pay ID'),
             ),
           const SizedBox(height: 14),
-          if (child.email.isNotEmpty)
-            _CredentialRow(
-              icon: Icons.alternate_email,
-              label: context.l10n.loginEmail,
-              value: child.email,
-              onCopy: () => _copy(child.email, context.l10n.loginEmail),
-              // Only a student the response gave an id for can be named to
-              // the endpoint.
-              onEdit: child.childId == null ? null : _editEmail,
-            ),
-          const SizedBox(height: 14),
+          // if (child.email.isNotEmpty)
+          //   _CredentialRow(
+          //     icon: Icons.alternate_email,
+          //     label: context.l10n.loginEmail,
+          //     value: child.email,
+          //     onCopy: () => _copy(child.email, context.l10n.loginEmail),
+          //     // Only a student the response gave an id for can be named to
+          //     // the endpoint.
+          //     onEdit: child.childId == null ? null : _editEmail,
+          //   ),
+          // const SizedBox(height: 14),
           if (child.username.isNotEmpty)
             _CredentialRow(
               icon: Icons.alternate_email,
@@ -1322,19 +1322,21 @@ class _ProfileSheetState extends State<_ProfileSheet> {
             if (state.errorFor('name') != null)
               _FieldError(state.errorFor('name')!),
             const SizedBox(height: 16),
-            DrTextField(
-              label: context.l10n.forgotEmailField,
-              hint: 'example@bsb.edu.az',
-              icon: Icons.mail_outline,
-              controller: _emailController,
-              enabled: !busy,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              onChanged: (_) => context.read<ProfileCubit>().inputChanged(),
-            ),
+            widget.user.role != 'student'
+                ? DrTextField(
+                    label: context.l10n.forgotEmailField,
+                    hint: 'example@bsb.edu.az',
+                    icon: Icons.mail_outline,
+                    controller: _emailController,
+                    enabled: !busy,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) => context.read<ProfileCubit>().inputChanged(),
+                  )
+                : SizedBox(),
             if (state.errorFor('email') != null)
               _FieldError(state.errorFor('email')!),
-            const SizedBox(height: 16),
+            widget.user.role != 'student' ? const SizedBox(height: 16):SizedBox(),
             DrPhoneField(
               label: context.l10n.profilePhone,
               hint: '+994 50 123 45 67',

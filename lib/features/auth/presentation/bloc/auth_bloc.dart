@@ -300,10 +300,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(status: AuthStatus.loading));
-    await logoutUser(const NoParams());
-    // Awaited, not fired off: the login screen is one emit away, and whoever
-    // signs in next must not land on a device still subscribed as this parent.
+    // Before the logout, not after: the backend forgets this device's push
+    // token by the bearer token, which the logout clears. Awaited, not fired
+    // off: whoever signs in next must not land on a device still registered
+    // as this parent. Bounded by its own timeout, so a slow network delays
+    // the logout by seconds, not indefinitely.
     await push.signOut();
+    await logoutUser(const NoParams());
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 }

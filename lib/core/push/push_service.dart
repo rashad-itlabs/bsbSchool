@@ -12,11 +12,11 @@ abstract class PushService {
   /// Boots the SDK and registers its listeners. Call once, before `runApp`.
   Future<void> init();
 
-  /// Binds this device to [user]: the external id the backend targets, plus
-  /// the app's language, by which OneSignal picks the version of a message.
+  /// Binds this device to [user]: registers its push token with the backend,
+  /// together with the app's language, which the backend writes to it in.
   ///
-  /// Safe to call again for the same account — a repeat only re-sends the
-  /// language.
+  /// Safe to call again for the same account — a repeat sends nothing unless
+  /// the token or the language changed.
   ///
   /// [promptPermission] asks the OS for permission to show notifications. True
   /// only right after a sign-in, never on a cold start: the system dialog is
@@ -30,10 +30,13 @@ abstract class PushService {
 
   /// Releases the account, so the next person to sign in on this device does
   /// not inherit the previous one's notifications.
+  ///
+  /// Call it while the session is still valid: the backend needs the bearer
+  /// token to know whose device to forget.
   Future<void> signOut();
 }
 
-/// Stands in wherever OneSignal must not run — unit and widget tests.
+/// Stands in wherever Firebase must not run — unit and widget tests.
 class NoopPushService implements PushService {
   const NoopPushService();
 

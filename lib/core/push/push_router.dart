@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 /// without a named route, and the app has none.
 enum PushTarget { dashboard, foodCard, tuition, notifications, profile }
 
-/// Carries a notification tap from the OneSignal listener to `HomeShell`.
+/// Carries a notification tap from the push listeners to `HomeShell`.
 ///
 /// The tap routinely lands before the shell exists — opening the app *from* a
 /// notification is the whole point — so the target is held until something

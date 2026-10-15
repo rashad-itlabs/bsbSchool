@@ -4,8 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../network/api_client.dart';
 import '../network/network_info.dart';
-import '../push/onesignal_push_service.dart';
+import '../push/firebase_push_service.dart';
+import '../push/foreground_notifier.dart';
+import '../push/push_messaging.dart';
 import '../push/push_service.dart';
+import '../push/push_token_api.dart';
 import '../storage/selected_child_storage.dart';
 import '../storage/update_prompt_storage.dart';
 import '../utils/app_info.dart';
@@ -180,9 +183,15 @@ Future<void> initDependencies() async {
   // A bare Dio, not the app's: the reachability probe hits a third-party host
   // and must not carry the auth interceptor's bearer token there.
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(Dio()));
-  // Singleton: it holds the external id this device is currently bound to, and
-  // a second instance would re-`login` on every sign-in.
-  sl.registerLazySingleton<PushService>(() => OneSignalPushService());
+  // Singleton: it holds what was last registered with the backend, and a
+  // second instance would register again on every sign-in.
+  sl.registerLazySingleton<PushTokenApi>(() => DioPushTokenApi(sl()));
+  sl.registerLazySingleton<PushService>(() => FirebasePushService(
+        messaging: FirebasePushMessaging(),
+        api: sl(),
+        notifier: LocalForegroundNotifier(),
+        appInfo: sl(),
+      ));
 
   _initAuth();
   _initBalance();

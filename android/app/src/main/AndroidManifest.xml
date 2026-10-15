@@ -1,15 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+ won't show a notification until the user has granted this.
-         The OneSignal SDK's own manifest declares it too; kept here so the
-         requirement is visible from the app, not only after a merge. -->
+         firebase_messaging asks for it at runtime (FirebasePushService). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Saving downloaded books into the public Downloads folder. Android 10+
          goes through MediaStore, which needs no permission at all. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"/>
     <application
-        android:label="British School In Baku"
+        android:label="BSB"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -34,6 +33,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- What FCM uses for a notification it shows by itself (app in the
+             background). The icon must be a silhouette — the launcher icon is
+             opaque and would be a white square — and the channel is the one
+             LocalForegroundNotifier creates, so both kinds share one entry in
+             the system settings. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="bsb_default" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

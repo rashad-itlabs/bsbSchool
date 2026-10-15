@@ -21,6 +21,10 @@ class _SpyPushService implements PushService {
   final List<bool> prompts = [];
   int signOuts = 0;
 
+  /// Asked at sign-out: was the session still there to authorise it?
+  bool Function()? isLoggedIn;
+  final List<bool> signedOutWhileLoggedIn = [];
+
   @override
   Future<void> init() async {}
 
@@ -36,7 +40,11 @@ class _SpyPushService implements PushService {
   }
 
   @override
-  Future<void> signOut() async => signOuts++;
+  Future<void> signOut() async {
+    signOuts++;
+    final loggedIn = isLoggedIn;
+    if (loggedIn != null) signedOutWhileLoggedIn.add(loggedIn());
+  }
 }
 
 /// The bits of the repository [AuthBloc] reads. [user] is both the restored
@@ -411,6 +419,29 @@ void main() {
           .firstWhere((s) => s.status == AuthStatus.unauthenticated);
 
       expect(push.signOuts, 1);
+      await bloc.close();
+    });
+
+    test('the device is released while the session can still authorise it',
+        () async {
+      final repository =
+          _FakeAuthRepository(user: _parent(accountId: 66, pushId: '66'));
+      final push = _SpyPushService()..isLoggedIn = () => repository.isLoggedIn;
+      final bloc = AuthBloc(
+        loginUser: LoginUser(repository),
+        logoutUser: LogoutUser(repository),
+        repository: repository,
+        push: push,
+      );
+
+      bloc.add(const AuthLogoutRequested());
+      await bloc.stream
+          .firstWhere((s) => s.status == AuthStatus.unauthenticated);
+
+      // The backend forgets the push token by the bearer token; after the
+      // logout there is none to send.
+      expect(push.signedOutWhileLoggedIn, [true]);
+      expect(repository.isLoggedIn, isFalse);
       await bloc.close();
     });
   });
