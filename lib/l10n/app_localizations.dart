@@ -1791,6 +1791,36 @@ abstract class AppL10n {
   /// **'Bu tarixlərdə əməliyyat yoxdur'**
   String get noTransactionsInRange;
 
+  /// No description provided for @notifFilterAttendance.
+  ///
+  /// In az, this message translates to:
+  /// **'Davamiyyət'**
+  String get notifFilterAttendance;
+
+  /// No description provided for @notifFilterCafeteria.
+  ///
+  /// In az, this message translates to:
+  /// **'Bufet'**
+  String get notifFilterCafeteria;
+
+  /// No description provided for @notifFilterExam.
+  ///
+  /// In az, this message translates to:
+  /// **'İmtahan'**
+  String get notifFilterExam;
+
+  /// No description provided for @notifFilterHomework.
+  ///
+  /// In az, this message translates to:
+  /// **'Ev tapşırığı'**
+  String get notifFilterHomework;
+
+  /// No description provided for @notifFilterSystem.
+  ///
+  /// In az, this message translates to:
+  /// **'Sistem'**
+  String get notifFilterSystem;
+
   /// No description provided for @notifPrefAttendance.
   ///
   /// In az, this message translates to:
@@ -1845,11 +1875,23 @@ abstract class AppL10n {
   /// **'Bildiriş'**
   String get notificationFallback;
 
+  /// No description provided for @notificationFromSchool.
+  ///
+  /// In az, this message translates to:
+  /// **'Məktəb rəhbərliyi'**
+  String get notificationFromSchool;
+
   /// No description provided for @notificationsEmpty.
   ///
   /// In az, this message translates to:
   /// **'Hələ bildiriş yoxdur.'**
   String get notificationsEmpty;
+
+  /// No description provided for @notificationsEmptyFilter.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu bölmədə hələ bildiriş yoxdur.'**
+  String get notificationsEmptyFilter;
 
   /// No description provided for @notificationsTitle.
   ///

@@ -10,6 +10,8 @@ class NotificationModel extends NotificationItem {
     super.sender,
     super.file,
     super.date,
+    super.source,
+    super.categoryName,
   });
 
   /// Matches one entry of the `data` array returned by `GET /notifications`.
@@ -23,6 +25,8 @@ class NotificationModel extends NotificationItem {
         sender: _asString(json['sender']),
         file: _asString(json['file']),
         date: _asDate(json['date']),
+        source: _asString(json['source']),
+        categoryName: _asString(json['category']),
       );
 
   static int _asInt(dynamic value) =>

@@ -929,6 +929,21 @@ class AppL10nRu extends AppL10n {
   String get noTransactionsInRange => 'За этот период операций нет';
 
   @override
+  String get notifFilterAttendance => 'Посещаемость';
+
+  @override
+  String get notifFilterCafeteria => 'Столовая';
+
+  @override
+  String get notifFilterExam => 'Экзамены';
+
+  @override
+  String get notifFilterHomework => 'Домашние задания';
+
+  @override
+  String get notifFilterSystem => 'Системные';
+
+  @override
   String get notifPrefAttendance => 'Посещаемость';
 
   @override
@@ -959,7 +974,13 @@ class AppL10nRu extends AppL10n {
   String get notificationFallback => 'Уведомление';
 
   @override
+  String get notificationFromSchool => 'Администрация школы';
+
+  @override
   String get notificationsEmpty => 'Уведомлений пока нет.';
+
+  @override
+  String get notificationsEmptyFilter => 'В этом разделе уведомлений пока нет.';
 
   @override
   String get notificationsTitle => 'Уведомления';

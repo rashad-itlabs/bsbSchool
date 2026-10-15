@@ -927,6 +927,21 @@ class AppL10nEn extends AppL10n {
   String get noTransactionsInRange => 'No transactions in this period';
 
   @override
+  String get notifFilterAttendance => 'Attendance';
+
+  @override
+  String get notifFilterCafeteria => 'Canteen';
+
+  @override
+  String get notifFilterExam => 'Exams';
+
+  @override
+  String get notifFilterHomework => 'Homework';
+
+  @override
+  String get notifFilterSystem => 'System';
+
+  @override
   String get notifPrefAttendance => 'Attendance';
 
   @override
@@ -958,7 +973,14 @@ class AppL10nEn extends AppL10n {
   String get notificationFallback => 'Notification';
 
   @override
+  String get notificationFromSchool => 'School administration';
+
+  @override
   String get notificationsEmpty => 'No notifications yet.';
+
+  @override
+  String get notificationsEmptyFilter =>
+      'No notifications in this section yet.';
 
   @override
   String get notificationsTitle => 'Notifications';

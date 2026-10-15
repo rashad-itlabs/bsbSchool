@@ -32,6 +32,21 @@ class _Tab {
   });
 }
 
+/// The notifications tab for whoever is signed in: a student gets its own
+/// filter pills (see [NotificationsScreen.forStudent]). The tab list is
+/// const, so the role is read here rather than when the list is built.
+class _NotificationsTab extends StatelessWidget {
+  const _NotificationsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final isParent = context.select<AuthBloc, bool>(
+      (bloc) => bloc.state.user?.isParent ?? false,
+    );
+    return NotificationsScreen(forStudent: !isParent);
+  }
+}
+
 /// Hosts the primary tabs behind the persistent [DrBottomNav].
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -105,7 +120,7 @@ class _HomeShellState extends State<HomeShell> {
     ),
     _Tab(
       DrNavDestination(Icons.notifications_none_rounded, DrNavLabel.notifications),
-      NotificationsScreen(),
+      _NotificationsTab(),
     ),
     _Tab(
       DrNavDestination(Icons.person_outline_rounded, DrNavLabel.profile),

@@ -8,6 +8,7 @@ import 'package:bsbschool/core/push/push_token_api.dart';
 import 'package:bsbschool/core/utils/app_info.dart';
 import 'package:bsbschool/features/auth/domain/entities/auth_user.dart';
 import 'package:bsbschool/features/notifications/presentation/notification_prefs.dart';
+import 'package:bsbschool/features/notifications/presentation/notifications_feed_signal.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -149,6 +150,7 @@ void main() {
       isEnabled: (kind) => !switchedOff.contains(kind),
     );
     PushRouter.instance.take();
+    NotificationsFeedSignal.instance.takeOpenPushId();
     await push.init();
   });
 
@@ -321,6 +323,97 @@ void main() {
       ).init();
 
       expect(PushRouter.instance.take(), PushTarget.profile);
+    });
+  });
+
+  group('the notifications feed', () {
+    late int pings;
+    void count() => pings++;
+
+    setUp(() {
+      pings = 0;
+      NotificationsFeedSignal.instance.addListener(count);
+    });
+    tearDown(() => NotificationsFeedSignal.instance.removeListener(count));
+
+    test('a message in the foreground asks for the feed again', () async {
+      messaging.foreground.add(const PushMessage(
+        title: 'Valideyn iclası',
+        body: 'Cümə, 18:00',
+        data: {'type': 'admin_push', 'notification_id': '21'},
+      ));
+      await _settle();
+
+      expect(pings, 1);
+      // Arriving is not opening: only a tap opens the entry.
+      expect(NotificationsFeedSignal.instance.hasPendingOpen, isFalse);
+    });
+
+    test('so does a kind the parent keeps silent', () async {
+      switchedOff.add(NotificationKind.homework);
+      messaging.foreground
+          .add(const PushMessage(title: 'Ev', data: {'kind': 'homework'}));
+      await _settle();
+
+      expect(notifier.shown, isEmpty);
+      expect(pings, 1);
+    });
+
+    test('a tapped school announcement lands on the tab and is opened',
+        () async {
+      messaging.opened.add(const PushMessage(
+          data: {'type': 'admin_push', 'notification_id': '21'}));
+      await _settle();
+
+      expect(PushRouter.instance.take(), PushTarget.notifications);
+      expect(pings, 1);
+      expect(NotificationsFeedSignal.instance.takeOpenPushId(), 21);
+    });
+
+    test('a tapped foreground announcement is opened too', () async {
+      notifier.onTap!({'type': 'admin_push', 'notification_id': '27'});
+
+      expect(NotificationsFeedSignal.instance.takeOpenPushId(), 27);
+    });
+
+    test('any other tap refreshes but opens nothing', () async {
+      messaging.opened.add(const PushMessage(data: {'type': 'tuition'}));
+      await _settle();
+
+      expect(pings, 1);
+      expect(NotificationsFeedSignal.instance.hasPendingOpen, isFalse);
+    });
+
+    test('the announcement that started the app waits for the tab', () async {
+      final cold = _FakeMessaging()
+        ..initial = const PushMessage(
+            data: {'type': 'admin_push', 'notification_id': '12'});
+      await FirebasePushService(
+        messaging: cold,
+        api: api,
+        notifier: _FakeNotifier(),
+        appInfo: _FakeAppInfo(),
+        locale: () => const Locale('az'),
+        localeChanges: ValueNotifier(const Locale('az')),
+      ).init();
+
+      expect(NotificationsFeedSignal.instance.takeOpenPushId(), 12);
+    });
+
+    test('the id is read only from an admin push', () {
+      expect(
+          FirebasePushService.adminPushId(
+              {'type': ' Admin_Push ', 'notification_id': ' 5 '}),
+          5);
+      expect(FirebasePushService.adminPushId({'type': 'admin_push'}), isNull);
+      expect(
+          FirebasePushService.adminPushId(
+              {'type': 'admin_push', 'notification_id': 'x'}),
+          isNull);
+      expect(
+          FirebasePushService.adminPushId(
+              {'type': 'homework', 'notification_id': '5'}),
+          isNull);
     });
   });
 }

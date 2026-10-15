@@ -16,3 +16,12 @@ class NotificationsFetched extends NotificationsEvent {
 class NotificationsRefreshed extends NotificationsEvent {
   const NotificationsRefreshed();
 }
+
+/// A filter pill was tapped; null is "all".
+class NotificationsCategorySelected extends NotificationsEvent {
+  final NotificationCategory? category;
+  const NotificationsCategorySelected(this.category);
+
+  @override
+  List<Object?> get props => [category];
+}

@@ -15,6 +15,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       : super(const NotificationsState()) {
     on<NotificationsFetched>(_onFetched);
     on<NotificationsRefreshed>(_onFetched);
+    on<NotificationsCategorySelected>(
+      (event, emit) => emit(state.withCategory(event.category)),
+    );
   }
 
   Future<void> _onFetched(
@@ -33,12 +36,14 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         errorMessage: failure.message,
       )),
       // Built fresh rather than via copyWith so null ids actually clear the
-      // previous ones.
+      // previous ones. The picked pill stays: a push or a language change
+      // refetches behind the parent's back.
       (content) => emit(NotificationsState(
         status: NotificationsStatus.loaded,
         studentId: content.studentId,
         classId: content.classId,
         items: content.items,
+        category: state.category,
       )),
     );
   }

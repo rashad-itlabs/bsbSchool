@@ -927,6 +927,21 @@ class AppL10nAz extends AppL10n {
   String get noTransactionsInRange => 'Bu tarixlərdə əməliyyat yoxdur';
 
   @override
+  String get notifFilterAttendance => 'Davamiyyət';
+
+  @override
+  String get notifFilterCafeteria => 'Bufet';
+
+  @override
+  String get notifFilterExam => 'İmtahan';
+
+  @override
+  String get notifFilterHomework => 'Ev tapşırığı';
+
+  @override
+  String get notifFilterSystem => 'Sistem';
+
+  @override
   String get notifPrefAttendance => 'Davamiyyət';
 
   @override
@@ -958,7 +973,13 @@ class AppL10nAz extends AppL10n {
   String get notificationFallback => 'Bildiriş';
 
   @override
+  String get notificationFromSchool => 'Məktəb rəhbərliyi';
+
+  @override
   String get notificationsEmpty => 'Hələ bildiriş yoxdur.';
+
+  @override
+  String get notificationsEmptyFilter => 'Bu bölmədə hələ bildiriş yoxdur.';
 
   @override
   String get notificationsTitle => 'Bildirişlər';

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../features/auth/domain/entities/auth_user.dart';
 import '../../features/auth/domain/entities/child_account.dart';
 import '../../features/notifications/presentation/notification_prefs.dart';
+import '../../features/notifications/presentation/notifications_feed_signal.dart';
 import '../../l10n/app_localizations.dart';
 import '../l10n/locale_controller.dart';
 import '../utils/app_info.dart';
@@ -42,6 +43,9 @@ class FirebasePushService implements PushService {
   final Listenable _localeChanges;
   final bool Function(NotificationKind kind) _isEnabled;
 
+  /// Where the notifications tab hears that its feed changed.
+  final NotificationsFeedSignal _feed;
+
   FirebasePushService({
     required this.messaging,
     required this.api,
@@ -50,9 +54,11 @@ class FirebasePushService implements PushService {
     Locale Function()? locale,
     Listenable? localeChanges,
     bool Function(NotificationKind kind)? isEnabled,
+    NotificationsFeedSignal? feed,
   })  : _locale = locale ?? _appLocale,
         _localeChanges = localeChanges ?? LocaleController.instance,
-        _isEnabled = isEnabled ?? NotificationPrefs.instance.isEnabled;
+        _isEnabled = isEnabled ?? NotificationPrefs.instance.isEnabled,
+        _feed = feed ?? NotificationsFeedSignal.instance;
 
   static Locale _appLocale() => LocaleController.instance.resolve(
         WidgetsBinding.instance.platformDispatcher.locales,
@@ -192,6 +198,11 @@ class FirebasePushService implements PushService {
   String _channelName() => lookupAppL10n(_locale()).navNotifications;
 
   void _onForeground(PushMessage message) {
+    // The feed is asked for again even for a kind kept silent below: the
+    // message is on the server either way (a homework entry, a school
+    // announcement), and the open tab should list it.
+    _feed.pushReceived();
+
     // A kind the parent switched off must stay silent. The backend does not
     // know the switches — they live on this device — so this is where they
     // are honoured; the system shows background messages without asking us.
@@ -206,6 +217,19 @@ class FirebasePushService implements PushService {
 
   void _route(Map<String, dynamic> data) {
     PushRouter.instance.request(PushRouter.parse(data));
+    // A tapped announcement lands on the notifications tab (its `type` is not
+    // a tab); the tab refetches and opens that very entry.
+    _feed.pushReceived(openPushId: adminPushId(data));
+  }
+
+  /// The id of an admin push — `{"type": "admin_push", "notification_id": "21"}`
+  /// (backend `PushChannel`); null for every other message. FCM delivers
+  /// every `data` value as a string.
+  @visibleForTesting
+  static int? adminPushId(Map<String, dynamic> data) {
+    final type = (data['type'] ?? '').toString().trim().toLowerCase();
+    if (type != 'admin_push') return null;
+    return int.tryParse((data['notification_id'] ?? '').toString().trim());
   }
 
   NotificationKind? _kindOf(Map<String, dynamic> data) {

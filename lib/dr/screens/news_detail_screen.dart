@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/utils/html_text.dart';
 import '../../features/news/domain/entities/news_item.dart';
@@ -35,24 +34,6 @@ class NewsDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          if (item.createdAt != null) ...[
-            Row(
-              children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 14, color: context.dr.textMuted),
-                const SizedBox(width: 6),
-                Text(
-                  DateFormat('dd MMMM yyyy, HH:mm').format(item.createdAt!),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: context.dr.textMuted,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-          ],
           Text(
             item.titleIn(language),
             style: TextStyle(
