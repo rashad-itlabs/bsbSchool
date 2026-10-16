@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../storage/token_storage.dart';
 import 'auth_interceptor.dart';
+import 'locale_interceptor.dart';
 
 /// Single configured [Dio] instance shared by every service in the app.
 ///
@@ -28,6 +29,8 @@ class ApiClient {
           validateStatus: (status) => status != null && status < 500,
         ),
       ) {
+    // Server messages in the app's language — see [LocaleInterceptor].
+    dio.interceptors.add(LocaleInterceptor());
     dio.interceptors.add(
       AuthInterceptor(tokenStorage, onUnauthorized: onUnauthorized),
     );
