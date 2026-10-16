@@ -1509,6 +1509,12 @@ abstract class AppL10n {
   /// **'Təhvil faylını yüklə'**
   String get hwSubmissionFile;
 
+  /// No description provided for @hwPostedAt.
+  ///
+  /// In az, this message translates to:
+  /// **'Vurulma saatı'**
+  String get hwPostedAt;
+
   /// No description provided for @languageAz.
   ///
   /// In az, this message translates to:

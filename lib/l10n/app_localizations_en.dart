@@ -780,6 +780,9 @@ class AppL10nEn extends AppL10n {
   String get hwSubmissionFile => 'Download submitted file';
 
   @override
+  String get hwPostedAt => 'Posted at';
+
+  @override
   String get languageAz => 'Azerbaijani';
 
   @override

@@ -779,6 +779,9 @@ class AppL10nAz extends AppL10n {
   String get hwSubmissionFile => 'Təhvil faylını yüklə';
 
   @override
+  String get hwPostedAt => 'Vurulma saatı';
+
+  @override
   String get languageAz => 'Azərbaycan dili';
 
   @override

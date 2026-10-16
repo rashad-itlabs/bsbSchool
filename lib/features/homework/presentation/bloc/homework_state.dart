@@ -47,16 +47,29 @@ class HomeworkState extends Equatable {
   /// keeps the order the API sent.
   List<Homework> get tabHomeworks {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
     final inTab = homeworks.where((hw) {
-      final date = hw.submitDate;
-      if (date == null) return tab == HomeworkTab.active;
-      final due = DateTime(date.year, date.month, date.day);
-      final expired = due.isBefore(today);
+      final expired = isExpired(hw, now);
       return tab == HomeworkTab.active ? !expired : expired;
     }).toList();
 
     return tab == HomeworkTab.past ? _newestFirst(inTab) : inTab;
+  }
+
+  /// Whether [hw] belongs to the inactive tab at [now].
+  ///
+  /// The server's `archive_at` (deadline day, 08:00 school time — the same
+  /// moment the website archives it) decides, compared with the actual clock.
+  /// A server without that field (before 13.10.2026) falls back to the old
+  /// rule: inactive from the day after the deadline. No deadline at all
+  /// stays active.
+  static bool isExpired(Homework hw, DateTime now) {
+    final archiveAt = hw.archiveAt;
+    if (archiveAt != null) return !now.isBefore(archiveAt);
+
+    final date = hw.submitDate;
+    if (date == null) return false;
+    final today = DateTime(now.year, now.month, now.day);
+    return DateTime(date.year, date.month, date.day).isBefore(today);
   }
 
   /// Latest deadline first — the date the card shows. On the same deadline

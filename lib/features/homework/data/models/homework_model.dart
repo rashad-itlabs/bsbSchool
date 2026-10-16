@@ -12,6 +12,8 @@ class HomeworkModel extends Homework {
     super.homeworkDate,
     super.submitDate,
     super.evaluationDate,
+    super.createdAt,
+    super.archiveAt,
     super.documentUrl,
     super.classId,
     super.subjectId,
@@ -29,6 +31,8 @@ class HomeworkModel extends Homework {
         homeworkDate: _asDate(json['homework_date']),
         submitDate: _asDate(json['submit_date']),
         evaluationDate: _asDate(json['evaluation_date']),
+        createdAt: _asDate(json['created_at']),
+        archiveAt: _asDate(json['archive_at']),
         documentUrl: _asString(json['document']),
         classId: _asNullableInt(json['class_id']),
         subjectId: _asNullableInt(json['subject_id']),
@@ -61,8 +65,10 @@ class HomeworkModel extends Homework {
     return (text == null || text.isEmpty) ? null : text;
   }
 
-  /// Dates come as `yyyy-MM-dd` (`marked_at` adds ` HH:mm:ss`); a bad value
-  /// degrades to null, not a crash.
+  /// Dates come as `yyyy-MM-dd` (`marked_at` and `created_at` add
+  /// ` HH:mm:ss`, read as school wall-clock time; `archive_at` is ISO 8601
+  /// with the `+04:00` offset, so it is a real instant); a bad value degrades
+  /// to null, not a crash.
   static DateTime? _asDate(dynamic value) {
     final text = _asString(value);
     return text == null ? null : DateTime.tryParse(text);

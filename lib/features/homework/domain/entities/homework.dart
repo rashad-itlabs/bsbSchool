@@ -26,6 +26,16 @@ class Homework extends Equatable {
   /// When the teacher evaluates it.
   final DateTime? evaluationDate;
 
+  /// When the teacher posted it to the system (`created_at`, school time).
+  /// Null on a server older than 15.10.2026.
+  final DateTime? createdAt;
+
+  /// The moment it moves to the inactive tab (`archive_at`): the deadline day
+  /// at 08:00 school time. The server owns this rule (`HomeworkArchive`, the
+  /// website reads the same one) — the app only compares it with the clock.
+  /// Null when there is no usable deadline.
+  final DateTime? archiveAt;
+
   /// Absolute URL of an attached file, when present.
   final String? documentUrl;
 
@@ -47,6 +57,8 @@ class Homework extends Equatable {
     this.homeworkDate,
     this.submitDate,
     this.evaluationDate,
+    this.createdAt,
+    this.archiveAt,
     this.documentUrl,
     this.classId,
     this.subjectId,
@@ -64,6 +76,8 @@ class Homework extends Equatable {
         homeworkDate,
         submitDate,
         evaluationDate,
+        createdAt,
+        archiveAt,
         documentUrl,
         classId,
         subjectId,

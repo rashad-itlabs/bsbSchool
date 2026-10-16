@@ -92,6 +92,9 @@ class HomeworkDetailScreen extends StatelessWidget {
                     label: context.l10n.hwGivenDate,
                     value: _formatDate(homework.homeworkDate)),
                 _InfoRow(
+                    label: context.l10n.hwPostedAt,
+                    value: _formatDateTime(homework.createdAt)),
+                _InfoRow(
                     label: context.l10n.hwDueDate,
                     value: _formatDate(homework.submitDate)),
                 _InfoRow(
@@ -273,6 +276,9 @@ class _DownloadButton extends StatelessWidget {
 
 String _formatDate(DateTime? date) =>
     date == null ? '' : DateFormat('dd MMM yyyy').format(date);
+
+String _formatDateTime(DateTime? date) =>
+    date == null ? '' : DateFormat('dd MMM yyyy, HH:mm').format(date);
 
 /// The server sends rich text (`<p>...</p>`); the detail view shows plain text.
 String _stripHtml(String html) => html

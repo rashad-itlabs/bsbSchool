@@ -781,6 +781,9 @@ class AppL10nRu extends AppL10n {
   String get hwSubmissionFile => 'Скачать сданный файл';
 
   @override
+  String get hwPostedAt => 'Время внесения';
+
+  @override
   String get languageAz => 'Азербайджанский';
 
   @override

@@ -277,6 +277,26 @@ class _HomeworkCard extends StatelessWidget {
               ),
             ],
           ),
+          if (homework.createdAt != null) ...[
+            const SizedBox(height: 6),
+            // One Text with spans, so a large font wraps instead of overflowing.
+            Text.rich(
+              TextSpan(
+                text: '${context.l10n.hwPostedAt}: ',
+                style: TextStyle(fontSize: 12, color: context.dr.textMuted),
+                children: [
+                  TextSpan(
+                    text: DateFormat('dd MMM yyyy, HH:mm')
+                        .format(homework.createdAt!),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: context.dr.textMain,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
       ),
