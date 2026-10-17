@@ -68,6 +68,9 @@ class AttendanceWeekOverview extends StatelessWidget {
     // The "no session" dot was a white wash, invisible on the light theme's
     // white card; the border token reads on both.
     if (onDay.isEmpty) return context.dr.border;
+    // Excused lessons (QƏRAR-107) don't colour a day; one excused from start
+    // to end is blue — the month calendar's rule.
+    if (onDay.every((r) => r.isExcused)) return DrColors.blue;
     if (onDay.any((r) => r.isAbsent)) return DrColors.red;
     if (onDay.any((r) => r.isLate)) return DrColors.teal;
     return context.dr.accent;

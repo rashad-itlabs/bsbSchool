@@ -7,6 +7,7 @@ import '../../features/homework/domain/entities/homework.dart';
 import '../../features/homework/presentation/bloc/homework_bloc.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../widgets/homework_status.dart';
 import 'homework_detail_screen.dart';
 import '../../core/l10n/l10n.dart';
 
@@ -205,10 +206,15 @@ class _HomeworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desc = _stripHtml(homework.description);
-    // Handed-in work no longer counts down to its deadline.
-    final tag = homework.isSubmitted
-        ? _DeadlineTag(context.l10n.hwSubmitted, context.dr.accent)
-        : _deadlineTag(context, homework.submitDate);
+    // The server's status (17.10.2026: its `statuses` dictionary — the
+    // website's words and colours). «Assigned» keeps the deadline countdown,
+    // which says more; a server without statuses keeps the old rule.
+    final badge = HomeworkStatusBadge.of(context, homework);
+    final tag = badge != null && !badge.isAssigned
+        ? _DeadlineTag(badge.label, badge.color)
+        : badge == null && homework.isSubmitted
+            ? _DeadlineTag(context.l10n.hwSubmitted, context.dr.accent)
+            : _deadlineTag(context, homework.submitDate);
 
     return GestureDetector(
       onTap: () => _open(context),
@@ -227,23 +233,30 @@ class _HomeworkCard extends StatelessWidget {
                 size: 48,
                 radius: 16,
               ),
-              if (tag != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: tag.color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    tag.label.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: tag.color,
+              if (tag != null) ...[
+                const SizedBox(width: 8),
+                // Flexible: a server label («Учитель не отметил») is longer
+                // than the old countdown words and wraps instead of overflowing.
+                Flexible(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: tag.color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _upper(context, tag.label),
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: tag.color,
+                      ),
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
@@ -349,6 +362,13 @@ _DeadlineTag? _deadlineTag(BuildContext context, DateTime? submitDate) {
   if (days == 1) return _DeadlineTag(context.l10n.homeworkTomorrow, DrColors.teal);
   return _DeadlineTag(context.l10n.homeworkDaysLeft(days), context.dr.accent);
 }
+
+/// Dart's `toUpperCase` has no locale: Azerbaijani `i` becomes `I`, not `İ`,
+/// so «Yerinə yetirilib» read «YERINƏ YETIRILIB». Dotted `i` is mapped first.
+String _upper(BuildContext context, String text) =>
+    Localizations.localeOf(context).languageCode == 'az'
+        ? text.replaceAll('i', 'İ').toUpperCase()
+        : text.toUpperCase();
 
 String _formatDate(DateTime? date) =>
     date == null ? '—' : DateFormat('dd MMM yyyy').format(date);

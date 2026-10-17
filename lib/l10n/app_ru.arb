@@ -48,6 +48,7 @@
   "attendanceLate": "Опоздания",
   "attendanceLateTag": "Опоздал",
   "attendanceMeetingTag": "На встрече",
+  "attendanceExcusedTag": "Отпросился",
   "attendanceMixed": "Смешанный",
   "attendanceLesson": "Урок",
   "attendanceMonthOverview": "Обзор за {month}",

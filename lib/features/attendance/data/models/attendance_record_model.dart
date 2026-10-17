@@ -9,6 +9,7 @@ class AttendanceRecordModel extends AttendanceRecord {
     super.className,
     super.teacher,
     super.status,
+    super.excused,
     super.effort,
     super.note,
     super.period,
@@ -26,6 +27,7 @@ class AttendanceRecordModel extends AttendanceRecord {
         className: _asString(json['class']),
         teacher: _asString(json['teacher']),
         status: _asString(json['status']) ?? 'Present',
+        excused: _asBool(json['excused']),
         effort: _asInt(json['effort']),
         note: _asString(json['note']),
         period: _asString(json['period']),
@@ -35,6 +37,13 @@ class AttendanceRecordModel extends AttendanceRecord {
 
   static int _asInt(dynamic value) =>
       value is int ? value : int.tryParse(value?.toString() ?? '') ?? 0;
+
+  /// `excused` is a JSON bool; `1` / `"true"` are tolerated, anything else
+  /// (absent on an older server) is false.
+  static bool _asBool(dynamic value) =>
+      value == true ||
+      value == 1 ||
+      const ['true', '1'].contains(value?.toString().toLowerCase());
 
   /// The API sends `null` for missing values; empty strings mean the same.
   static String? _asString(dynamic value) {

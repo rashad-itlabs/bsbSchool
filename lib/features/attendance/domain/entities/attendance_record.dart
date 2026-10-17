@@ -13,8 +13,13 @@ class AttendanceRecord extends Equatable {
   final String? className;
   final String? teacher;
 
-  /// Raw status text: `Present`, `Late`, `Absent`, `Meeting`.
+  /// Raw status text: `Present`, `Late`, `Absent`, `Meeting`, `Excused`.
   final String status;
+
+  /// The school excused the lesson (QƏRAR-107, server 17.10.2026). Until the
+  /// server sends `Excused` as the [status] itself (`.env` API_RAW_EXCUSED,
+  /// backend question E-038) such a lesson arrives as `Absent` with this flag.
+  final bool excused;
 
   /// Effort score the teacher logged (0 when not graded).
   final int effort;
@@ -37,6 +42,7 @@ class AttendanceRecord extends Equatable {
     this.className,
     this.teacher,
     this.status = 'Present',
+    this.excused = false,
     this.effort = 0,
     this.note,
     this.period,
@@ -47,7 +53,13 @@ class AttendanceRecord extends Equatable {
   /// Normalised status buckets so the UI never string-compares raw text.
   bool get isPresent => status.toLowerCase() == 'present';
   bool get isLate => status.toLowerCase() == 'late';
-  bool get isAbsent => status.toLowerCase() == 'absent';
+
+  /// Excused either way the server says it — the raw word, or `Absent` plus
+  /// the [excused] flag — so the app needs no change when the server flips.
+  bool get isExcused => excused || status.toLowerCase() == 'excused';
+
+  /// A real absence: an excused lesson is not one (the website, QƏRAR-107).
+  bool get isAbsent => status.toLowerCase() == 'absent' && !isExcused;
 
   /// Away at a meeting during the lesson — 27 marks since September; nothing
   /// on the server counts it (backend docs), and neither do the stat cards.
@@ -88,6 +100,7 @@ class AttendanceRecord extends Equatable {
         className,
         teacher,
         status,
+        excused,
         effort,
         note,
         period,

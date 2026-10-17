@@ -1,4 +1,5 @@
 import '../../domain/entities/homework_content.dart';
+import '../../domain/entities/homework_status_info.dart';
 import 'homework_model.dart';
 
 class HomeworkContentModel extends HomeworkContent {
@@ -9,13 +10,24 @@ class HomeworkContentModel extends HomeworkContent {
   });
 
   /// Matches the whole `GET /homework` body:
-  /// `{ "class_id": 94, "class_name": "Class Group 7", "data": [ ... ] }`
+  /// `{ "class_id": 94, "class_name": "Class Group 7", "data": [ ... ],
+  ///    "statuses": [ ... ] }` — `statuses` since 16.10.2026; each homework
+  /// gets its status's entry attached (`Homework.statusInfo`).
   factory HomeworkContentModel.fromJson(Map<String, dynamic> json) {
+    final dictionary = json['statuses'];
+    final statuses = {
+      for (final info in (dictionary is List ? dictionary : const [])
+          .map(HomeworkModel.statusInfoFromJson)
+          .whereType<HomeworkStatusInfo>())
+        info.code: info,
+    };
+
     final raw = json['data'];
     final homeworks = raw is List
         ? raw
             .whereType<Map>()
-            .map((e) => HomeworkModel.fromJson(Map<String, dynamic>.from(e)))
+            .map((e) => HomeworkModel.fromJson(Map<String, dynamic>.from(e),
+                statuses: statuses))
             .toList()
         : <HomeworkModel>[];
 

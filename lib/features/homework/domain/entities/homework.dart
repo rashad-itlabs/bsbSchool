@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'homework_status_info.dart';
 import 'homework_submission.dart';
 
 /// One entry of the `data` array returned by `GET /homework`.
@@ -42,10 +43,24 @@ class Homework extends Equatable {
   final int? classId;
   final int? subjectId;
 
-  /// The student's hand-in; null until it has been marked as submitted.
+  /// The teacher's mark, when there is one. Present for «done» — but also for
+  /// «not done» and «absent» (codes 3 / 6), so it does NOT mean "submitted".
   final HomeworkSubmission? submission;
 
-  bool get isSubmitted => submission != null;
+  /// The server's status (`status` key, `status_code`, `status_label` in the
+  /// request language); null on a server older than 08.10.2026.
+  final String? status;
+  final int? statusCode;
+  final String? statusLabel;
+
+  /// This status's entry in the response's `statuses` dictionary (labels in
+  /// every language, colour, hint); null when the server sent no dictionary.
+  final HomeworkStatusInfo? statusInfo;
+
+  /// Marked as done. The server's status decides; only a server without one
+  /// falls back to "there is a mark", which used to be the whole rule.
+  bool get isSubmitted =>
+      status != null ? status == 'submitted' : submission != null;
 
   const Homework({
     required this.id,
@@ -63,6 +78,10 @@ class Homework extends Equatable {
     this.classId,
     this.subjectId,
     this.submission,
+    this.status,
+    this.statusCode,
+    this.statusLabel,
+    this.statusInfo,
   });
 
   @override
@@ -82,5 +101,9 @@ class Homework extends Equatable {
         classId,
         subjectId,
         submission,
+        status,
+        statusCode,
+        statusLabel,
+        statusInfo,
       ];
 }

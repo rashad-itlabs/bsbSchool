@@ -28,6 +28,9 @@ class DrColors {
   static const Color red = Color(0xFFFF6B6B);
   static const Color redStrong = Color(0xFFFF4757);
   static const Color green = Color(0xFF2ECC71);
+
+  /// An excused lesson (QƏRAR-107) — the website's `#3B82F6`.
+  static const Color blue = Color(0xFF3B82F6);
 }
 
 /// Surface / text tokens that differ between light and dark. Exposed as a

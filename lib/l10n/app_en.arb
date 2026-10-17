@@ -48,6 +48,7 @@
   "attendanceLate": "Late",
   "attendanceLateTag": "Late",
   "attendanceMeetingTag": "Meeting",
+  "attendanceExcusedTag": "Excused",
   "attendanceMixed": "Mixed",
   "attendanceLesson": "Lesson",
   "attendanceMonthOverview": "Overview for {month}",

@@ -113,6 +113,9 @@ class AppL10nEn extends AppL10n {
   String get attendanceMeetingTag => 'Meeting';
 
   @override
+  String get attendanceExcusedTag => 'Excused';
+
+  @override
   String get attendanceMixed => 'Mixed';
 
   @override

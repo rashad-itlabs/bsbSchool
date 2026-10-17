@@ -228,7 +228,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
 
   Widget _legend(BuildContext context, DateTime month) {
     // Counted per day, not per record, so the numbers match the coloured cells.
-    var present = 0, late = 0, absent = 0, mixed = 0;
+    var present = 0, late = 0, absent = 0, mixed = 0, excused = 0;
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
     for (var d = 1; d <= daysInMonth; d++) {
       switch (_statusOn(DateTime(month.year, month.month, d))) {
@@ -240,6 +240,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           absent++;
         case _DayStatus.mixed:
           mixed++;
+        case _DayStatus.excused:
+          excused++;
         case null:
           break;
       }
@@ -247,6 +249,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
 
     // One line, spread edge to edge. Each item is loosely Flexible so a long
     // label shrinks (with an ellipsis) on a narrow phone instead of overflowing.
+    // The excused item only shows in a month that has such a day — a fifth
+    // item would squeeze the line on every other month.
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -254,6 +258,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
         _legendItem(context, _DayStatus.late, context.l10n.attendanceLateTag, late),
         _legendItem(context, _DayStatus.absent, context.l10n.attendanceAbsent, absent),
         _legendItem(context, _DayStatus.mixed, context.l10n.attendanceMixed, mixed),
+        if (excused > 0)
+          _legendItem(context, _DayStatus.excused, context.l10n.attendanceExcusedTag, excused),
       ].map((item) => Flexible(child: item)).toList(),
     );
   }
@@ -286,15 +292,19 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
 
   /// A day with both a missed and an attended session is [_DayStatus.mixed];
   /// otherwise the worst status logged on [day] wins (absent > late > present).
+  /// Excused lessons (QƏRAR-107) don't colour a day — the website's rule — and
+  /// a day excused from start to end is [_DayStatus.excused].
   _DayStatus? _statusOn(DateTime day) {
-    final onDay = widget.records.where((r) {
+    final logged = widget.records.where((r) {
       final d = r.date;
       return d != null &&
           d.year == day.year &&
           d.month == day.month &&
           d.day == day.day;
     });
-    if (onDay.isEmpty) return null;
+    if (logged.isEmpty) return null;
+    final onDay = logged.where((r) => !r.isExcused);
+    if (onDay.isEmpty) return _DayStatus.excused;
     final anyAbsent = onDay.any((r) => r.isAbsent);
     if (anyAbsent && onDay.any((r) => !r.isAbsent)) return _DayStatus.mixed;
     if (anyAbsent) return _DayStatus.absent;
@@ -307,6 +317,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
       _DayStatus.present => context.dr.accent,
       _DayStatus.late => DrColors.teal,
       _DayStatus.absent => DrColors.red,
+      _DayStatus.excused => DrColors.blue,
     // Only used where a single colour is unavoidable; cells and the legend
     // dot paint [_mixedGradient] instead.
       _DayStatus.mixed => DrColors.red,
@@ -326,4 +337,4 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
   }
 }
 
-enum _DayStatus { present, late, absent, mixed }
+enum _DayStatus { present, late, absent, mixed, excused }

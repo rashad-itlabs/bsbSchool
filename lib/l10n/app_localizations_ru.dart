@@ -113,6 +113,9 @@ class AppL10nRu extends AppL10n {
   String get attendanceMeetingTag => 'На встрече';
 
   @override
+  String get attendanceExcusedTag => 'Отпросился';
+
+  @override
   String get attendanceMixed => 'Смешанный';
 
   @override

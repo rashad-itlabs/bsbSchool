@@ -285,6 +285,12 @@ abstract class AppL10n {
   /// **'Görüşdə'**
   String get attendanceMeetingTag;
 
+  /// No description provided for @attendanceExcusedTag.
+  ///
+  /// In az, this message translates to:
+  /// **'İcazəli'**
+  String get attendanceExcusedTag;
+
   /// No description provided for @attendanceMixed.
   ///
   /// In az, this message translates to:

@@ -86,11 +86,15 @@ class _BodyState extends State<_Body> {
         d.month == _visibleMonth.month;
   }
 
+  /// The rate follows the website (QƏRAR-07): (P + L) ÷ (P + L + A + E) — an
+  /// excused lesson counts as missed, but is not an absence on the card.
   ({int present, int absent, int late, int rate}) _monthStats(
       List<AttendanceRecord> records) {
-    var present = 0, absent = 0, late = 0;
+    var present = 0, absent = 0, late = 0, excused = 0;
     for (final r in records.where(_inVisibleMonth)) {
-      if (r.isAbsent) {
+      if (r.isExcused) {
+        excused++;
+      } else if (r.isAbsent) {
         absent++;
       } else if (r.isLate) {
         late++;
@@ -98,7 +102,7 @@ class _BodyState extends State<_Body> {
         present++;
       }
     }
-    final total = present + absent + late;
+    final total = present + absent + late + excused;
     final rate = total == 0 ? 0 : (((present + late) / total) * 100).round();
     return (present: present, absent: absent, late: late, rate: rate);
   }
@@ -327,6 +331,11 @@ class _StatusTag {
 /// Takes a [context] because the "present" tag paints the brand accent as a dot
 /// and as text, both of which need the light theme's darker variant.
 _StatusTag _statusTag(BuildContext context, AttendanceRecord record) {
+  // Before the absent check: an excused lesson may still arrive as `Absent`
+  // with the `excused` flag (backend E-038).
+  if (record.isExcused) {
+    return _StatusTag(context.l10n.attendanceExcusedTag, DrColors.blue);
+  }
   if (record.isAbsent) {
     return _StatusTag(context.l10n.attendanceAbsent, DrColors.red);
   }

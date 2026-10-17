@@ -6,6 +6,7 @@ import '../../features/homework/domain/entities/homework.dart';
 import '../../features/homework/domain/entities/homework_submission.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../widgets/homework_status.dart';
 import '../../core/l10n/l10n.dart';
 
 /// Full view of a single homework, reached by tapping a card on the list.
@@ -19,6 +20,12 @@ class HomeworkDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final desc = _stripHtml(homework.description);
+    // The server's status (`statuses` dictionary, 17.10.2026). The status
+    // block shows with a teacher's mark, and for «teacher has not marked» —
+    // there is no mark then, but the hint explains what that means.
+    final badge = HomeworkStatusBadge.of(context, homework);
+    final showStatus = homework.submission != null ||
+        (badge != null && badge.key == 'teacher_missed');
 
     return DrScaffold(
       child: ListView(
@@ -61,8 +68,8 @@ class HomeworkDetailScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          if (homework.submission != null) ...[
-            _SubmissionSection(submission: homework.submission!),
+          if (showStatus) ...[
+            _SubmissionSection(submission: homework.submission, badge: badge),
             const SizedBox(height: 24),
           ],
           if (desc.isNotEmpty) ...[
@@ -114,23 +121,37 @@ class HomeworkDetailScreen extends StatelessWidget {
   }
 }
 
-/// The hand-in, shown only once the server has one: a "submitted" status plus
-/// whatever of the date, notes, grade, comment and file it filled in.
+/// The status and the teacher's mark: the server's status (17.10.2026 — it
+/// used to say "submitted" for every mark, «not done» and «absent» too) plus
+/// whatever of the date, notes, grade, comment and file the mark filled in.
+/// A server without statuses falls back to "submitted".
 class _SubmissionSection extends StatelessWidget {
-  final HomeworkSubmission submission;
-  const _SubmissionSection({required this.submission});
+  final HomeworkSubmission? submission;
+  final HomeworkStatusBadge? badge;
+  const _SubmissionSection({required this.submission, required this.badge});
+
+  IconData get _icon => switch (badge?.key) {
+        'not_submitted' => Icons.cancel_rounded,
+        'absent' => Icons.person_off_rounded,
+        'teacher_missed' => Icons.schedule_rounded,
+        'assigned' => Icons.hourglass_empty_rounded,
+        _ => Icons.check_circle_rounded,
+      };
 
   @override
   Widget build(BuildContext context) {
-    final markedAt = submission.markedAt;
+    final submission = this.submission;
+    final markedAt = submission?.markedAt;
     final rows = <(String, String?)>[
       if (markedAt != null)
         (context.l10n.hwMarkedAt,
             DateFormat('dd MMM yyyy, HH:mm').format(markedAt)),
-      (context.l10n.hwGrade, submission.grade),
-      (context.l10n.hwNotes, submission.notes),
-      (context.l10n.hwTeacherComment, submission.teacherComment),
+      (context.l10n.hwGrade, submission?.grade),
+      (context.l10n.hwNotes, submission?.notes),
+      (context.l10n.hwTeacherComment, submission?.teacherComment),
     ].where((r) => r.$2 != null && r.$2!.isNotEmpty).toList();
+    final color = badge?.color ?? context.dr.accent;
+    final hint = badge?.hint;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -149,32 +170,43 @@ class _SubmissionSection extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 13, color: context.dr.textMuted)),
                   ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: context.dr.accentSoft,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle_rounded,
-                            size: 14, color: context.dr.accent),
-                        const SizedBox(width: 4),
-                        Text(
-                          context.l10n.hwSubmitted,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: context.dr.accent,
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: badge == null
+                            ? context.dr.accentSoft
+                            : color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_icon, size: 14, color: color),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              badge?.label ?? context.l10n.hwSubmitted,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
+              if (hint != null) ...[
+                const SizedBox(height: 8),
+                Text(hint,
+                    style:
+                        TextStyle(fontSize: 12, color: context.dr.textMuted)),
+              ],
               if (rows.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Divider(color: context.dr.border, height: 1),
@@ -189,10 +221,10 @@ class _SubmissionSection extends StatelessWidget {
             ],
           ),
         ),
-        if (submission.documentUrl != null) ...[
+        if (submission?.documentUrl != null) ...[
           const SizedBox(height: 12),
           _DownloadButton(
-            url: submission.documentUrl!,
+            url: submission!.documentUrl!,
             label: submission.originalName ?? context.l10n.hwSubmissionFile,
           ),
         ],

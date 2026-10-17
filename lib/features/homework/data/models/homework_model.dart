@@ -1,4 +1,5 @@
 import '../../domain/entities/homework.dart';
+import '../../domain/entities/homework_status_info.dart';
 import '../../domain/entities/homework_submission.dart';
 
 class HomeworkModel extends Homework {
@@ -18,26 +19,77 @@ class HomeworkModel extends Homework {
     super.classId,
     super.subjectId,
     super.submission,
+    super.status,
+    super.statusCode,
+    super.statusLabel,
+    super.statusInfo,
   });
 
   /// Matches one entry of the `data` array returned by `GET /homework`.
-  factory HomeworkModel.fromJson(Map<String, dynamic> json) => HomeworkModel(
-        id: _asInt(json['id']),
-        name: _asString(json['homework_name']) ?? 'Adsız tapşırıq',
-        description: _asString(json['description']) ?? '',
-        subject: _asString(json['subject']),
-        section: _asString(json['section']),
-        teacher: _asString(json['teacher']),
-        homeworkDate: _asDate(json['homework_date']),
-        submitDate: _asDate(json['submit_date']),
-        evaluationDate: _asDate(json['evaluation_date']),
-        createdAt: _asDate(json['created_at']),
-        archiveAt: _asDate(json['archive_at']),
-        documentUrl: _asString(json['document']),
-        classId: _asNullableInt(json['class_id']),
-        subjectId: _asNullableInt(json['subject_id']),
-        submission: _asSubmission(json['submission']),
-      );
+  /// [statuses] — the response's `statuses` dictionary by code
+  /// (`HomeworkContentModel` reads it); this entry's one is attached.
+  factory HomeworkModel.fromJson(
+    Map<String, dynamic> json, {
+    Map<int, HomeworkStatusInfo> statuses = const {},
+  }) {
+    final code = _asNullableInt(json['status_code']);
+    return HomeworkModel(
+      id: _asInt(json['id']),
+      name: _asString(json['homework_name']) ?? 'Adsız tapşırıq',
+      description: _asString(json['description']) ?? '',
+      subject: _asString(json['subject']),
+      section: _asString(json['section']),
+      teacher: _asString(json['teacher']),
+      homeworkDate: _asDate(json['homework_date']),
+      submitDate: _asDate(json['submit_date']),
+      evaluationDate: _asDate(json['evaluation_date']),
+      createdAt: _asDate(json['created_at']),
+      archiveAt: _asDate(json['archive_at']),
+      documentUrl: _asString(json['document']),
+      classId: _asNullableInt(json['class_id']),
+      subjectId: _asNullableInt(json['subject_id']),
+      submission: _asSubmission(json['submission']),
+      status: _asString(json['status']),
+      statusCode: code,
+      statusLabel: _asString(json['status_label']),
+      statusInfo: code == null ? null : statuses[code],
+    );
+  }
+
+  /// One entry of the `statuses` dictionary; null when it has no usable code.
+  static HomeworkStatusInfo? statusInfoFromJson(dynamic value) {
+    if (value is! Map) return null;
+    final code = _asNullableInt(value['code']);
+    final key = _asString(value['key']);
+    if (code == null || key == null) return null;
+    return HomeworkStatusInfo(
+      code: code,
+      key: key,
+      label: _asString(value['label']) ?? key,
+      labels: _asTexts(value['labels']),
+      color: _asColor(value['color']),
+      hint: _asString(value['hint']),
+      hints: _asTexts(value['hints']),
+    );
+  }
+
+  /// `{"az": "...", "en": "...", "ru": null}` → the non-empty ones.
+  static Map<String, String> _asTexts(dynamic value) {
+    if (value is! Map) return const {};
+    return {
+      for (final e in value.entries)
+        if (_asString(e.value) != null) e.key.toString(): _asString(e.value)!,
+    };
+  }
+
+  /// `#RRGGBB` → opaque ARGB; anything else → null.
+  static int? _asColor(dynamic value) {
+    final text = _asString(value);
+    if (text == null || !RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(text)) {
+      return null;
+    }
+    return 0xFF000000 | int.parse(text.substring(1), radix: 16);
+  }
 
   /// `submission` is `null` until the work is handed in, then an object.
   static HomeworkSubmission? _asSubmission(dynamic value) {

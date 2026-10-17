@@ -31,6 +31,7 @@
   "attendanceLate": "Gecikmə",
   "attendanceLateTag": "Gecikib",
   "attendanceMeetingTag": "Görüşdə",
+  "attendanceExcusedTag": "İcazəli",
   "attendanceMixed": "Qarışıq",
   "attendanceLesson": "Dərs",
   "attendanceMonthOverview": "{month} ayı üzrə icmal",
