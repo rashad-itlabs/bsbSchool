@@ -11,6 +11,9 @@ class AttendanceRecordModel extends AttendanceRecord {
     super.status,
     super.effort,
     super.note,
+    super.period,
+    super.startTime,
+    super.endTime,
   });
 
   /// Matches one entry of the `data` array returned by `GET /attendance`.
@@ -25,6 +28,9 @@ class AttendanceRecordModel extends AttendanceRecord {
         status: _asString(json['status']) ?? 'Present',
         effort: _asInt(json['effort']),
         note: _asString(json['note']),
+        period: _asString(json['period']),
+        startTime: _asString(json['start_time']),
+        endTime: _asString(json['end_time']),
       );
 
   static int _asInt(dynamic value) =>

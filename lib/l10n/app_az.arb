@@ -30,6 +30,7 @@
   "attendanceEmpty": "Qeyd tapılmadı",
   "attendanceLate": "Gecikmə",
   "attendanceLateTag": "Gecikib",
+  "attendanceMeetingTag": "Görüşdə",
   "attendanceMixed": "Qarışıq",
   "attendanceLesson": "Dərs",
   "attendanceMonthOverview": "{month} ayı üzrə icmal",

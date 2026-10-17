@@ -47,6 +47,7 @@
   "attendanceEmpty": "Записи не найдены",
   "attendanceLate": "Опоздания",
   "attendanceLateTag": "Опоздал",
+  "attendanceMeetingTag": "На встрече",
   "attendanceMixed": "Смешанный",
   "attendanceLesson": "Урок",
   "attendanceMonthOverview": "Обзор за {month}",

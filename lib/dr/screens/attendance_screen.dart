@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/l10n/app_dates.dart';
@@ -207,27 +206,88 @@ class _BodyState extends State<_Body> {
     );
   }
 
+  /// One lesson: its time, the subject with the teacher under it, and the
+  /// status as a tinted pill. No date — the section header above names the
+  /// day — and no separate dot, which said the same as the pill.
   Widget _log(BuildContext context, AttendanceRecord record,
       {bool divider = true}) {
     final tag = _statusTag(context, record);
-    final title =
-        record.section ?? record.subject ?? context.l10n.attendanceLesson;
-    final subtitle = [
-      if (record.date != null) DateFormat('dd MMM yyyy').format(record.date!),
-      if (record.teacher != null) record.teacher!,
-    ].join(' • ');
 
     return DrTransactionTile(
-      leading: Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(color: tag.color, shape: BoxShape.circle),
-      ),
-      title: title,
-      subtitle: subtitle.isEmpty ? '—' : subtitle,
+      leading: _LessonTime(record: record),
+      title: record.lessonName ?? context.l10n.attendanceLesson,
+      subtitle: record.teacher ?? '—',
       divider: divider,
-      trailing:
-      Text(tag.label, style: TextStyle(fontSize: 12, color: tag.color)),
+      trailing: _StatusPill(tag: tag),
+    );
+  }
+}
+
+/// The status as a small rounded pill in its own colour.
+class _StatusPill extends StatelessWidget {
+  final _StatusTag tag;
+  const _StatusPill({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: tag.color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        tag.label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: tag.color,
+        ),
+      ),
+    );
+  }
+}
+
+/// The lesson's clock time (server `start_time` / `end_time`, 17.10.2026):
+/// start bold, end muted below; a dash when the record has no lesson slot.
+/// Tabular figures keep the column aligned row to row; a minimum width rather
+/// than a fixed one lets it grow with large text scales.
+class _LessonTime extends StatelessWidget {
+  final AttendanceRecord record;
+  const _LessonTime({required this.record});
+
+  @override
+  Widget build(BuildContext context) {
+    const digits = [FontFeature.tabularFigures()];
+    final start = record.startShort;
+    final end = record.endShort;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 44),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            start ?? '—',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: start == null ? context.dr.textMuted : context.dr.textMain,
+              fontFeatures: digits,
+            ),
+          ),
+          if (end != null)
+            Text(
+              end,
+              style: TextStyle(
+                fontSize: 11,
+                color: context.dr.textMuted,
+                fontFeatures: digits,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -275,6 +335,9 @@ _StatusTag _statusTag(BuildContext context, AttendanceRecord record) {
   }
   if (record.isPresent) {
     return _StatusTag(context.l10n.attendancePresent, context.dr.accent);
+  }
+  if (record.isMeeting) {
+    return _StatusTag(context.l10n.attendanceMeetingTag, DrColors.purple);
   }
   return _StatusTag(record.status, context.dr.accent);
 }

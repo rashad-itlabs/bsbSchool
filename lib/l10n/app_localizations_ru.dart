@@ -110,6 +110,9 @@ class AppL10nRu extends AppL10n {
   String get attendanceLateTag => 'Опоздал';
 
   @override
+  String get attendanceMeetingTag => 'На встрече';
+
+  @override
   String get attendanceMixed => 'Смешанный';
 
   @override

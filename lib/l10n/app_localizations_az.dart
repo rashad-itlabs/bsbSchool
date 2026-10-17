@@ -110,6 +110,9 @@ class AppL10nAz extends AppL10n {
   String get attendanceLateTag => 'Gecikib';
 
   @override
+  String get attendanceMeetingTag => 'Görüşdə';
+
+  @override
   String get attendanceMixed => 'Qarışıq';
 
   @override

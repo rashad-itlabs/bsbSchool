@@ -23,17 +23,30 @@ class AttendanceState extends Equatable {
 
   bool get isLoading => status == AttendanceStatus.loading;
 
-  /// Records sorted newest first for the "recent logs" list.
+  /// Records sorted newest day first and, within a day, by lesson time (first
+  /// lesson on top; a record without a slot goes last). Ties keep the server's
+  /// order explicitly — Dart's `sort` is not stable.
   List<AttendanceRecord> get recentRecords {
-    final sorted = [...records];
-    sorted.sort((a, b) {
+    final indexed = records.indexed.toList();
+    indexed.sort((x, y) {
+      final a = x.$2, b = y.$2;
       final ad = a.date, bd = b.date;
-      if (ad == null && bd == null) return 0;
-      if (ad == null) return 1;
-      if (bd == null) return -1;
-      return bd.compareTo(ad);
+      if (ad == null && bd != null) return 1;
+      if (ad != null && bd == null) return -1;
+      if (ad != null && bd != null) {
+        final byDay = bd.compareTo(ad);
+        if (byDay != 0) return byDay;
+      }
+      final at = a.startTime, bt = b.startTime;
+      if (at == null && bt != null) return 1;
+      if (at != null && bt == null) return -1;
+      if (at != null && bt != null) {
+        final byTime = at.compareTo(bt);
+        if (byTime != 0) return byTime;
+      }
+      return x.$1.compareTo(y.$1);
     });
-    return sorted;
+    return [for (final e in indexed) e.$2];
   }
 
   AttendanceState copyWith({

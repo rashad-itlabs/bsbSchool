@@ -47,6 +47,7 @@
   "attendanceEmpty": "No records found",
   "attendanceLate": "Late",
   "attendanceLateTag": "Late",
+  "attendanceMeetingTag": "Meeting",
   "attendanceMixed": "Mixed",
   "attendanceLesson": "Lesson",
   "attendanceMonthOverview": "Overview for {month}",
