@@ -1527,6 +1527,48 @@ abstract class AppL10n {
   /// **'Vurulma saatı'**
   String get hwPostedAt;
 
+  /// No description provided for @hwFilterCount.
+  ///
+  /// In az, this message translates to:
+  /// **'{count} tapşırıq'**
+  String hwFilterCount(int count);
+
+  /// No description provided for @hwFilterCountOf.
+  ///
+  /// In az, this message translates to:
+  /// **'{total} tapşırıqdan {count}'**
+  String hwFilterCountOf(int count, int total);
+
+  /// No description provided for @hwFilterRemove.
+  ///
+  /// In az, this message translates to:
+  /// **'{name} filtrini götür'**
+  String hwFilterRemove(String name);
+
+  /// No description provided for @hwFilterReset.
+  ///
+  /// In az, this message translates to:
+  /// **'Sıfırla'**
+  String get hwFilterReset;
+
+  /// No description provided for @hwFilterSelected.
+  ///
+  /// In az, this message translates to:
+  /// **'{count} seçilib'**
+  String hwFilterSelected(int count);
+
+  /// No description provided for @hwFilterShow.
+  ///
+  /// In az, this message translates to:
+  /// **'Nəticəni göstər ({count})'**
+  String hwFilterShow(int count);
+
+  /// No description provided for @hwFilterSubjects.
+  ///
+  /// In az, this message translates to:
+  /// **'Fənlər'**
+  String get hwFilterSubjects;
+
   /// No description provided for @languageAz.
   ///
   /// In az, this message translates to:

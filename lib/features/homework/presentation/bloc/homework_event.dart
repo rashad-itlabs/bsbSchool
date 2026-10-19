@@ -17,14 +17,20 @@ class HomeworkRefreshed extends HomeworkEvent {
   const HomeworkRefreshed();
 }
 
-/// User tapped a subject pill ([HomeworkState.allSubjects] clears the filter).
-class HomeworkSubjectSelected extends HomeworkEvent {
-  final String subject;
+/// The filter sheet was applied, a filter chip removed, or the filters reset:
+/// the whole pick, by [HomeworkState.sectionKey] and status key. Empty sets
+/// are "all".
+class HomeworkFiltersChanged extends HomeworkEvent {
+  final Set<String> sections;
+  final Set<String> statuses;
 
-  const HomeworkSubjectSelected(this.subject);
+  const HomeworkFiltersChanged({
+    this.sections = const {},
+    this.statuses = const {},
+  });
 
   @override
-  List<Object?> get props => [subject];
+  List<Object?> get props => [sections, statuses];
 }
 
 /// User switched between the "Aktiv" and "Deaktiv" tabs.

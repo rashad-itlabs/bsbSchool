@@ -788,6 +788,37 @@ class AppL10nAz extends AppL10n {
   String get hwPostedAt => 'Vurulma saatı';
 
   @override
+  String hwFilterCount(int count) {
+    return '$count tapşırıq';
+  }
+
+  @override
+  String hwFilterCountOf(int count, int total) {
+    return '$total tapşırıqdan $count';
+  }
+
+  @override
+  String hwFilterRemove(String name) {
+    return '$name filtrini götür';
+  }
+
+  @override
+  String get hwFilterReset => 'Sıfırla';
+
+  @override
+  String hwFilterSelected(int count) {
+    return '$count seçilib';
+  }
+
+  @override
+  String hwFilterShow(int count) {
+    return 'Nəticəni göstər ($count)';
+  }
+
+  @override
+  String get hwFilterSubjects => 'Fənlər';
+
+  @override
   String get languageAz => 'Azərbaycan dili';
 
   @override

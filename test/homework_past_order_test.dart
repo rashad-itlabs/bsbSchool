@@ -57,7 +57,8 @@ void main() {
     });
 
     test('a subject filter keeps the order', () {
-      final fizika = state.copyWith(subject: 'Fizika');
+      // No section on these: the subject is what the filter matches by.
+      final fizika = state.withFilters(sections: {'Fizika'}, statuses: {});
       expect(_ids(fizika.visibleHomeworks), [4, 5]);
     });
   });

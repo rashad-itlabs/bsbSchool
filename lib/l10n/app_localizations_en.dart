@@ -789,6 +789,43 @@ class AppL10nEn extends AppL10n {
   String get hwPostedAt => 'Posted at';
 
   @override
+  String hwFilterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count assignments',
+      one: '1 assignment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hwFilterCountOf(int count, int total) {
+    return '$count of $total';
+  }
+
+  @override
+  String hwFilterRemove(String name) {
+    return 'Remove filter: $name';
+  }
+
+  @override
+  String get hwFilterReset => 'Reset';
+
+  @override
+  String hwFilterSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String hwFilterShow(int count) {
+    return 'Show results ($count)';
+  }
+
+  @override
+  String get hwFilterSubjects => 'Subjects';
+
+  @override
   String get languageAz => 'Azerbaijani';
 
   @override

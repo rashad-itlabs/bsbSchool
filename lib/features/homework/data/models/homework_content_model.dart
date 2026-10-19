@@ -7,6 +7,7 @@ class HomeworkContentModel extends HomeworkContent {
     super.classId,
     super.className,
     super.homeworks,
+    super.statuses,
   });
 
   /// Matches the whole `GET /homework` body:
@@ -15,12 +16,12 @@ class HomeworkContentModel extends HomeworkContent {
   /// gets its status's entry attached (`Homework.statusInfo`).
   factory HomeworkContentModel.fromJson(Map<String, dynamic> json) {
     final dictionary = json['statuses'];
-    final statuses = {
-      for (final info in (dictionary is List ? dictionary : const [])
-          .map(HomeworkModel.statusInfoFromJson)
-          .whereType<HomeworkStatusInfo>())
-        info.code: info,
-    };
+    // In the server's order: the filter sheet lists them that way.
+    final ordered = (dictionary is List ? dictionary : const [])
+        .map(HomeworkModel.statusInfoFromJson)
+        .whereType<HomeworkStatusInfo>()
+        .toList();
+    final statuses = {for (final info in ordered) info.code: info};
 
     final raw = json['data'];
     final homeworks = raw is List
@@ -39,6 +40,7 @@ class HomeworkContentModel extends HomeworkContent {
           : int.tryParse(classId?.toString() ?? ''),
       className: json['class_name']?.toString(),
       homeworks: homeworks,
+      statuses: ordered,
     );
   }
 }

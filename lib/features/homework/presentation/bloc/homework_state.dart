@@ -5,10 +5,19 @@ enum HomeworkStatus { initial, loading, loaded, error }
 /// Which half of the list the tabs show: deadlines still ahead, or behind.
 enum HomeworkTab { active, past }
 
-class HomeworkState extends Equatable {
-  /// Sentinel for "no subject filter" — also the label of the first pill.
-  static const String allSubjects = kAllFilterSentinel;
+/// One section in the filter sheet: [key] is what a homework is matched by
+/// ([HomeworkState.sectionKey]), [label] what the sheet says.
+class HomeworkSectionOption extends Equatable {
+  final String key;
+  final String label;
 
+  const HomeworkSectionOption({required this.key, required this.label});
+
+  @override
+  List<Object?> get props => [key, label];
+}
+
+class HomeworkState extends Equatable {
   final HomeworkStatus status;
 
   /// Everything the API returned, unfiltered.
@@ -17,9 +26,17 @@ class HomeworkState extends Equatable {
   final int? classId;
   final String? className;
 
-  final String subject;
+  /// The server's status dictionary, in its order (see [statusOptions]).
+  final List<HomeworkStatusInfo> statusDictionary;
 
-  /// Selected tab — the screen opens on [HomeworkTab.active].
+  /// Sections picked in the filter sheet, by [sectionKey]; empty is "all".
+  final Set<String> sections;
+
+  /// Statuses picked in the filter sheet, by server key; empty is "all".
+  final Set<String> statuses;
+
+  /// Selected tab — the screen opens on [HomeworkTab.active]. The filters
+  /// hold across both tabs.
   final HomeworkTab tab;
 
   final String? errorMessage;
@@ -29,7 +46,9 @@ class HomeworkState extends Equatable {
     this.homeworks = const [],
     this.classId,
     this.className,
-    this.subject = allSubjects,
+    this.statusDictionary = const [],
+    this.sections = const {},
+    this.statuses = const {},
     this.tab = HomeworkTab.active,
     this.errorMessage,
   });
@@ -97,19 +116,118 @@ class HomeworkState extends Equatable {
     return b.compareTo(a);
   }
 
-  /// Pill labels: "Hamısı" plus every subject present in the selected tab.
-  List<String> get subjects {
-    final unique = <String>{
-      for (final hw in tabHomeworks)
-        if (hw.subject != null) hw.subject!,
-    }.toList()..sort();
-    return [allSubjects, ...unique];
+  /// What a homework is matched by in the section filter: its section, else
+  /// its subject; null when it has neither (it then shows only unfiltered).
+  static String? sectionKey(Homework hw) {
+    for (final value in [hw.section, hw.subject]) {
+      final text = value?.trim();
+      if (text != null && text.isNotEmpty) return text;
+    }
+    return null;
   }
 
-  /// What the list renders: [tabHomeworks] narrowed by [subject].
-  List<Homework> get visibleHomeworks {
-    if (subject == allSubjects) return tabHomeworks;
-    return tabHomeworks.where((hw) => hw.subject == subject).toList();
+  /// The sections the sheet offers — from both tabs, so the list does not
+  /// change under the parent when they switch. A section is called by its
+  /// subject: its own name is the auto-name `Mathematics-8C2 <teacher>`.
+  /// Two sections of one subject add their teacher to tell them apart.
+  List<HomeworkSectionOption> get sectionOptions {
+    final byKey = <String, Homework>{};
+    for (final hw in homeworks) {
+      final key = sectionKey(hw);
+      if (key != null) byKey.putIfAbsent(key, () => hw);
+    }
+
+    String subjectOf(String key) => byKey[key]!.subject?.trim() ?? key;
+    final perSubject = <String, int>{};
+    for (final key in byKey.keys) {
+      perSubject.update(subjectOf(key), (n) => n + 1, ifAbsent: () => 1);
+    }
+
+    final options = [
+      for (final MapEntry(:key, value: hw) in byKey.entries)
+        HomeworkSectionOption(
+          key: key,
+          label: perSubject[subjectOf(key)]! > 1 && hw.teacher != null
+              ? '${subjectOf(key)} · ${hw.teacher}'
+              : subjectOf(key),
+        ),
+    ]..sort((a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+    return options;
+  }
+
+  /// The statuses the sheet offers: the server's dictionary, all of it, in
+  /// its order. A server without one (before 16.10.2026) — the statuses the
+  /// homeworks carry, in the same order; none at all hides the group.
+  List<HomeworkStatusInfo> get statusOptions {
+    if (statusDictionary.isNotEmpty) return statusDictionary;
+
+    const order = [
+      'assigned',
+      'submitted',
+      'not_submitted',
+      'teacher_missed',
+      'absent',
+    ];
+    final byKey = <String, HomeworkStatusInfo>{};
+    for (final hw in homeworks) {
+      final key = hw.status;
+      if (key == null || byKey.containsKey(key)) continue;
+      byKey[key] = hw.statusInfo ??
+          HomeworkStatusInfo(
+            code: hw.statusCode ?? 0,
+            key: key,
+            label: hw.statusLabel ?? key,
+          );
+    }
+    int rank(String key) {
+      final i = order.indexOf(key);
+      return i < 0 ? order.length : i;
+    }
+
+    return byKey.values.toList()
+      ..sort((a, b) => rank(a.key).compareTo(rank(b.key)));
+  }
+
+  /// [tabHomeworks] narrowed by a pick of sections and statuses; an empty
+  /// set lets everything through. The tab's order is kept.
+  List<Homework> filtered({
+    required Set<String> sections,
+    required Set<String> statuses,
+  }) {
+    return tabHomeworks.where((hw) {
+      if (sections.isNotEmpty && !sections.contains(sectionKey(hw))) {
+        return false;
+      }
+      if (statuses.isNotEmpty && !statuses.contains(hw.status)) return false;
+      return true;
+    }).toList();
+  }
+
+  /// What the list renders: [tabHomeworks] narrowed by the applied filters.
+  List<Homework> get visibleHomeworks =>
+      filtered(sections: sections, statuses: statuses);
+
+  /// How many filters are on — the badge on the filter button.
+  int get filterCount => sections.length + statuses.length;
+
+  bool get isFiltered => filterCount > 0;
+
+  /// The same state with these filters applied — [copyWith] cannot empty them.
+  HomeworkState withFilters({
+    required Set<String> sections,
+    required Set<String> statuses,
+  }) {
+    return HomeworkState(
+      status: status,
+      homeworks: homeworks,
+      classId: classId,
+      className: className,
+      statusDictionary: statusDictionary,
+      sections: Set.unmodifiable(sections),
+      statuses: Set.unmodifiable(statuses),
+      tab: tab,
+      errorMessage: errorMessage,
+    );
   }
 
   HomeworkState copyWith({
@@ -117,7 +235,6 @@ class HomeworkState extends Equatable {
     List<Homework>? homeworks,
     int? classId,
     String? className,
-    String? subject,
     HomeworkTab? tab,
     String? errorMessage,
   }) {
@@ -126,7 +243,9 @@ class HomeworkState extends Equatable {
       homeworks: homeworks ?? this.homeworks,
       classId: classId ?? this.classId,
       className: className ?? this.className,
-      subject: subject ?? this.subject,
+      statusDictionary: statusDictionary,
+      sections: sections,
+      statuses: statuses,
       tab: tab ?? this.tab,
       // Intentionally not carried over: only the state that failed shows it.
       errorMessage: errorMessage,
@@ -134,6 +253,15 @@ class HomeworkState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, homeworks, classId, className, subject, tab, errorMessage];
+  List<Object?> get props => [
+        status,
+        homeworks,
+        classId,
+        className,
+        statusDictionary,
+        sections,
+        statuses,
+        tab,
+        errorMessage,
+      ];
 }

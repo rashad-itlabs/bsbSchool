@@ -238,6 +238,13 @@
   "hwTeacherComment": "Müəllimin rəyi",
   "hwSubmissionFile": "Təhvil faylını yüklə",
   "hwPostedAt": "Vurulma saatı",
+  "hwFilterCount": "{count} tapşırıq",
+  "hwFilterCountOf": "{total} tapşırıqdan {count}",
+  "hwFilterRemove": "{name} filtrini götür",
+  "hwFilterReset": "Sıfırla",
+  "hwFilterSelected": "{count} seçilib",
+  "hwFilterShow": "Nəticəni göstər ({count})",
+  "hwFilterSubjects": "Fənlər",
   "languageAz": "Azərbaycan dili",
   "languageEn": "İngilis dili",
   "languagePickSubtitle": "Bunu sonra tənzimləmələrdən dəyişə bilərsiniz.",
@@ -781,6 +788,44 @@
   "@homeworkDaysLeft": {
     "placeholders": {
       "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@hwFilterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hwFilterCountOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@hwFilterRemove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@hwFilterSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@hwFilterShow": {
+    "placeholders": {
+      "count": {
         "type": "int"
       }
     }

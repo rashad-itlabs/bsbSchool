@@ -50,17 +50,13 @@ class _HomeworkView extends StatelessWidget {
                   onSelected: (tab) => bloc.add(HomeworkTabSelected(tab)),
                 ),
                 const SizedBox(height: 20),
-                if (state.subjects.length > 1) ...[
-                  DrChipBar(
-                    labels: [
-                      for (final subject in state.subjects)
-                        context.filterLabel(subject),
-                    ],
-                    selectedIndex: state.subjects.indexOf(state.subject),
-                    onSelected: (i) =>
-                        bloc.add(HomeworkSubjectSelected(state.subjects[i])),
-                  ),
-                  const SizedBox(height: 24),
+                // Once there is a list to narrow: hidden while the first load
+                // runs, on an error and for a student without a class.
+                if (state.status == HomeworkStatus.loaded &&
+                    !state.hasNoClass &&
+                    state.homeworks.isNotEmpty) ...[
+                  _FilterBar(state: state),
+                  const SizedBox(height: 20),
                 ],
                 _Body(state: state),
                 const SizedBox(height: 20),
@@ -176,6 +172,13 @@ class _Body extends StatelessWidget {
         text: state.tab == HomeworkTab.active
             ? context.l10n.homeworkNoActive
             : context.l10n.homeworkNoInactive,
+        // Nothing left after filtering: the way out is right here.
+        actionLabel: state.isFiltered ? context.l10n.hwFilterReset : null,
+        onAction: state.isFiltered
+            ? () => context
+                .read<HomeworkBloc>()
+                .add(const HomeworkFiltersChanged())
+            : null,
       );
     }
 
@@ -320,7 +323,17 @@ class _HomeworkCard extends StatelessWidget {
 class _Message extends StatelessWidget {
   final String text;
   final VoidCallback? onRetry;
-  const _Message({required this.text, this.onRetry});
+
+  /// Another button in place of "retry" — the filters' reset.
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _Message({
+    required this.text,
+    this.onRetry,
+    this.actionLabel,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +348,467 @@ class _Message extends StatelessWidget {
             const SizedBox(height: 16),
             TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
           ],
+          if (onAction != null && actionLabel != null) ...[
+            const SizedBox(height: 16),
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// The tab's count and the filter button; under them, while any filter is
+/// on, each one as a chip that removes it, and a reset.
+class _FilterBar extends StatelessWidget {
+  final HomeworkState state;
+  const _FilterBar({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bloc = context.read<HomeworkBloc>();
+    final total = state.tabHomeworks.length;
+
+    void apply({Set<String>? sections, Set<String>? statuses}) =>
+        bloc.add(HomeworkFiltersChanged(
+          sections: sections ?? state.sections,
+          statuses: statuses ?? state.statuses,
+        ));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                state.isFiltered
+                    ? l10n.hwFilterCountOf(state.visibleHomeworks.length, total)
+                    : l10n.hwFilterCount(total),
+                style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+              ),
+            ),
+            _FilterButton(
+              count: state.filterCount,
+              onTap: () => _showFilterSheet(context),
+            ),
+          ],
+        ),
+        if (state.isFiltered) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (final option in state.sectionOptions)
+                if (state.sections.contains(option.key))
+                  _AppliedChip(
+                    label: option.label,
+                    onRemove: () =>
+                        apply(sections: {...state.sections}..remove(option.key)),
+                  ),
+              for (final info in state.statusOptions)
+                if (state.statuses.contains(info.key))
+                  _AppliedChip(
+                    label: HomeworkStatusBadge.ofInfo(context, info).label,
+                    onRemove: () =>
+                        apply(statuses: {...state.statuses}..remove(info.key)),
+                  ),
+              TextButton(
+                onPressed: () => bloc.add(const HomeworkFiltersChanged()),
+                child: Text(l10n.hwFilterReset),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// «Filtr», with the number of filters on in a badge once there are any.
+class _FilterButton extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+  const _FilterButton({required this.count, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final on = count > 0;
+    final color = on ? context.dr.accent : context.dr.textMain;
+
+    return Material(
+      color: on ? context.dr.accentSoft : context.dr.bgSurface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: on ? context.dr.accent : context.dr.border),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.tune_rounded, size: 18, color: color),
+                const SizedBox(width: 8),
+                Text(
+                  context.l10n.commonFilter,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+                if (on) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    constraints:
+                        const BoxConstraints(minWidth: 20, minHeight: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: DrColors.accentGreen,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One filter that is on, under the button; the cross takes it off.
+class _AppliedChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onRemove;
+  const _AppliedChip({required this.label, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: context.l10n.hwFilterRemove(label),
+      excludeSemantics: true,
+      child: Material(
+        color: context.dr.bgSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: context.dr.border),
+        ),
+        child: InkWell(
+          onTap: onRemove,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(Icons.close_rounded,
+                    size: 14, color: context.dr.textMuted),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens the filter sheet over the screen. The sheet is its own route, above
+/// this screen's [BlocProvider], so the bloc is handed in.
+Future<void> _showFilterSheet(BuildContext context) {
+  final bloc = context.read<HomeworkBloc>();
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => BlocProvider.value(
+      value: bloc,
+      child: const _FilterSheet(),
+    ),
+  );
+}
+
+/// Sections and statuses, several of each; nothing changes until «show
+/// results», whose count follows the picks as they are made.
+class _FilterSheet extends StatefulWidget {
+  const _FilterSheet();
+
+  @override
+  State<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<_FilterSheet> {
+  late final Set<String> _sections;
+  late final Set<String> _statuses;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<HomeworkBloc>().state;
+    _sections = {...state.sections};
+    _statuses = {...state.statuses};
+  }
+
+  void _toggle(Set<String> set, String key) => setState(
+        () => set.contains(key) ? set.remove(key) : set.add(key),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = context.watch<HomeworkBloc>().state;
+    final sectionOptions = state.sectionOptions;
+    final statusOptions = state.statusOptions;
+    final shown =
+        state.filtered(sections: _sections, statuses: _statuses).length;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: context.dr.bgSurface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: context.dr.border),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.dr.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.commonFilter,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700),
+                ),
+              ),
+              TextButton(
+                onPressed: _sections.isEmpty && _statuses.isEmpty
+                    ? null
+                    : () => setState(() {
+                          _sections.clear();
+                          _statuses.clear();
+                        }),
+                child: Text(l10n.hwFilterReset),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (sectionOptions.isNotEmpty)
+                    _ChoiceGroup(
+                      title: l10n.hwFilterSubjects,
+                      picked: _sections.length,
+                      children: [
+                        for (final option in sectionOptions)
+                          _Choice(
+                            label: option.label,
+                            selected: _sections.contains(option.key),
+                            onTap: () => _toggle(_sections, option.key),
+                          ),
+                      ],
+                    ),
+                  if (sectionOptions.isNotEmpty && statusOptions.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Divider(color: context.dr.border, height: 1),
+                    ),
+                  if (statusOptions.isNotEmpty)
+                    _ChoiceGroup(
+                      title: l10n.hwStatus,
+                      picked: _statuses.length,
+                      children: [
+                        for (final info in statusOptions)
+                          Builder(builder: (context) {
+                            final badge =
+                                HomeworkStatusBadge.ofInfo(context, info);
+                            return _Choice(
+                              label: badge.label,
+                              dot: badge.color,
+                              selected: _statuses.contains(info.key),
+                              onTap: () => _toggle(_statuses, info.key),
+                            );
+                          }),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          DrPrimaryButton(
+            label: l10n.hwFilterShow(shown),
+            onTap: () {
+              context.read<HomeworkBloc>().add(HomeworkFiltersChanged(
+                    sections: {..._sections},
+                    statuses: {..._statuses},
+                  ));
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A titled group of choices, with how many are picked.
+class _ChoiceGroup extends StatelessWidget {
+  final String title;
+  final int picked;
+  final List<Widget> children;
+  const _ChoiceGroup({
+    required this.title,
+    required this.picked,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _upper(context, title),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.4,
+                  color: context.dr.textMuted,
+                ),
+              ),
+            ),
+            if (picked > 0)
+              Text(
+                context.l10n.hwFilterSelected(picked),
+                style: TextStyle(fontSize: 12, color: context.dr.textMuted),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(spacing: 8, runSpacing: 8, children: children),
+      ],
+    );
+  }
+}
+
+/// One pickable option: lime with a tick when picked; a status shows its
+/// colour as a dot while not.
+class _Choice extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color? dot;
+  final VoidCallback onTap;
+  const _Choice({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.dot,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected ? DrColors.accentGreen : context.dr.bgSurfaceLight,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: selected ? DrColors.accentGreen : context.dr.border,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 40),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (selected)
+                    const Icon(Icons.check_rounded,
+                        size: 16, color: Colors.black)
+                  else if (dot != null)
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration:
+                          BoxDecoration(color: dot, shape: BoxShape.circle),
+                    ),
+                  if (selected || dot != null) const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w500,
+                        color: selected ? Colors.black : context.dr.textMain,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

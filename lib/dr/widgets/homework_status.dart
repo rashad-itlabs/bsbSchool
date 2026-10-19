@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/homework/domain/entities/homework.dart';
+import '../../features/homework/domain/entities/homework_status_info.dart';
 import '../theme/dr_colors.dart';
 
 /// How a homework's status is shown: its name in the app language, colour and
@@ -45,6 +46,24 @@ class HomeworkStatusBadge {
         server != null ? Color(server) : _fallback(context, key),
       ),
       hint: info?.hintFor(language),
+    );
+  }
+
+  /// A status as the filter sheet offers it — the same words and colour a
+  /// card with that status shows.
+  static HomeworkStatusBadge ofInfo(
+      BuildContext context, HomeworkStatusInfo info) {
+    final language = Localizations.localeOf(context).languageCode;
+    final server = info.color;
+
+    return HomeworkStatusBadge(
+      key: info.key,
+      label: info.labelFor(language),
+      color: _readable(
+        context,
+        server != null ? Color(server) : _fallback(context, info.key),
+      ),
+      hint: info.hintFor(language),
     );
   }
 

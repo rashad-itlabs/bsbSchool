@@ -790,6 +790,45 @@ class AppL10nRu extends AppL10n {
   String get hwPostedAt => 'Время внесения';
 
   @override
+  String hwFilterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count задания',
+      many: '$count заданий',
+      few: '$count задания',
+      one: '$count задание',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hwFilterCountOf(int count, int total) {
+    return '$count из $total';
+  }
+
+  @override
+  String hwFilterRemove(String name) {
+    return 'Убрать фильтр: $name';
+  }
+
+  @override
+  String get hwFilterReset => 'Сбросить';
+
+  @override
+  String hwFilterSelected(int count) {
+    return 'Выбрано: $count';
+  }
+
+  @override
+  String hwFilterShow(int count) {
+    return 'Показать ($count)';
+  }
+
+  @override
+  String get hwFilterSubjects => 'Предметы';
+
+  @override
   String get languageAz => 'Азербайджанский';
 
   @override
