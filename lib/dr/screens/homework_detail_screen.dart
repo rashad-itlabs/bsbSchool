@@ -6,12 +6,14 @@ import '../../features/homework/domain/entities/homework.dart';
 import '../../features/homework/domain/entities/homework_submission.dart';
 import '../theme/dr_colors.dart';
 import '../widgets/dr_widgets.dart';
+import '../widgets/homework_description.dart';
 import '../widgets/homework_status.dart';
 import '../../core/l10n/l10n.dart';
 
 /// Full view of a single homework, reached by tapping a card on the list.
-/// Shows the whole (HTML-stripped) description, the key dates, and — when the
-/// server attached a file — a button that opens/downloads it in the browser.
+/// Shows the whole description (its links tappable, its YouTube videos as
+/// cards — [HomeworkDescription]), the key dates, and — when the server
+/// attached a file — a button that opens/downloads it in the browser.
 class HomeworkDetailScreen extends StatelessWidget {
   final Homework homework;
 
@@ -19,7 +21,6 @@ class HomeworkDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final desc = _stripHtml(homework.description);
     // The server's status (`statuses` dictionary, 17.10.2026). The status
     // block shows with a teacher's mark, and for «teacher has not marked» —
     // there is no mark then, but the hint explains what that means.
@@ -72,18 +73,12 @@ class HomeworkDetailScreen extends StatelessWidget {
             _SubmissionSection(submission: homework.submission, badge: badge),
             const SizedBox(height: 24),
           ],
-          if (desc.isNotEmpty) ...[
+          if (HomeworkDescription.hasContent(homework.description)) ...[
             DrSectionHeader(title: context.l10n.hwDetailDescription),
             DrCard(
               radius: 20,
-              child: Text(
-                desc,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                  color: context.dr.textMain,
-                ),
-              ),
+              // Links tappable, YouTube videos as cards (19.10.2026).
+              child: HomeworkDescription(html: homework.description),
             ),
             const SizedBox(height: 24),
           ],
@@ -311,17 +306,6 @@ String _formatDate(DateTime? date) =>
 
 String _formatDateTime(DateTime? date) =>
     date == null ? '' : DateFormat('dd MMM yyyy, HH:mm').format(date);
-
-/// The server sends rich text (`<p>...</p>`); the detail view shows plain text.
-String _stripHtml(String html) => html
-    .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
-    .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n')
-    .replaceAll(RegExp(r'<[^>]*>'), '')
-    .replaceAll('&nbsp;', ' ')
-    .replaceAll('&amp;', '&')
-    .replaceAll(RegExp(r'[ \t]+'), ' ')
-    .replaceAll(RegExp(r'\n\s*\n+'), '\n\n')
-    .trim();
 
 /// A stable emoji per subject so cards stay visually varied without server art.
 String _emojiFor(String? subject) {

@@ -618,6 +618,9 @@ class AppL10nEn extends AppL10n {
   String get fileCouldNotOpen => 'The file could not be opened';
 
   @override
+  String get linkCouldNotOpen => 'The link could not be opened';
+
+  @override
   String get fileDownload => 'Download file';
 
   @override
@@ -844,6 +847,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get hwFilterSubjects => 'Subjects';
+
+  @override
+  String get hwWatchVideo => 'Watch the video';
 
   @override
   String get languageAz => 'Azerbaijani';

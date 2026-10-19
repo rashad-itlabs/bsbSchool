@@ -76,5 +76,11 @@
             <action android:name="android.intent.action.SENDTO"/>
             <data android:scheme="mailto"/>
         </intent>
+        <!-- A link or YouTube video in a homework description opens in a
+             Custom Tab, inside the app; Android 11+ hides the browsers that
+             offer one without this. -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService"/>
+        </intent>
     </queries>
 </manifest>

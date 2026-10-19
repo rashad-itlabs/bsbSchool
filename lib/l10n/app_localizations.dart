@@ -1191,6 +1191,12 @@ abstract class AppL10n {
   /// **'Fayl açıla bilmədi'**
   String get fileCouldNotOpen;
 
+  /// No description provided for @linkCouldNotOpen.
+  ///
+  /// In az, this message translates to:
+  /// **'Link açıla bilmədi'**
+  String get linkCouldNotOpen;
+
   /// No description provided for @fileDownload.
   ///
   /// In az, this message translates to:
@@ -1592,6 +1598,12 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Fənlər'**
   String get hwFilterSubjects;
+
+  /// No description provided for @hwWatchVideo.
+  ///
+  /// In az, this message translates to:
+  /// **'Videonu izlə'**
+  String get hwWatchVideo;
 
   /// No description provided for @languageAz.
   ///

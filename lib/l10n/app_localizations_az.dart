@@ -617,6 +617,9 @@ class AppL10nAz extends AppL10n {
   String get fileCouldNotOpen => 'Fayl açıla bilmədi';
 
   @override
+  String get linkCouldNotOpen => 'Link açıla bilmədi';
+
+  @override
   String get fileDownload => 'Faylı yüklə';
 
   @override
@@ -837,6 +840,9 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get hwFilterSubjects => 'Fənlər';
+
+  @override
+  String get hwWatchVideo => 'Videonu izlə';
 
   @override
   String get languageAz => 'Azərbaycan dili';
