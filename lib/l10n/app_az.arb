@@ -30,6 +30,9 @@
   "attendanceEmpty": "Qeyd tapılmadı",
   "attendanceLate": "Gecikmə",
   "attendanceLateTag": "Gecikib",
+  "attendanceLateDetail": "{minutes} dəq gecikib · gəlmə saatı {time}",
+  "attendanceLateCameAt": "gəlmə saatı {time}",
+  "attendanceInOtherLesson": "bu saatda başqa dərsdə «iştirak» qeyd olunub",
   "attendanceMeetingTag": "Görüşdə",
   "attendanceExcusedTag": "İcazəli",
   "attendancePermitArriveAt": "gəlir: {time}",
@@ -616,6 +619,23 @@
   "@attendancePermitDay": {
     "placeholders": {
       "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendanceLateDetail": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendanceLateCameAt": {
+    "placeholders": {
+      "time": {
         "type": "String"
       }
     }

@@ -232,6 +232,34 @@ class _BodyState extends State<_Body> {
       subtitle: record.teacher ?? '—',
       divider: divider,
       trailing: _StatusPill(tag: tag),
+      footer: _detail(context, record, tag),
+    );
+  }
+
+  /// The line under the teacher (server 19.10.2026, backend E-039), as the
+  /// website words it: a late arrival's minutes and time («35 dəq gecikib ·
+  /// gəlmə saatı 09:45», QƏRAR-114), or an absence that was a lesson in
+  /// another group at the same time. Nothing otherwise.
+  Widget? _detail(
+      BuildContext context, AttendanceRecord record, _StatusTag tag) {
+    final l10n = context.l10n;
+    String? text;
+    if (record.isLate && record.lateAt != null) {
+      text = record.lateMinutes != null
+          ? l10n.attendanceLateDetail(record.lateMinutes!, record.lateAt!)
+          : l10n.attendanceLateCameAt(record.lateAt!);
+    } else if (record.isAbsent && record.inOtherLesson) {
+      text = record.inOtherLessonText ?? l10n.attendanceInOtherLesson;
+    }
+    if (text == null) return null;
+
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: record.isLate ? tag.color : context.dr.textMuted,
+      ),
     );
   }
 }

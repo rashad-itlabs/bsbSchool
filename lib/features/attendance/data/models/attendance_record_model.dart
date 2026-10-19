@@ -15,6 +15,10 @@ class AttendanceRecordModel extends AttendanceRecord {
     super.period,
     super.startTime,
     super.endTime,
+    super.lateAt,
+    super.lateMinutes,
+    super.inOtherLesson,
+    super.inOtherLessonText,
   });
 
   /// Matches one entry of the `data` array returned by `GET /attendance`.
@@ -33,7 +37,16 @@ class AttendanceRecordModel extends AttendanceRecord {
         period: _asString(json['period']),
         startTime: _asString(json['start_time']),
         endTime: _asString(json['end_time']),
+        lateAt: _asString(json['late_at']),
+        lateMinutes: _asNullableInt(json['late_minutes']),
+        inOtherLesson: _asBool(json['in_other_lesson']),
+        inOtherLessonText: _asString(json['in_other_lesson_text']),
       );
+
+  /// `late_minutes` — a number or null; anything unreadable is null, not 0
+  /// (0 would print «0 min late»).
+  static int? _asNullableInt(dynamic value) =>
+      value is int ? value : int.tryParse(value?.toString() ?? '');
 
   static int _asInt(dynamic value) =>
       value is int ? value : int.tryParse(value?.toString() ?? '') ?? 0;

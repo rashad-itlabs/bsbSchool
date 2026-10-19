@@ -110,6 +110,20 @@ class AppL10nAz extends AppL10n {
   String get attendanceLateTag => 'Gecikib';
 
   @override
+  String attendanceLateDetail(int minutes, String time) {
+    return '$minutes dəq gecikib · gəlmə saatı $time';
+  }
+
+  @override
+  String attendanceLateCameAt(String time) {
+    return 'gəlmə saatı $time';
+  }
+
+  @override
+  String get attendanceInOtherLesson =>
+      'bu saatda başqa dərsdə «iştirak» qeyd olunub';
+
+  @override
   String get attendanceMeetingTag => 'Görüşdə';
 
   @override

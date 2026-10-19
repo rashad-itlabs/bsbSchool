@@ -357,6 +357,10 @@ class DrTransactionTile extends StatelessWidget {
   final String subtitle;
   final Widget trailing;
   final bool divider;
+
+  /// An extra line under [subtitle] — a lesson's late arrival, say; none by
+  /// default.
+  final Widget? footer;
   const DrTransactionTile({
     super.key,
     required this.leading,
@@ -364,6 +368,7 @@ class DrTransactionTile extends StatelessWidget {
     required this.subtitle,
     required this.trailing,
     this.divider = true,
+    this.footer,
   });
 
   @override
@@ -398,6 +403,10 @@ class DrTransactionTile extends StatelessWidget {
                   subtitle,
                   style: TextStyle(fontSize: 12, color: context.dr.textMuted),
                 ),
+                if (footer != null) ...[
+                  const SizedBox(height: 4),
+                  footer!,
+                ],
               ],
             ),
           ),

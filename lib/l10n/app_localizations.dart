@@ -279,6 +279,24 @@ abstract class AppL10n {
   /// **'Gecikib'**
   String get attendanceLateTag;
 
+  /// No description provided for @attendanceLateDetail.
+  ///
+  /// In az, this message translates to:
+  /// **'{minutes} dəq gecikib · gəlmə saatı {time}'**
+  String attendanceLateDetail(int minutes, String time);
+
+  /// No description provided for @attendanceLateCameAt.
+  ///
+  /// In az, this message translates to:
+  /// **'gəlmə saatı {time}'**
+  String attendanceLateCameAt(String time);
+
+  /// No description provided for @attendanceInOtherLesson.
+  ///
+  /// In az, this message translates to:
+  /// **'bu saatda başqa dərsdə «iştirak» qeyd olunub'**
+  String get attendanceInOtherLesson;
+
   /// No description provided for @attendanceMeetingTag.
   ///
   /// In az, this message translates to:

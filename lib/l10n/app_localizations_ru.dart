@@ -110,6 +110,20 @@ class AppL10nRu extends AppL10n {
   String get attendanceLateTag => 'Опоздал';
 
   @override
+  String attendanceLateDetail(int minutes, String time) {
+    return 'опоздал на $minutes мин · пришёл в $time';
+  }
+
+  @override
+  String attendanceLateCameAt(String time) {
+    return 'пришёл в $time';
+  }
+
+  @override
+  String get attendanceInOtherLesson =>
+      'в это время отмечен «был» на другом уроке';
+
+  @override
   String get attendanceMeetingTag => 'На встрече';
 
   @override

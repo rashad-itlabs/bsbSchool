@@ -110,6 +110,20 @@ class AppL10nEn extends AppL10n {
   String get attendanceLateTag => 'Late';
 
   @override
+  String attendanceLateDetail(int minutes, String time) {
+    return '$minutes min late · came at $time';
+  }
+
+  @override
+  String attendanceLateCameAt(String time) {
+    return 'came at $time';
+  }
+
+  @override
+  String get attendanceInOtherLesson =>
+      'marked present in another lesson at this time';
+
+  @override
   String get attendanceMeetingTag => 'Meeting';
 
   @override

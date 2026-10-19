@@ -34,6 +34,20 @@ class AttendanceRecord extends Equatable {
   final String? startTime;
   final String? endTime;
 
+  /// A late arrival (QƏRAR-114, server 19.10.2026): when the child came in
+  /// (`late_at`, `HH:mm`) and how many minutes after the lesson began
+  /// (`late_minutes`). Only on `Late`; null on a Late logged before 19.10,
+  /// one without a lesson slot, and on an older server.
+  final String? lateAt;
+  final int? lateMinutes;
+
+  /// `Absent` here, but present or late in another lesson at the same time
+  /// (a parallel option or support group; server 19.10.2026) — the website
+  /// says so under the absence. [inOtherLessonText] is the server's wording
+  /// in the app language.
+  final bool inOtherLesson;
+  final String? inOtherLessonText;
+
   const AttendanceRecord({
     required this.id,
     this.date,
@@ -48,6 +62,10 @@ class AttendanceRecord extends Equatable {
     this.period,
     this.startTime,
     this.endTime,
+    this.lateAt,
+    this.lateMinutes,
+    this.inOtherLesson = false,
+    this.inOtherLessonText,
   });
 
   /// Normalised status buckets so the UI never string-compares raw text.
@@ -106,5 +124,9 @@ class AttendanceRecord extends Equatable {
         period,
         startTime,
         endTime,
+        lateAt,
+        lateMinutes,
+        inOtherLesson,
+        inOtherLessonText,
       ];
 }
