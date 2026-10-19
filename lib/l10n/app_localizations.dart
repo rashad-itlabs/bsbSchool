@@ -291,6 +291,30 @@ abstract class AppL10n {
   /// **'İcazəli'**
   String get attendanceExcusedTag;
 
+  /// No description provided for @attendancePermitArriveAt.
+  ///
+  /// In az, this message translates to:
+  /// **'gəlir: {time}'**
+  String attendancePermitArriveAt(String time);
+
+  /// No description provided for @attendancePermitDay.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagird {date} tarixinə icazəlidir'**
+  String attendancePermitDay(String date);
+
+  /// No description provided for @attendancePermitLeaveAt.
+  ///
+  /// In az, this message translates to:
+  /// **'çıxır: {time}'**
+  String attendancePermitLeaveAt(String time);
+
+  /// No description provided for @attendancePermitRange.
+  ///
+  /// In az, this message translates to:
+  /// **'Şagird {dates} tarixlərinə icazəlidir'**
+  String attendancePermitRange(String dates);
+
   /// No description provided for @attendanceMixed.
   ///
   /// In az, this message translates to:

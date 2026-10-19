@@ -157,5 +157,24 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Görüşdə'), findsOneWidget);
     });
+
+    testWidgets('the month legend under the calendar sits two to a row',
+        (tester) async {
+      await _pump(tester, width: 320);
+
+      // `Gəlib 3`, not the row's `Gəlib` pill.
+      Finder legend(String label) => find.byWidgetPredicate((w) =>
+          w is Text && RegExp('^$label \\d+\$').hasMatch(w.data ?? ''));
+      Offset at(String label) => tester.getTopLeft(legend(label));
+
+      expect(at('Gəlib').dy, at('Gecikib').dy);
+      expect(at('Gəlib').dx, lessThan(at('Gecikib').dx));
+      expect(at('Qayıb').dy, greaterThan(at('Gəlib').dy));
+      expect(at('Qayıb').dy, at('Qarışıq').dy);
+      expect(at('Qayıb').dx, at('Gəlib').dx);
+      // Whether a label is cut short is not checked: the test font draws every
+      // glyph a full em wide — `Gecikib 0` takes 108 px here, ~55 in Inter.
+      expect(tester.takeException(), isNull);
+    });
   });
 }

@@ -11,6 +11,10 @@ class AttendanceState extends Equatable {
   /// Every session the API returned, newest first once sorted.
   final List<AttendanceRecord> records;
 
+  /// The child's permissions (server 19.10.2026) — the excused days, also the
+  /// ones whose lessons have not started yet and so have no record.
+  final List<AttendancePermission> permissions;
+
   final String? errorMessage;
 
   const AttendanceState({
@@ -18,10 +22,19 @@ class AttendanceState extends Equatable {
     this.studentId,
     this.summary = const AttendanceSummary(),
     this.records = const [],
+    this.permissions = const [],
     this.errorMessage,
   });
 
   bool get isLoading => status == AttendanceStatus.loading;
+
+  /// The permission covering [day], if any.
+  AttendancePermission? permissionOn(DateTime day) {
+    for (final p in permissions) {
+      if (p.covers(day)) return p;
+    }
+    return null;
+  }
 
   /// Records sorted newest day first and, within a day, by lesson time (first
   /// lesson on top; a record without a slot goes last). Ties keep the server's
@@ -54,6 +67,7 @@ class AttendanceState extends Equatable {
     int? studentId,
     AttendanceSummary? summary,
     List<AttendanceRecord>? records,
+    List<AttendancePermission>? permissions,
     String? errorMessage,
   }) {
     return AttendanceState(
@@ -61,11 +75,13 @@ class AttendanceState extends Equatable {
       studentId: studentId ?? this.studentId,
       summary: summary ?? this.summary,
       records: records ?? this.records,
+      permissions: permissions ?? this.permissions,
       // Intentionally not carried over: only the state that failed shows it.
       errorMessage: errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, studentId, summary, records, errorMessage];
+  List<Object?> get props =>
+      [status, studentId, summary, records, permissions, errorMessage];
 }

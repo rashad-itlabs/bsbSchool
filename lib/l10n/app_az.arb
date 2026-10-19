@@ -32,6 +32,10 @@
   "attendanceLateTag": "Gecikib",
   "attendanceMeetingTag": "Görüşdə",
   "attendanceExcusedTag": "İcazəli",
+  "attendancePermitArriveAt": "gəlir: {time}",
+  "attendancePermitDay": "Şagird {date} tarixinə icazəlidir",
+  "attendancePermitLeaveAt": "çıxır: {time}",
+  "attendancePermitRange": "Şagird {dates} tarixlərinə icazəlidir",
   "attendanceMixed": "Qarışıq",
   "attendanceLesson": "Dərs",
   "attendanceMonthOverview": "{month} ayı üzrə icmal",
@@ -596,6 +600,34 @@
   "@attendanceMonthOverview": {
     "placeholders": {
       "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendancePermitArriveAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendancePermitDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendancePermitLeaveAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@attendancePermitRange": {
+    "placeholders": {
+      "dates": {
         "type": "String"
       }
     }

@@ -116,6 +116,26 @@ class AppL10nRu extends AppL10n {
   String get attendanceExcusedTag => 'Отпросился';
 
   @override
+  String attendancePermitArriveAt(String time) {
+    return 'придёт к $time';
+  }
+
+  @override
+  String attendancePermitDay(String date) {
+    return 'Отпросился на $date';
+  }
+
+  @override
+  String attendancePermitLeaveAt(String time) {
+    return 'уходит в $time';
+  }
+
+  @override
+  String attendancePermitRange(String dates) {
+    return 'Отпросился на $dates';
+  }
+
+  @override
   String get attendanceMixed => 'Смешанный';
 
   @override

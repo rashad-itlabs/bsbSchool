@@ -116,6 +116,26 @@ class AppL10nAz extends AppL10n {
   String get attendanceExcusedTag => 'İcazəli';
 
   @override
+  String attendancePermitArriveAt(String time) {
+    return 'gəlir: $time';
+  }
+
+  @override
+  String attendancePermitDay(String date) {
+    return 'Şagird $date tarixinə icazəlidir';
+  }
+
+  @override
+  String attendancePermitLeaveAt(String time) {
+    return 'çıxır: $time';
+  }
+
+  @override
+  String attendancePermitRange(String dates) {
+    return 'Şagird $dates tarixlərinə icazəlidir';
+  }
+
+  @override
   String get attendanceMixed => 'Qarışıq';
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/di/injection_container.dart';
 import '../../core/l10n/app_dates.dart';
+import '../../features/attendance/domain/entities/attendance_permission.dart';
 import '../../features/attendance/domain/entities/attendance_record.dart';
 import '../../features/attendance/presentation/bloc/attendance_bloc.dart';
 import '../../features/attendance/presentation/widgets/attendance_month_calendar.dart';
@@ -141,6 +142,8 @@ class _BodyState extends State<_Body> {
     final records = state.recentRecords;
     final stats = _monthStats(records);
     final dayRecords = records.where(_isSelected).toList();
+    // 19.10.2026 — the school excused the child for the selected day.
+    final permission = state.permissionOn(_selectedDay);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -175,15 +178,21 @@ class _BodyState extends State<_Body> {
         const SizedBox(height: 30),
         AttendanceMonthCalendar(
           records: records,
+          permissions: state.permissions,
           selectedDay: _selectedDay,
           onDaySelected: (day) => setState(() => _selectedDay = day),
           onMonthChanged: _onMonthChanged,
         ),
         const SizedBox(height: 30),
         DrSectionHeader(title: AppDates.full(context, _selectedDay)),
-        if (dayRecords.isEmpty)
+        if (permission != null) ...[
+          _PermissionNote(permission: permission),
+          if (dayRecords.isNotEmpty) const SizedBox(height: 12),
+        ],
+        // On a permission day with nothing logged the note above says it all.
+        if (dayRecords.isEmpty && permission == null)
           _Message(text: context.l10n.attendanceEmpty)
-        else
+        else if (dayRecords.isNotEmpty)
           DrListCard(
             children: [
               for (var i = 0; i < dayRecords.length; i++)
@@ -223,6 +232,70 @@ class _BodyState extends State<_Body> {
       subtitle: record.teacher ?? '—',
       divider: divider,
       trailing: _StatusPill(tag: tag),
+    );
+  }
+}
+
+/// «Şagird 17–20 oktyabr tarixlərinə icazəlidir» above the lessons of a
+/// permission day (server 19.10.2026, `permissions`), in the excused blue; a
+/// one-day permission names its day, a part-day one adds its leaving or
+/// arriving time.
+///
+/// Shown only for a day the permission covers — the one picked in the
+/// calendar, which opens on today. It names the permission's own dates (owner,
+/// 19.10.2026): the server's ready text said «bu günə» («for today»), which
+/// told neither which days nor how long.
+class _PermissionNote extends StatelessWidget {
+  final AttendancePermission permission;
+  const _PermissionNote({required this.permission});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    // The range as the school entered it — weekend days inside it included,
+    // as the parent asked for it; its school days only if the server left the
+    // ends out (`dates` is never empty, see the model).
+    final from = permission.dateFrom ?? permission.dates.first;
+    final to = permission.dateTo ?? permission.dates.last;
+    final oneDay =
+        from.year == to.year && from.month == to.month && from.day == to.day;
+    final dates = AppDates.dayRange(context, from, to);
+    final time = permission.time;
+
+    final text = [
+      oneDay ? l10n.attendancePermitDay(dates) : l10n.attendancePermitRange(dates),
+      // A leave or arrive without a time reads as the whole day — the
+      // server's rule too.
+      if (permission.kind == 'leave' && time != null)
+        l10n.attendancePermitLeaveAt(time),
+      if (permission.kind == 'arrive' && time != null)
+        l10n.attendancePermitArriveAt(time),
+    ].join(' · ');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: DrColors.blue.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: DrColors.blue.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.event_available_rounded,
+              size: 22, color: DrColors.blue),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: context.dr.textMain,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

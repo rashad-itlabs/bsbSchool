@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
+import '../../domain/entities/attendance_permission.dart';
 import '../../domain/entities/attendance_record.dart';
 import '../../../../core/l10n/app_dates.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -18,12 +19,18 @@ import '../../../../core/l10n/l10n.dart';
 /// first day of the newly shown month.
 class AttendanceMonthCalendar extends StatefulWidget {
   final List<AttendanceRecord> records;
+
+  /// The child's permissions (server 19.10.2026): a covered day with nothing
+  /// logged yet — a lesson not started, a future day — reads as excused, and
+  /// a future one is tappable so its "excused" line can be read.
+  final List<AttendancePermission> permissions;
   final DateTime? selectedDay;
   final ValueChanged<DateTime>? onDaySelected;
   final ValueChanged<DateTime>? onMonthChanged; // YENİ
   const AttendanceMonthCalendar({
     super.key,
     required this.records,
+    this.permissions = const [],
     this.selectedDay,
     this.onDaySelected,
     this.onMonthChanged, // YENİ
@@ -50,8 +57,14 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
   /// Navigation is bounded by the data: the oldest logged month up to the
   /// newest of (today, last logged session). The current month is always inside
   /// the range, so the default month is never out of bounds.
+  /// Logged days and permission days — next month's permission is reachable.
+  Iterable<DateTime> get _dates => [
+        ...widget.records.map((r) => r.date).whereType<DateTime>(),
+        for (final p in widget.permissions) ...p.dates,
+      ];
+
   DateTime get _firstMonth {
-    final dates = widget.records.map((r) => r.date).whereType<DateTime>();
+    final dates = _dates;
     if (dates.isEmpty) return _currentMonth;
     final oldest = dates.reduce((a, b) => a.isBefore(b) ? a : b);
     final oldestMonth = DateTime(oldest.year, oldest.month);
@@ -59,7 +72,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
   }
 
   DateTime get _lastMonth {
-    final dates = widget.records.map((r) => r.date).whereType<DateTime>();
+    final dates = _dates;
     if (dates.isEmpty) return _currentMonth;
     final newest = dates.reduce((a, b) => a.isAfter(b) ? a : b);
     final newestMonth = DateTime(newest.year, newest.month);
@@ -172,9 +185,11 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
         day.year == selected.year &&
         day.month == selected.month &&
         day.day == selected.day;
-    // Future days have nothing logged yet, so only today and earlier respond.
+    // Future days have nothing logged yet, so only today and earlier respond —
+    // except a permission day, whose "excused" line is worth reading ahead.
     final canTap = widget.onDaySelected != null &&
-        !day.isAfter(DateTime(now.year, now.month, now.day));
+        (!day.isAfter(DateTime(now.year, now.month, now.day)) ||
+            _permitted(day));
     final isMixed = status == _DayStatus.mixed;
     // A mixed day has no single colour: it is painted half and half instead,
     // and its number stays neutral so it reads on both halves.
@@ -247,20 +262,37 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
       }
     }
 
-    // One line, spread edge to edge. Each item is loosely Flexible so a long
-    // label shrinks (with an ellipsis) on a narrow phone instead of overflowing.
-    // The excused item only shows in a month that has such a day — a fifth
-    // item would squeeze the line on every other month.
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    // Two to a row (owner, 19.10.2026): on one line the labels were squeezed
+    // into ellipses on a narrow phone. A long label still shrinks with an
+    // ellipsis inside its half rather than overflowing. The excused item only
+    // shows in a month that has such a day.
+    final items = [
+      _legendItem(context, _DayStatus.present, context.l10n.attendancePresent, present),
+      _legendItem(context, _DayStatus.late, context.l10n.attendanceLateTag, late),
+      _legendItem(context, _DayStatus.absent, context.l10n.attendanceAbsent, absent),
+      _legendItem(context, _DayStatus.mixed, context.l10n.attendanceMixed, mixed),
+      if (excused > 0)
+        _legendItem(context, _DayStatus.excused, context.l10n.attendanceExcusedTag, excused),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _legendItem(context, _DayStatus.present, context.l10n.attendancePresent, present),
-        _legendItem(context, _DayStatus.late, context.l10n.attendanceLateTag, late),
-        _legendItem(context, _DayStatus.absent, context.l10n.attendanceAbsent, absent),
-        _legendItem(context, _DayStatus.mixed, context.l10n.attendanceMixed, mixed),
-        if (excused > 0)
-          _legendItem(context, _DayStatus.excused, context.l10n.attendanceExcusedTag, excused),
-      ].map((item) => Flexible(child: item)).toList(),
+        for (var i = 0; i < items.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: items[i]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: i + 1 < items.length
+                    ? items[i + 1]
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 
@@ -284,7 +316,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           child: Text('$label $count',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11, color: context.dr.textMuted)),
+              style: TextStyle(fontSize: 12, color: context.dr.textMuted)),
         ),
       ],
     );
@@ -293,7 +325,10 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
   /// A day with both a missed and an attended session is [_DayStatus.mixed];
   /// otherwise the worst status logged on [day] wins (absent > late > present).
   /// Excused lessons (QƏRAR-107) don't colour a day — the website's rule — and
-  /// a day excused from start to end is [_DayStatus.excused].
+  /// a day excused from start to end is [_DayStatus.excused]. So is a
+  /// permission day with nothing logged yet (19.10.2026: its lessons have not
+  /// started, the server sends no record for them). Once a lesson is logged,
+  /// the records decide — a child who came anyway reads as present.
   _DayStatus? _statusOn(DateTime day) {
     final logged = widget.records.where((r) {
       final d = r.date;
@@ -302,7 +337,7 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
           d.month == day.month &&
           d.day == day.day;
     });
-    if (logged.isEmpty) return null;
+    if (logged.isEmpty) return _permitted(day) ? _DayStatus.excused : null;
     final onDay = logged.where((r) => !r.isExcused);
     if (onDay.isEmpty) return _DayStatus.excused;
     final anyAbsent = onDay.any((r) => r.isAbsent);
@@ -311,6 +346,8 @@ class _AttendanceMonthCalendarState extends State<AttendanceMonthCalendar> {
     if (onDay.any((r) => r.isLate)) return _DayStatus.late;
     return _DayStatus.present;
   }
+
+  bool _permitted(DateTime day) => widget.permissions.any((p) => p.covers(day));
 
   Color _statusColor(BuildContext context, _DayStatus status) {
     return switch (status) {

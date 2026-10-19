@@ -35,6 +35,32 @@ class AppDates {
   static String full(BuildContext context, DateTime date) =>
       DateFormat.yMMMMd(_tag(context)).format(date);
 
+  /// A span of days, the month said once where it can be: "17–20 oktyabr",
+  /// "30 sentyabr – 2 oktyabr", "October 17–20"; the years too when they
+  /// differ; one day alone — [dayMonth].
+  static String dayRange(BuildContext context, DateTime from, DateTime to) =>
+      dayRangeIn(_tag(context), from, to);
+
+  /// [dayRange] for a language tag, without a [BuildContext].
+  static String dayRangeIn(String tag, DateTime from, DateTime to) {
+    final dayMonth = DateFormat.MMMMd(tag);
+    if (from.year != to.year) {
+      final full = DateFormat.yMMMMd(tag);
+      return '${full.format(from)} – ${full.format(to)}';
+    }
+    if (from.month != to.month) {
+      return '${dayMonth.format(from)} – ${dayMonth.format(to)}';
+    }
+    if (from.day == to.day) return dayMonth.format(from);
+    // Same month: its name once, where the language puts it — after the
+    // day in az and ru («17–20 oktyabr»), before it in en («October 17–20»).
+    final month = DateFormat.MMMM(tag).format(from);
+    final monthFirst = dayMonth.format(from).startsWith(month);
+    return monthFirst
+        ? '$month ${from.day}–${to.day}'
+        : '${from.day}–${dayMonth.format(to)}';
+  }
+
   /// "5 sen 2026" — the compact form used in list rows.
   static String short(BuildContext context, DateTime date) =>
       DateFormat.yMMMd(_tag(context)).format(date);

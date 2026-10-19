@@ -352,7 +352,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       create: (_) => sl<AttendanceBloc>()..add(const AttendanceFetched()),
       child: BlocBuilder<AttendanceBloc, AttendanceState>(
         builder: (context, state) =>
-            AttendanceWeekOverview(records: state.records),
+            AttendanceWeekOverview(
+                records: state.records, permissions: state.permissions),
       ),
     );
   }

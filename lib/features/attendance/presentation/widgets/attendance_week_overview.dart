@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
+import '../../domain/entities/attendance_permission.dart';
 import '../../domain/entities/attendance_record.dart';
 import '../../../../core/l10n/app_dates.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -11,7 +12,11 @@ import '../../../../core/l10n/l10n.dart';
 /// attendance screen so both stay in sync.
 class AttendanceWeekOverview extends StatelessWidget {
   final List<AttendanceRecord> records;
-  const AttendanceWeekOverview({super.key, required this.records});
+
+  /// A permission day with nothing logged yet is blue — the calendar's rule.
+  final List<AttendancePermission> permissions;
+  const AttendanceWeekOverview(
+      {super.key, required this.records, this.permissions = const []});
 
   static const _labels = ['Be', 'Ça', 'Ç', 'Ca', 'C', 'Ş', 'B'];
   @override
@@ -67,7 +72,11 @@ class AttendanceWeekOverview extends StatelessWidget {
     });
     // The "no session" dot was a white wash, invisible on the light theme's
     // white card; the border token reads on both.
-    if (onDay.isEmpty) return context.dr.border;
+    if (onDay.isEmpty) {
+      return permissions.any((p) => p.covers(day))
+          ? DrColors.blue
+          : context.dr.border;
+    }
     // Excused lessons (QƏRAR-107) don't colour a day; one excused from start
     // to end is blue — the month calendar's rule.
     if (onDay.every((r) => r.isExcused)) return DrColors.blue;

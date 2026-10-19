@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/usecase/usecase.dart';
+import '../../domain/entities/attendance_permission.dart';
 import '../../domain/entities/attendance_record.dart';
 import '../../domain/entities/attendance_summary.dart';
 import '../../domain/usecases/get_attendance.dart';
@@ -40,6 +41,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         studentId: content.studentId,
         summary: content.summary,
         records: content.records,
+        permissions: content.permissions,
       )),
     );
   }
