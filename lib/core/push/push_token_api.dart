@@ -11,12 +11,18 @@ abstract class PushTokenApi {
   /// Upserts the row for [token]. A token already filed under another account
   /// — a shared family phone — moves to the one signed in now.
   ///
+  /// [muted] are the kinds the parent switched off on this device
+  /// (`NotificationKind.pushKind`); the server sends this device none of them.
+  /// Always sent, empty included, so turning the last switch back on clears
+  /// the list on the server.
+  ///
   /// Answers whether the server took it, so the caller knows to try again.
   Future<bool> register({
     required String token,
     required String platform,
     required String locale,
     String? appVersion,
+    List<String> muted = const [],
   });
 
   /// Forgets [token]. Has to run while the session is still valid: without
@@ -36,12 +42,14 @@ class DioPushTokenApi implements PushTokenApi {
     required String platform,
     required String locale,
     String? appVersion,
+    List<String> muted = const [],
   }) {
     return _send(() => dio.post(path, data: {
           'token': token,
           'platform': platform,
           'locale': locale,
           'app_version': ?appVersion,
+          'muted': muted,
         }));
   }
 

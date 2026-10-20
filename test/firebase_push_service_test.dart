@@ -58,7 +58,7 @@ class _FakeMessaging implements PushMessaging {
 /// The backend's `/pushToken`.
 class _FakeApi implements PushTokenApi {
   bool accept = true;
-  final List<Map<String, String?>> registered = [];
+  final List<Map<String, Object?>> registered = [];
   final List<String> unregistered = [];
 
   @override
@@ -67,12 +67,14 @@ class _FakeApi implements PushTokenApi {
     required String platform,
     required String locale,
     String? appVersion,
+    List<String> muted = const [],
   }) async {
     registered.add({
       'token': token,
       'platform': platform,
       'locale': locale,
       'app_version': appVersion,
+      'muted': muted,
     });
     return accept;
   }
@@ -131,7 +133,7 @@ void main() {
   late _FakeApi api;
   late _FakeNotifier notifier;
   late ValueNotifier<Locale> locale;
-  late Set<NotificationKind> switchedOff;
+  late ValueNotifier<Set<NotificationKind>> switchedOff;
   late FirebasePushService push;
 
   setUp(() async {
@@ -139,7 +141,7 @@ void main() {
     api = _FakeApi();
     notifier = _FakeNotifier();
     locale = ValueNotifier(const Locale('az'));
-    switchedOff = {};
+    switchedOff = ValueNotifier({});
     push = FirebasePushService(
       messaging: messaging,
       api: api,
@@ -147,7 +149,8 @@ void main() {
       appInfo: _FakeAppInfo(),
       locale: () => locale.value,
       localeChanges: locale,
-      isEnabled: (kind) => !switchedOff.contains(kind),
+      isEnabled: (kind) => !switchedOff.value.contains(kind),
+      prefsChanges: switchedOff,
     );
     PushRouter.instance.take();
     NotificationsFeedSignal.instance.takeOpenPushId();
@@ -164,6 +167,7 @@ void main() {
           'platform': 'android',
           'locale': 'az',
           'app_version': '2.0.11',
+          'muted': <String>[],
         },
       ]);
     });
@@ -219,6 +223,71 @@ void main() {
 
     test('a language change before any sign-in registers nothing', () async {
       locale.value = const Locale('en');
+      await _settle();
+      await _settle();
+
+      expect(api.registered, isEmpty);
+    });
+  });
+
+  group('switches', () {
+    test('the kinds switched off go with the token', () async {
+      switchedOff.value = {NotificationKind.homework, NotificationKind.exam};
+      await push.signIn(_parent);
+
+      // The enum's order, not the order they were flipped in.
+      expect(api.registered.single['muted'], ['exam', 'homework']);
+    });
+
+    test('a flipped switch reaches the server at once', () async {
+      await push.signIn(_parent);
+
+      switchedOff.value = {NotificationKind.attendance};
+      await _settle();
+      await _settle();
+      switchedOff.value = {};
+      await _settle();
+      await _settle();
+
+      expect(api.registered.map((r) => r['muted']), [
+        <String>[],
+        ['attendance'],
+        <String>[],
+      ]);
+    });
+
+    test('flips that cancel out before the request leaves send nothing',
+        () async {
+      await push.signIn(_parent);
+
+      switchedOff.value = {NotificationKind.cafeteria};
+      switchedOff.value = {};
+      await _settle();
+      await _settle();
+
+      expect(api.registered, hasLength(1));
+    });
+
+    test('one the server refused is sent again on the next sign-in',
+        () async {
+      await push.signIn(_parent);
+
+      api.accept = false;
+      switchedOff.value = {NotificationKind.homework};
+      await _settle();
+      await _settle();
+      api.accept = true;
+      await push.signIn(_parent);
+
+      expect(api.registered.map((r) => r['muted']), [
+        <String>[],
+        ['homework'],
+        ['homework'],
+      ]);
+    });
+
+    test('a switch flipped while signed out sends nothing', () async {
+      switchedOff.value = {NotificationKind.exam};
       await _settle();
       await _settle();
 
@@ -287,7 +356,7 @@ void main() {
     });
 
     test('a kind the parent switched off stays silent', () async {
-      switchedOff.add(NotificationKind.homework);
+      switchedOff.value = {NotificationKind.homework};
       messaging.foreground.add(const PushMessage(
         title: 'Yeni ev tapşırığı',
         data: {'kind': 'homework'},
@@ -350,7 +419,7 @@ void main() {
     });
 
     test('so does a kind the parent keeps silent', () async {
-      switchedOff.add(NotificationKind.homework);
+      switchedOff.value = {NotificationKind.homework};
       messaging.foreground
           .add(const PushMessage(title: 'Ev', data: {'kind': 'homework'}));
       await _settle();

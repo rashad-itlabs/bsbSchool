@@ -8,15 +8,20 @@ import '../../../core/l10n/l10n.dart';
 /// enum: a const field would freeze whichever language was loaded first and
 /// never follow a language switch.
 enum NotificationKind {
-  attendance('notify_attendance', '🏫'),
-  cafeteria('notify_cafeteria', '☕'),
-  exam('notify_exam', '📚'),
-  homework('notify_homework', '📝');
+  attendance('notify_attendance', '🏫', 'attendance'),
+  cafeteria('notify_cafeteria', '☕', 'cafeteria'),
+  exam('notify_exam', '📚', 'exam'),
+  homework('notify_homework', '📝', 'homework');
 
-  const NotificationKind(this.prefsKey, this.emoji);
+  const NotificationKind(this.prefsKey, this.emoji, this.pushKind);
 
   final String prefsKey;
   final String emoji;
+
+  /// What the backend calls the kind — a push's `data.kind`, and the name in
+  /// the `muted` list sent with the push token. Spelled out rather than taken
+  /// from [name], so renaming a case cannot quietly change the contract.
+  final String pushKind;
 
   String get title => switch (this) {
     NotificationKind.attendance => L.s.notifPrefAttendance,
@@ -35,8 +40,13 @@ enum NotificationKind {
 
 /// Global, persisted delivery preferences for notifications.
 ///
-/// Client-side only — the `GET /notifications` feed is not filtered by them —
-/// but held in one place so every screen that shows the switches (the
+/// They decide what this phone is sent, not what the `GET /notifications` feed
+/// lists: `FirebasePushService` hands the switched-off kinds to the server with
+/// the push token, and the server leaves this device out of those pushes — so a
+/// switch holds while the app is closed too (20.10.2026). Per device, like the
+/// token: a parent's second phone keeps its own switches.
+///
+/// Held in one place so every screen that shows the switches (the
 /// notifications tab and the profile screen) reads and writes the same values,
 /// and a choice survives a restart. Follows the [ThemeController] pattern:
 /// listen with an `AnimatedBuilder` and call [setEnabled] to change one.

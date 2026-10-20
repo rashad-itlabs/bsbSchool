@@ -20,8 +20,8 @@ import 'push_token_api.dart';
 ///
 /// The backend keeps one row per device in `push_tokens` and picks the
 /// language of a message itself, so this class has two jobs: keep that row
-/// current (token, app language), and turn a message or a tap into something
-/// the parent sees.
+/// current (token, app language, the kinds switched off in [NotificationPrefs]),
+/// and turn a message or a tap into something the parent sees.
 ///
 /// A device whose account has a row here is no longer sent anything through
 /// OneSignal; an account without one still is, so a parent on a phone that
@@ -41,7 +41,11 @@ class FirebasePushService implements PushService {
   /// in. Injectable, with [localeChanges], so the tests need no preferences.
   final Locale Function() _locale;
   final Listenable _localeChanges;
+
+  /// The parent's switches, and the signal that one was flipped — injectable
+  /// the same way.
   final bool Function(NotificationKind kind) _isEnabled;
+  final Listenable _prefsChanges;
 
   /// Where the notifications tab hears that its feed changed.
   final NotificationsFeedSignal _feed;
@@ -54,10 +58,12 @@ class FirebasePushService implements PushService {
     Locale Function()? locale,
     Listenable? localeChanges,
     bool Function(NotificationKind kind)? isEnabled,
+    Listenable? prefsChanges,
     NotificationsFeedSignal? feed,
   })  : _locale = locale ?? _appLocale,
         _localeChanges = localeChanges ?? LocaleController.instance,
         _isEnabled = isEnabled ?? NotificationPrefs.instance.isEnabled,
+        _prefsChanges = prefsChanges ?? NotificationPrefs.instance,
         _feed = feed ?? NotificationsFeedSignal.instance;
 
   static Locale _appLocale() => LocaleController.instance.resolve(
@@ -74,10 +80,11 @@ class FirebasePushService implements PushService {
   /// without waiting on Firebase.
   String? _token;
 
-  /// `account|token|language` the server last accepted. Every child switch
-  /// and session reload calls [signIn]; this keeps that to one request per
-  /// launch unless something actually changed. Not persisted on purpose: the
-  /// request on each launch is what keeps `last_seen_at` fresh.
+  /// `account|token|language|muted kinds` the server last accepted. Every
+  /// child switch and session reload calls [signIn]; this keeps that to one
+  /// request per launch unless something actually changed. Not persisted on
+  /// purpose: the request on each launch is what keeps `last_seen_at` fresh —
+  /// and what hands the server switches a failed request did not.
   String? _sent;
 
   /// Registrations run one at a time, so a sign-out never races one that is
@@ -104,6 +111,7 @@ class FirebasePushService implements PushService {
       if (initial != null) _route(initial.data);
 
       _localeChanges.addListener(_onLocaleChanged);
+      _prefsChanges.addListener(_onPrefsChanged);
     } catch (e) {
       debugPrint('[push] init failed — no notifications this launch: $e');
     }
@@ -170,7 +178,8 @@ class FirebasePushService implements PushService {
       _token = token;
 
       final locale = _locale().languageCode;
-      final key = '$account|$token|$locale';
+      final muted = _muted();
+      final key = '$account|$token|$locale|${muted.join(',')}';
       if (key == _sent) return;
 
       final ok = await api.register(
@@ -178,6 +187,7 @@ class FirebasePushService implements PushService {
         platform: appInfo.platform,
         locale: locale,
         appVersion: await appInfo.version,
+        muted: muted,
       );
       // Signed out while the request was out: leave nothing marked as sent.
       if (ok && _account == account) _sent = key;
@@ -195,6 +205,17 @@ class FirebasePushService implements PushService {
     unawaited(_enqueue());
   }
 
+  /// A switch flipped on the profile screen: the server hears it at once, so
+  /// it holds while the app is closed. Read when the request goes out, not
+  /// now — quick flips queued behind one another send only the final state.
+  void _onPrefsChanged() => unawaited(_enqueue());
+
+  /// The switched-off kinds, in the enum's fixed order so [_sent] compares.
+  List<String> _muted() => [
+        for (final kind in NotificationKind.values)
+          if (!_isEnabled(kind)) kind.pushKind,
+      ];
+
   String _channelName() => lookupAppL10n(_locale()).navNotifications;
 
   void _onForeground(PushMessage message) {
@@ -203,9 +224,10 @@ class FirebasePushService implements PushService {
     // announcement), and the open tab should list it.
     _feed.pushReceived();
 
-    // A kind the parent switched off must stay silent. The backend does not
-    // know the switches — they live on this device — so this is where they
-    // are honoured; the system shows background messages without asking us.
+    // A kind the parent switched off must stay silent. The server already
+    // leaves this device out of it; this catches what slipped past — sent
+    // before the switch reached the server, or by a server without the
+    // `muted` column yet. A background message the system shows on its own.
     final kind = _kindOf(message.data);
     if (kind != null && !_isEnabled(kind)) return;
     if (message.title == null && message.body == null) return;
