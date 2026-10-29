@@ -231,7 +231,17 @@ class _BodyState extends State<_Body> {
       title: record.lessonName ?? context.l10n.attendanceLesson,
       subtitle: record.teacher ?? '—',
       divider: divider,
-      trailing: _StatusPill(tag: tag),
+      trailing: _StatusPill(
+        tag: tag,
+        // Only an excused lesson the school left a note on opens one.
+        onTap: record.hasExcusedNote
+            ? () => _showExcuseNote(context, record)
+            : null,
+        // A screen reader hears the note without opening the sheet.
+        semanticsLabel: record.hasExcusedNote
+            ? [tag.label, ...record.excusedNotesText].join('. ')
+            : null,
+      ),
       footer: _detail(context, record, tag),
     );
   }
@@ -329,25 +339,191 @@ class _PermissionNote extends StatelessWidget {
 }
 
 /// The status as a small rounded pill in its own colour.
+///
+/// With [onTap] — an excused lesson the school left a note on — it carries an
+/// ⓘ and opens the note. The tap area reaches above and below the pill, so a
+/// thumb finds it without the row growing.
 class _StatusPill extends StatelessWidget {
   final _StatusTag tag;
-  const _StatusPill({required this.tag});
+  final VoidCallback? onTap;
+
+  /// Read instead of the label when set — the status and the note in one.
+  final String? semanticsLabel;
+
+  const _StatusPill({required this.tag, this.onTap, this.semanticsLabel});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    final tappable = onTap != null;
+    final pill = Container(
+      padding: EdgeInsets.fromLTRB(10, 4, tappable ? 7 : 10, 4),
       decoration: BoxDecoration(
         color: tag.color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        tag.label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: tag.color,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tag.label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: tag.color,
+            ),
+          ),
+          if (tappable) ...[
+            const SizedBox(width: 4),
+            Icon(Icons.info_outline_rounded, size: 14, color: tag.color),
+          ],
+        ],
+      ),
+    );
+    if (!tappable) return pill;
+
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      excludeSemantics: semanticsLabel != null,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: pill,
         ),
+      ),
+    );
+  }
+}
+
+/// The note behind an excused lesson (owner, 20.10.2026: the «İcazəli» pill
+/// opens it) — which lesson, and what the school wrote, selectable. Looks like
+/// the notifications tab's sheet.
+Future<void> _showExcuseNote(BuildContext context, AttendanceRecord record) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => _ExcuseNoteSheet(record: record),
+  );
+}
+
+class _ExcuseNoteSheet extends StatelessWidget {
+  final AttendanceRecord record;
+  const _ExcuseNoteSheet({required this.record});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final date = record.date;
+    final start = record.startShort;
+    final end = record.endShort;
+    final meta = [
+      record.lessonName ?? l10n.attendanceLesson,
+      if (date != null) AppDates.dayMonth(context, date),
+      if (start != null) end == null ? start : '$start–$end',
+    ].join(' · ');
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      decoration: BoxDecoration(
+        color: context.dr.bgSurface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: context.dr.border),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.dr.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: DrColors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.event_available_rounded,
+                    size: 26, color: DrColors.blue),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.attendanceExcuseNoteTitle,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: context.dr.textMain,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      meta,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.dr.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, note) in record.excusedNotes.indexed)
+                    Container(
+                      margin: EdgeInsets.only(top: i == 0 ? 0 : 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: DrColors.blue.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: DrColors.blue.withValues(alpha: 0.25)),
+                      ),
+                      child: SelectableText(
+                        note,
+                        style: TextStyle(
+                          fontSize: 15,
+                          height: 1.45,
+                          color: context.dr.textMain,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

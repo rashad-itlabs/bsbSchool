@@ -21,6 +21,16 @@ class AttendanceRecord extends Equatable {
   /// backend question E-038) such a lesson arrives as `Absent` with this flag.
   final bool excused;
 
+  /// What the school wrote when it excused the lesson (`excused_notes`, server
+  /// 20.10.2026) — the permission's note, not the teacher's [note]; a text the
+  /// [note] already says is left out. Only on an excused lesson; empty when
+  /// nobody wrote one, and on an older server.
+  final List<String> excusedNotes;
+
+  /// The same in the app language, worded by the server (`excused_notes_text`,
+  /// «İcazə: …»).
+  final List<String> excusedNotesText;
+
   /// Effort score the teacher logged (0 when not graded).
   final int effort;
 
@@ -57,6 +67,8 @@ class AttendanceRecord extends Equatable {
     this.teacher,
     this.status = 'Present',
     this.excused = false,
+    this.excusedNotes = const [],
+    this.excusedNotesText = const [],
     this.effort = 0,
     this.note,
     this.period,
@@ -78,6 +90,9 @@ class AttendanceRecord extends Equatable {
 
   /// A real absence: an excused lesson is not one (the website, QƏRAR-107).
   bool get isAbsent => status.toLowerCase() == 'absent' && !isExcused;
+
+  /// An excused lesson the school left a note on — the one whose pill opens it.
+  bool get hasExcusedNote => isExcused && excusedNotes.isNotEmpty;
 
   /// Away at a meeting during the lesson — 27 marks since September; nothing
   /// on the server counts it (backend docs), and neither do the stat cards.
@@ -119,6 +134,8 @@ class AttendanceRecord extends Equatable {
         teacher,
         status,
         excused,
+        excusedNotes,
+        excusedNotesText,
         effort,
         note,
         period,

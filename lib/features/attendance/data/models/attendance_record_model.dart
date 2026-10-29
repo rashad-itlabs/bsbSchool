@@ -10,6 +10,8 @@ class AttendanceRecordModel extends AttendanceRecord {
     super.teacher,
     super.status,
     super.excused,
+    super.excusedNotes,
+    super.excusedNotesText,
     super.effort,
     super.note,
     super.period,
@@ -32,6 +34,8 @@ class AttendanceRecordModel extends AttendanceRecord {
         teacher: _asString(json['teacher']),
         status: _asString(json['status']) ?? 'Present',
         excused: _asBool(json['excused']),
+        excusedNotes: _asStrings(json['excused_notes']),
+        excusedNotesText: _asStrings(json['excused_notes_text']),
         effort: _asInt(json['effort']),
         note: _asString(json['note']),
         period: _asString(json['period']),
@@ -63,6 +67,12 @@ class AttendanceRecordModel extends AttendanceRecord {
     final text = value?.toString().trim();
     return (text == null || text.isEmpty) ? null : text;
   }
+
+  /// A JSON list of texts, blanks dropped; anything else (absent on an older
+  /// server, null) is empty.
+  static List<String> _asStrings(dynamic value) => value is List
+      ? [for (final v in value) ?_asString(v)]
+      : const [];
 
   /// Dates come as `yyyy-MM-dd`; a bad value degrades to null, not a crash.
   static DateTime? _asDate(dynamic value) {

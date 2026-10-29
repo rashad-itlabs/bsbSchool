@@ -35,6 +35,7 @@
   "attendanceInOtherLesson": "bu saatda başqa dərsdə «iştirak» qeyd olunub",
   "attendanceMeetingTag": "Görüşdə",
   "attendanceExcusedTag": "İcazəli",
+  "attendanceExcuseNoteTitle": "İcazə",
   "attendancePermitArriveAt": "gəlir: {time}",
   "attendancePermitDay": "Şagird {date} tarixinə icazəlidir",
   "attendancePermitLeaveAt": "çıxır: {time}",

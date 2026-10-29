@@ -32,13 +32,17 @@ AttendanceRecord _rec(
   String status,
   String start, {
   bool excused = false,
+  List<String> notes = const [],
 }) => AttendanceRecord(
   id: id,
   date: _today,
   subject: 'Lesson $id',
   status: status,
   excused: excused,
+  excusedNotes: notes,
+  excusedNotesText: [for (final n in notes) 'İcazə: $n'],
   startTime: start,
+  endTime: start.replaceFirst(RegExp(r'^\d\d'), '11'),
 );
 
 Future<void> _pump(WidgetTester tester, List<AttendanceRecord> records) async {
@@ -132,6 +136,73 @@ void main() {
     testWidgets('no excused day, no fifth legend item', (tester) async {
       await _pump(tester, [_rec(1, 'Present', '08:30:00')]);
       expect(find.textContaining('İcazəli'), findsNothing);
+    });
+  });
+
+  group("the permission's note (server 20.10.2026)", () {
+    test('both lists are read, blanks dropped', () {
+      final r = AttendanceRecordModel.fromJson({
+        'id': 1,
+        'status': 'Absent',
+        'excused': true,
+        'excused_notes': ['Həkimə gedir', ' ', null],
+        'excused_notes_text': ['İcazə: Həkimə gedir'],
+      });
+      expect(r.excusedNotes, ['Həkimə gedir']);
+      expect(r.excusedNotesText, ['İcazə: Həkimə gedir']);
+      expect(r.hasExcusedNote, isTrue);
+    });
+
+    test('an older server, or a lone string, is no note', () {
+      final old = AttendanceRecordModel.fromJson({'id': 1, 'excused': true});
+      final odd = AttendanceRecordModel.fromJson(
+          {'id': 1, 'excused': true, 'excused_notes': 'Həkimə gedir'});
+      expect(old.excusedNotes, isEmpty);
+      expect(odd.excusedNotes, isEmpty);
+      expect(old.hasExcusedNote, isFalse);
+    });
+
+    test('a note on a lesson that is not excused opens nothing', () {
+      final r = AttendanceRecordModel.fromJson({
+        'id': 1,
+        'status': 'Present',
+        'excused_notes': ['Həkimə gedir'],
+      });
+      expect(r.hasExcusedNote, isFalse);
+    });
+
+    testWidgets('the pill with a note carries an ⓘ and opens it', (
+      tester,
+    ) async {
+      await _pump(tester, [
+        _rec(1, 'Present', '08:30:00'),
+        _rec(2, 'Excused', '09:20:00', notes: ['Həkimə gedir']),
+        _rec(3, 'Excused', '10:00:00'),
+      ]);
+      // Two excused pills, only the one with a note is a button.
+      expect(find.text('İcazəli'), findsNWidgets(2));
+      expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.info_outline_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('İcazə'), findsOneWidget);
+      expect(find.text('Həkimə gedir'), findsOneWidget);
+      expect(find.textContaining('Lesson 2 · '), findsOneWidget);
+      expect(find.textContaining('09:20–11:20'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a screen reader hears the note on the pill', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await _pump(tester, [
+        _rec(1, 'Excused', '09:20:00', notes: ['Həkimə gedir']),
+      ]);
+      expect(
+        find.bySemanticsLabel('İcazəli. İcazə: Həkimə gedir'),
+        findsOneWidget,
+      );
+      semantics.dispose();
     });
   });
 }

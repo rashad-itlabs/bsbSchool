@@ -309,6 +309,12 @@ abstract class AppL10n {
   /// **'İcazəli'**
   String get attendanceExcusedTag;
 
+  /// No description provided for @attendanceExcuseNoteTitle.
+  ///
+  /// In az, this message translates to:
+  /// **'İcazə'**
+  String get attendanceExcuseNoteTitle;
+
   /// No description provided for @attendancePermitArriveAt.
   ///
   /// In az, this message translates to:

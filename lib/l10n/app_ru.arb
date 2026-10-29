@@ -52,6 +52,7 @@
   "attendanceInOtherLesson": "в это время отмечен «был» на другом уроке",
   "attendanceMeetingTag": "На встрече",
   "attendanceExcusedTag": "Отпросился",
+  "attendanceExcuseNoteTitle": "Разрешение",
   "attendancePermitArriveAt": "придёт к {time}",
   "attendancePermitDay": "Отпросился на {date}",
   "attendancePermitLeaveAt": "уходит в {time}",

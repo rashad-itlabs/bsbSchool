@@ -52,6 +52,7 @@
   "attendanceInOtherLesson": "marked present in another lesson at this time",
   "attendanceMeetingTag": "Meeting",
   "attendanceExcusedTag": "Excused",
+  "attendanceExcuseNoteTitle": "Permission",
   "attendancePermitArriveAt": "arrives at {time}",
   "attendancePermitDay": "Excused on {date}",
   "attendancePermitLeaveAt": "leaves at {time}",
