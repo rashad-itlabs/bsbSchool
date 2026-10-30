@@ -1,7 +1,4 @@
-import 'package:bsbschool/dr/screens/event_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../dr/theme/dr_colors.dart';
 import '../../../../dr/widgets/dr_widgets.dart';
@@ -45,6 +42,10 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
 
   /// The day whose events are listed under the grid.
   late DateTime _selectedDay;
+
+  /// The "+N" under the list was tapped: the selected day shows every entry.
+  /// Reset whenever the selection moves.
+  bool _showAllOfDay = false;
 
   /// Events bucketed by day, rebuilt only when the feed itself changes — the
   /// alternative is re-scanning ~200 entries for all 42 cells on every rebuild.
@@ -104,6 +105,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
       _selectedDay = isCurrentMonth
           ? DateTime(now.year, now.month, now.day)
           : _visibleMonth;
+      _showAllOfDay = false;
     });
   }
 
@@ -272,7 +274,10 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
     }
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedDay = day),
+      onTap: () => setState(() {
+        _selectedDay = day;
+        _showAllOfDay = false;
+      }),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         height: 44,
@@ -377,137 +382,186 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
             style: TextStyle(fontSize: 12, color: context.dr.textMuted),
           )
         else ...[
-          for (final event in events.take(_maxListedEvents))
+          for (final event
+              in events.take(_showAllOfDay ? events.length : _maxListedEvents))
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
-                  onTap: (){
-                    /// eventDetail
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (context){
-                          return Container(
-                            padding: EdgeInsets.all(15),
-                            //color: Colors.grey,
-                            width: double.infinity,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height:10),
-                                Align(
-                                  alignment: Alignment.topCenter,
-                                  child: Container(
-                                    width: 100,
-                                    height: 5,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[850],
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height:12),
-                                Text(event.title),
-                                SizedBox(height:2),
-                                Text(DateFormat('dd.MM.yyyy').format(event.date!),style: TextStyle(
-                                  fontSize: 12,
-                                ),),
-                                SizedBox(height:5),
-                                Divider(
-                                  height: 0.3,
-                                ),
-                                SizedBox(height:5),
-                                Text('Description:',style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),),
-                                SizedBox(height:5),
-                                Text(event.description),
-                                SizedBox(height:32),
-                              ],
-                            ),
-                          );
-                        }
-                    );
-                    // Navigator.of(context).push(CupertinoSheetRoute(
-                    //     builder: (context){
-                    //       return EventDetailScreen(event:event);
-                    //     }
-                    // ));
-                  },
-                  child: _eventRow(event)),
+                onTap: () => _showEventSheet(event),
+                child: _eventRow(event),
+              ),
             ),
-          if (events.length > _maxListedEvents)
-            Text(
-              've daha ${events.length - _maxListedEvents} tədbir',
-              style: TextStyle(fontSize: 11, color: context.dr.textMuted),
+          if (!_showAllOfDay && events.length > _maxListedEvents)
+            GestureDetector(
+              onTap: () => setState(() => _showAllOfDay = true),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  context.l10n.eventsMore(events.length - _maxListedEvents),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: context.dr.accent,
+                  ),
+                ),
+              ),
             ),
         ],
       ],
     );
   }
 
+  /// The language the entries are shown in — the app's, not the one the feed
+  /// was requested in: the bloc doesn't reload on a language switch, so the
+  /// text is picked from `translations` at build time.
+  String get _lang => Localizations.localeOf(context).languageCode;
+
+  /// The entry in full: title, its days (and time), and the description with
+  /// its line breaks. Scrolls when the text is taller than the sheet.
+  void _showEventSheet(SchoolEvent event) {
+    final color = eventColor(context, event.colorHex);
+    final description = event.descriptionIn(_lang).trim();
+    final start = event.date;
+    final last = event.lastDay;
+    final when = [
+      if (start != null && last != null) AppDates.dayRange(context, start, last),
+      if (event.time != null) event.time!,
+    ].join(' · ');
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.dr.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(sheetContext).size.height * 0.85,
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: context.dr.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  event.titleIn(_lang),
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    color: context.dr.textMain,
+                  ),
+                ),
+                if (when.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    when,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                ],
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  Container(height: 1, color: context.dr.border),
+                  const SizedBox(height: 14),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.45,
+                      color: context.dr.textMain,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Title and description wrap in full — they used to be cut to one line
+  /// each, with the description's line breaks folded into " • ". The colour bar
+  /// is the row's left border, so it grows with the text.
   Widget _eventRow(SchoolEvent event) {
     final color = eventColor(context, event.colorHex);
-    final description = event.description.trim().replaceAll('\n', ' • ');
+    final description = event.descriptionIn(_lang).trim();
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 3,
-          // Matches the two text lines rather than stretching the whole row.
-          height: description.isEmpty ? 16 : 32,
-          margin: const EdgeInsets.only(top: 2, right: 10),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                event.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: context.dr.textMain,
-                ),
-              ),
-              if (description.isNotEmpty) ...[
-                const SizedBox(height: 3),
+    return Container(
+      padding: const EdgeInsets.only(left: 10),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: color, width: 3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11, color: context.dr.textMuted),
+                  event.titleIn(_lang),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                    color: context.dr.textMain,
+                  ),
                 ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 11,
+                      height: 1.35,
+                      color: context.dr.textMuted,
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
-        ),
-        if (event.time != null) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              event.time!,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: color,
+          ),
+          if (event.time != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                event.time!,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 

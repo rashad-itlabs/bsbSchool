@@ -5,6 +5,7 @@ class SchoolEventModel extends SchoolEvent {
     required super.id,
     super.title,
     super.description,
+    super.translations,
     super.time,
     super.colorHex,
     super.date,
@@ -18,6 +19,7 @@ class SchoolEventModel extends SchoolEvent {
         id: _asInt(json['id']),
         title: _asString(json['title']) ?? '',
         description: _asString(json['description']) ?? '',
+        translations: _asTranslations(json['translations']),
         time: _asTime(json['event_time']),
         colorHex: _asString(json['color']),
         date: _asDate(json['event_date']),
@@ -34,6 +36,23 @@ class SchoolEventModel extends SchoolEvent {
   static String? _asString(dynamic value) {
     final text = value?.toString().trim();
     return (text == null || text.isEmpty) ? null : text;
+  }
+
+  /// `{"az": {"title": …, "description": …}, "en": {…}, "ru": {…}}`; anything
+  /// else (an older backend, a malformed entry) degrades to no translations.
+  static Map<String, SchoolEventText> _asTranslations(dynamic value) {
+    if (value is! Map) return const {};
+
+    final out = <String, SchoolEventText>{};
+    value.forEach((language, text) {
+      if (text is Map) {
+        out[language.toString()] = SchoolEventText(
+          title: _asString(text['title']) ?? '',
+          description: _asString(text['description']) ?? '',
+        );
+      }
+    });
+    return out;
   }
 
   /// Dates arrive as `2026-09-01`. They are stored at midnight so day-level

@@ -63,13 +63,40 @@ const _payload = [
   },
 ];
 
-Widget _host(Widget child) => MaterialApp(
+/// One busy day: a long, translated entry plus four more, so the "+N" shows.
+const _longTitleAz =
+    'Valideyn-müəllim görüşü və ilin sonu mükafatlandırma mərasimi (bütün məktəb, akt zalı)';
+const _longTitleEn =
+    'Parent-teacher meeting and end-of-year awards ceremony (whole school, assembly hall)';
+const _busyPayload = [
+  {
+    "id": 501,
+    "title": _longTitleEn,
+    "description": "Doors open 09:00\nParents please bring ID",
+    "translations": {
+      "az": {"title": _longTitleAz, "description": "Qapılar 09:00-da açılır\nValideynlər şəxsiyyət vəsiqəsi gətirsin"},
+      "en": {"title": _longTitleEn, "description": "Doors open 09:00\nParents please bring ID"},
+      "ru": {"title": "Родительское собрание", "description": "Двери открываются в 09:00"},
+    },
+    "event_time": "09:30",
+    "color": "#0d6efd",
+    "event_date": "2026-11-04",
+    "end_date": "2026-11-06",
+    "class_id": null,
+  },
+  {"id": 502, "title": "Second", "event_time": "10:00", "color": "#198754", "event_date": "2026-11-04"},
+  {"id": 503, "title": "Third", "event_time": "11:00", "color": "#fd7e14", "event_date": "2026-11-04"},
+  {"id": 504, "title": "Fourth", "event_time": "12:00", "color": "#6f42c1", "event_date": "2026-11-04"},
+  {"id": 505, "title": "Fifth", "event_time": "13:00", "color": "#d63384", "event_date": "2026-11-04"},
+];
+
+Widget _host(Widget child, {String locale = 'az'}) => MaterialApp(
       theme: ThemeData.dark().copyWith(
         extensions: const [DrPalette.dark],
       ),
       // The widgets under test read their copy from AppL10n, so the delegates
       // have to be in the tree the same way the real app installs them.
-      locale: const Locale('az'),
+      locale: Locale(locale),
       supportedLocales: AppL10n.supportedLocales,
       localizationsDelegates: AppL10n.localizationsDelegates,
       home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -83,6 +110,27 @@ String _month(int month) =>
 String _weekdayHead(int weekday) =>
     DateFormat.E('az').format(DateTime(2024, 1, weekday));
 String _dayMonth(DateTime date) => DateFormat.MMMMd('az').format(date);
+
+/// The header writes the month as a heading (`AppDates.monthTitle`): capitalised,
+/// with az's dotted `İ` for "iyun"/"iyul".
+String _monthTitle(int month) {
+  final m = _month(month);
+  return (m.startsWith('i') ? 'İ' : m[0].toUpperCase()) + m.substring(1);
+}
+
+/// Steps the calendar from the current month to [year]-[month] with the arrows,
+/// in whichever direction that lies — the tests must not depend on today.
+Future<void> _goTo(WidgetTester tester, int year, int month) async {
+  final now = DateTime.now();
+  final diff = (year - now.year) * 12 + (month - now.month);
+  final arrow = find.byIcon(
+    diff > 0 ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+  );
+  for (var i = 0; i < diff.abs(); i++) {
+    await tester.tap(arrow);
+    await tester.pumpAndSettle();
+  }
+}
 
 void main() {
   setUpAll(initializeDateFormatting);
@@ -159,7 +207,7 @@ void main() {
 
     // Opens on the current month.
     final now = DateTime.now();
-    expect(find.text(_month(now.month)), findsOneWidget);
+    expect(find.text(_monthTitle(now.month)), findsOneWidget);
     expect(find.text('${now.year}'), findsOneWidget);
 
     // Every day of the month has a cell.
@@ -173,20 +221,9 @@ void main() {
     await tester.pumpWidget(_host(EventsCalendarCard(events: events)));
     await tester.pumpAndSettle();
 
-    // Step forward from today (2026-08 at time of writing) until September 2026
-    // is on screen; the arrow is the second icon button.
-    final forward = find.byIcon(Icons.chevron_right_rounded);
-    expect(forward, findsOneWidget);
-
-    for (var i = 0; i < 24; i++) {
-      if (find.text(_month(DateTime.september)).evaluate().isNotEmpty &&
-          find.text('2026').evaluate().isNotEmpty) {
-        break;
-      }
-      await tester.tap(forward);
-      await tester.pumpAndSettle();
-    }
-    expect(find.text(_month(DateTime.september)), findsOneWidget);
+    // September 2026 — backwards or forwards from today, whichever it is.
+    await _goTo(tester, 2026, DateTime.september);
+    expect(find.text(_monthTitle(DateTime.september)), findsOneWidget);
 
     // Day 1 is auto-selected on a month the user navigated to.
     expect(find.text(_dayMonth(DateTime(2026, 9, 1))), findsOneWidget);
@@ -200,8 +237,10 @@ void main() {
       find.text('Students arrive and autumn term begins'),
       findsNWidgets(2),
     );
+    // The description keeps its line breaks (it used to be folded into " • "
+    // and cut to one line).
     expect(
-      find.text("2025-2026 Awards' Ceremony (whole school) • Orientation day"),
+      find.text("2025-2026 Awards' Ceremony (whole school)\nOrientation day"),
       findsOneWidget,
     );
 
@@ -216,6 +255,108 @@ void main() {
     expect(find.text('Bu gün üçün tədbir yoxdur'), findsOneWidget);
 
     expect(tester.takeException(), isNull);
+  });
+
+  group('titles in full, in the app language', () {
+    final busy = _busyPayload
+        .map((e) => SchoolEventModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+
+    /// A phone-sized screen, so a long title really has to wrap.
+    void phone(WidgetTester tester) {
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+    }
+
+    test('model reads translations; a missing one falls back', () {
+      final e = busy.first;
+      expect(e.titleIn('az'), _longTitleAz);
+      expect(e.titleIn('ru'), 'Родительское собрание');
+      expect(e.descriptionIn('az'), contains('\n'));
+      // No `translations` at all (older backend) → the request-language text.
+      expect(busy[1].titleIn('az'), 'Second');
+      expect(busy[1].translations, isEmpty);
+    });
+
+    testWidgets('row shows the whole title and description, no ellipsis',
+        (tester) async {
+      phone(tester);
+      await tester.pumpWidget(_host(EventsCalendarCard(events: busy)));
+      await tester.pumpAndSettle();
+      await _goTo(tester, 2026, DateTime.november);
+      await tester.tap(find.text('4').first);
+      await tester.pumpAndSettle();
+
+      final title = tester.widget<Text>(find.text(_longTitleAz));
+      expect(title.maxLines, isNull);
+      expect(title.overflow, isNot(TextOverflow.ellipsis));
+      // Wraps onto more than one line at phone width.
+      expect(tester.getSize(find.text(_longTitleAz)).height, greaterThan(20));
+      expect(
+        find.text('Qapılar 09:00-da açılır\nValideynlər şəxsiyyət vəsiqəsi gətirsin'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the language comes from the app, not the request',
+        (tester) async {
+      await tester.pumpWidget(
+        _host(EventsCalendarCard(events: busy), locale: 'ru'),
+      );
+      await tester.pumpAndSettle();
+      await _goTo(tester, 2026, DateTime.november);
+      await tester.tap(find.text('4').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Родительское собрание'), findsOneWidget);
+      expect(find.text(_longTitleEn), findsNothing);
+    });
+
+    testWidgets('"+N" is translated and opens the rest of the day',
+        (tester) async {
+      phone(tester);
+      await tester.pumpWidget(_host(EventsCalendarCard(events: busy)));
+      await tester.pumpAndSettle();
+      await _goTo(tester, 2026, DateTime.november);
+      await tester.tap(find.text('4').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Fifth'), findsNothing);
+      // az: "və daha {count} tədbir" — the row used to hard-code "ve daha".
+      await tester.tap(find.text('və daha 1 tədbir'));
+      await tester.pumpAndSettle();
+      expect(find.text('Fifth'), findsOneWidget);
+      expect(find.text('və daha 1 tədbir'), findsNothing);
+
+      // Moving to another day collapses the list again.
+      await tester.tap(find.text('5').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Fifth'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('tapping an entry opens it in full: days, time, text',
+        (tester) async {
+      phone(tester);
+      await tester.pumpWidget(_host(EventsCalendarCard(events: busy)));
+      await tester.pumpAndSettle();
+      await _goTo(tester, 2026, DateTime.november);
+      await tester.tap(find.text('4').first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(_longTitleAz));
+      await tester.pumpAndSettle();
+
+      // Row + sheet.
+      expect(find.text(_longTitleAz), findsNWidgets(2));
+      // 4–6 November, said once, plus the time.
+      expect(find.textContaining('09:30'), findsWidgets);
+      expect(find.textContaining('4–6'), findsOneWidget);
+      expect(find.text('Description:'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
   });
 
   testWidgets('loading and error states replace the grid', (tester) async {
