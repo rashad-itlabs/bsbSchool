@@ -61,9 +61,20 @@ const _payload = [
     "end_date": "2026-09-24",
     "class_id": null,
   },
+  // Starts in August, ends in September: belongs to both months' lists.
+  {
+    "id": 1000,
+    "title": "Summer camp",
+    "description": null,
+    "event_time": null,
+    "color": "#198754",
+    "event_date": "2026-08-28",
+    "end_date": "2026-09-02",
+    "class_id": null,
+  },
 ];
 
-/// One busy day: a long, translated entry plus four more, so the "+N" shows.
+/// One busy day: a long, translated entry plus six more, so the "+N" shows.
 const _longTitleAz =
     'Valideyn-müəllim görüşü və ilin sonu mükafatlandırma mərasimi (bütün məktəb, akt zalı)';
 const _longTitleEn =
@@ -88,6 +99,8 @@ const _busyPayload = [
   {"id": 503, "title": "Third", "event_time": "11:00", "color": "#fd7e14", "event_date": "2026-11-04"},
   {"id": 504, "title": "Fourth", "event_time": "12:00", "color": "#6f42c1", "event_date": "2026-11-04"},
   {"id": 505, "title": "Fifth", "event_time": "13:00", "color": "#d63384", "event_date": "2026-11-04"},
+  {"id": 506, "title": "Sixth", "event_time": "14:00", "color": "#25a194", "event_date": "2026-11-04"},
+  {"id": 507, "title": "Seventh", "event_time": "15:00", "color": "#6c757d", "event_date": "2026-11-04"},
 ];
 
 Widget _host(Widget child, {String locale = 'az'}) => MaterialApp(
@@ -217,7 +230,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('navigating to a month with events lists them', (tester) async {
+  testWidgets('the list under the grid is the whole month on screen',
+      (tester) async {
     await tester.pumpWidget(_host(EventsCalendarCard(events: events)));
     await tester.pumpAndSettle();
 
@@ -225,11 +239,54 @@ void main() {
     await _goTo(tester, 2026, DateTime.september);
     expect(find.text(_monthTitle(DateTime.september)), findsOneWidget);
 
-    // Day 1 is auto-selected on a month the user navigated to.
-    expect(find.text(_dayMonth(DateTime(2026, 9, 1))), findsOneWidget);
+    // Every entry of the month, without tapping a day; the multi-day break
+    // once, not once per day.
     expect(find.text('Staff returns'), findsOneWidget);
+    expect(
+      find.text('Students arrive and autumn term begins'),
+      findsNWidgets(2),
+    );
+    expect(find.text('Mid-term break'), findsOneWidget);
+    // An entry that began in August is still part of September…
+    expect(find.text('Summer camp'), findsOneWidget);
+    // …and each row says its days.
+    expect(find.text(_dayMonth(DateTime(2026, 9, 1))), findsOneWidget);
+    expect(find.text('21–24 ${_month(9)}'), findsOneWidget);
+    expect(
+      find.text('${_dayMonth(DateTime(2026, 8, 28))} – '
+          '${_dayMonth(DateTime(2026, 9, 2))}'),
+      findsOneWidget,
+    );
 
-    // Tapping the 8th shows both of that day's events with their descriptions.
+    // In calendar order: the August start first, the break last.
+    final camp = tester.getTopLeft(find.text('Summer camp')).dy;
+    final staff = tester.getTopLeft(find.text('Staff returns')).dy;
+    final pause = tester.getTopLeft(find.text('Mid-term break')).dy;
+    expect(camp, lessThan(staff));
+    expect(staff, lessThan(pause));
+
+    // August lists the camp too; October has nothing and says so.
+    await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Summer camp'), findsOneWidget);
+    expect(find.text('Staff returns'), findsNothing);
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.byIcon(Icons.chevron_right_rounded));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text(_monthTitle(DateTime.october)), findsOneWidget);
+    expect(find.text('Bu ay tədbir yoxdur'), findsOneWidget);
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping a day narrows the list to it; again, back to the month',
+      (tester) async {
+    await tester.pumpWidget(_host(EventsCalendarCard(events: events)));
+    await tester.pumpAndSettle();
+    await _goTo(tester, 2026, DateTime.september);
+
+    // The 8th: its two events with their descriptions, under its header.
     await tester.tap(find.text('8').first);
     await tester.pumpAndSettle();
     expect(find.text(_dayMonth(DateTime(2026, 9, 8))), findsOneWidget);
@@ -237,6 +294,7 @@ void main() {
       find.text('Students arrive and autumn term begins'),
       findsNWidgets(2),
     );
+    expect(find.text('Staff returns'), findsNothing);
     // The description keeps its line breaks (it used to be folded into " • "
     // and cut to one line).
     expect(
@@ -244,17 +302,77 @@ void main() {
       findsOneWidget,
     );
 
+    // The same day again widens it back to the month.
+    await tester.tap(find.text('8').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Staff returns'), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsNothing);
+
     // A day inside the multi-day break resolves to that event.
     await tester.tap(find.text('23'));
     await tester.pumpAndSettle();
     expect(find.text('Mid-term break'), findsOneWidget);
+    expect(find.text('Staff returns'), findsNothing);
+
+    // The header's × closes it too.
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Staff returns'), findsOneWidget);
 
     // An empty day says so rather than showing a stale list.
     await tester.tap(find.text('29'));
     await tester.pumpAndSettle();
     expect(find.text('Bu gün üçün tədbir yoxdur'), findsOneWidget);
 
+    // Paging drops the day: the next month's list, whole.
+    await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Summer camp'), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsNothing);
+
     expect(tester.takeException(), isNull);
+  });
+
+  group('red entries tint their date', () {
+    test('the panel\'s red counts; its pink and orange don\'t', () {
+      expect(isRedEventColor(const Color(0xFFDC3545)), isTrue);
+      expect(isRedEventColor(const Color(0xFFFF0000)), isTrue);
+      expect(isRedEventColor(const Color(0xFFD63384)), isFalse);
+      expect(isRedEventColor(const Color(0xFFFD7E14)), isFalse);
+      expect(isRedEventColor(DrColors.accentGreen), isFalse);
+      expect(isRedEventColor(Colors.white), isFalse);
+    });
+
+    Color? cellFill(WidgetTester tester, String day) {
+      final circle = tester.widget<Container>(
+        find
+            .ancestor(of: find.text(day), matching: find.byType(Container))
+            .first,
+      );
+      return (circle.decoration as BoxDecoration).color;
+    }
+
+    testWidgets('a day with a red entry is filled red, translucent',
+        (tester) async {
+      await tester.pumpWidget(_host(EventsCalendarCard(events: events)));
+      await tester.pumpAndSettle();
+      await _goTo(tester, 2026, DateTime.september);
+
+      // The 8th carries #dc3545 (next to an orange one).
+      expect(
+        cellFill(tester, '8'),
+        const Color(0xFFDC3545).withValues(alpha: 0.25),
+      );
+      // Teal, blue and empty days stay clear.
+      expect(cellFill(tester, '1'), Colors.transparent);
+      expect(cellFill(tester, '22'), Colors.transparent);
+      expect(cellFill(tester, '15'), Colors.transparent);
+
+      // Selected, the green pill wins.
+      await tester.tap(find.text('8').first);
+      await tester.pumpAndSettle();
+      expect(cellFill(tester, '8'), DrColors.accentGreen);
+    });
   });
 
   group('titles in full, in the app language', () {
@@ -314,26 +432,27 @@ void main() {
       expect(find.text(_longTitleEn), findsNothing);
     });
 
-    testWidgets('"+N" is translated and opens the rest of the day',
+    testWidgets('"+N" is translated and opens the rest of the list',
         (tester) async {
       phone(tester);
       await tester.pumpWidget(_host(EventsCalendarCard(events: busy)));
       await tester.pumpAndSettle();
       await _goTo(tester, 2026, DateTime.november);
-      await tester.tap(find.text('4').first);
-      await tester.pumpAndSettle();
 
-      expect(find.text('Fifth'), findsNothing);
+      // The month: seven entries, six shown — the latest one waits.
+      expect(find.text('Sixth'), findsOneWidget);
+      expect(find.text('Seventh'), findsNothing);
       // az: "və daha {count} tədbir" — the row used to hard-code "ve daha".
       await tester.tap(find.text('və daha 1 tədbir'));
       await tester.pumpAndSettle();
-      expect(find.text('Fifth'), findsOneWidget);
+      expect(find.text('Seventh'), findsOneWidget);
       expect(find.text('və daha 1 tədbir'), findsNothing);
 
-      // Moving to another day collapses the list again.
-      await tester.tap(find.text('5').first);
+      // Narrowing to a day collapses the list again.
+      await tester.tap(find.text('4').first);
       await tester.pumpAndSettle();
-      expect(find.text('Fifth'), findsNothing);
+      expect(find.text('Seventh'), findsNothing);
+      expect(find.text('və daha 1 tədbir'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

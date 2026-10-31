@@ -466,6 +466,9 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
+  String get eventsNoneThisMonth => 'No events this month';
+
+  @override
   String get eventsNoneToday => 'No events today';
 
   @override
@@ -893,6 +896,14 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get libraryEmpty => 'No books found';
+
+  @override
+  String get libraryLocked =>
+      'The library is closed due to an outstanding payment';
+
+  @override
+  String get libraryLockedNote =>
+      'The library will open once the payment matter is settled. Please contact the school for details.';
 
   @override
   String get librarySchoolPaid => '£19.99 paid by the school';

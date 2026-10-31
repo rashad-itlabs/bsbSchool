@@ -43,12 +43,15 @@ class _LibraryView extends StatelessWidget {
                       ? context.l10n.libraryTitle
                       : context.l10n.libraryTitleWithClass(state.className!),
                 ),
-                _SearchField(
-                  onChanged: (value) => bloc.add(LibrarySearchChanged(value)),
-                ),
-                const SizedBox(height: 12),
-                const _PaidNote(),
-                const SizedBox(height: 20),
+                // A closed library has nothing to search or filter.
+                if (!state.isLocked) ...[
+                  _SearchField(
+                    onChanged: (value) => bloc.add(LibrarySearchChanged(value)),
+                  ),
+                  const SizedBox(height: 12),
+                  const _PaidNote(),
+                  const SizedBox(height: 20),
+                ],
                 if (state.subjects.length > 1) ...[
                   DrChipBar(
                     labels: [
@@ -88,7 +91,17 @@ class _Body extends StatelessWidget {
     if (state.status == LibraryStatus.error) {
       return _Message(
         text: state.errorMessage ?? context.l10n.commonError,
-        onRetry: () => context.read<LibraryBloc>().add(const LibraryRefreshed()),
+        onRetry: () =>
+            context.read<LibraryBloc>().add(const LibraryRefreshed()),
+      );
+    }
+
+    // Before the no-class check: the server sends `class_id` null for a child
+    // without a session even when the library is closed.
+    if (state.isLocked) {
+      return _LockedNotice(
+        title: state.lockedText ?? context.l10n.libraryLocked,
+        note: state.lockedNote ?? context.l10n.libraryLockedNote,
       );
     }
 
@@ -104,7 +117,7 @@ class _Body extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-       // const DrSectionHeader(title: 'Kitablar'),
+        // const DrSectionHeader(title: 'Kitablar'),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
@@ -192,9 +205,9 @@ class _BookTile extends StatelessWidget {
   const _BookTile({required this.book});
 
   void _open(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => BookReaderScreen(book: book)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => BookReaderScreen(book: book)));
   }
 
   @override
@@ -204,10 +217,7 @@ class _BookTile extends StatelessWidget {
 
     return GestureDetector(
       onTap: readable ? () => _open(context) : null,
-      child: Opacity(
-        opacity: readable ? 1 : 0.5,
-        child: _content(context),
-      ),
+      child: Opacity(opacity: readable ? 1 : 0.5, child: _content(context)),
     );
   }
 
@@ -237,21 +247,72 @@ class _BookTile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Text(book.title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+        Text(
+          book.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 2),
-        Text(book.author ?? book.subject ?? '',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11, color: context.dr.textMuted)),
+        Text(
+          book.author ?? book.subject ?? '',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 11, color: context.dr.textMuted),
+        ),
       ],
     );
   }
 
   Widget _placeholder(BuildContext context) =>
       Icon(Icons.menu_book, size: 40, color: context.dr.textMuted);
+}
+
+/// The school closed the library over a debt («Library closed» on the site).
+/// The section stays in the menu on purpose — the owner wants the family to
+/// see why there are no books rather than think the list is empty.
+class _LockedNotice extends StatelessWidget {
+  final String title;
+  final String note;
+  const _LockedNotice({required this.title, required this.note});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: DrCard(
+        child: Column(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: DrColors.orange.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.lock_outline,
+                size: 28,
+                color: DrColors.orange,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              note,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: context.dr.textMuted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Message extends StatelessWidget {
@@ -265,12 +326,17 @@ class _Message extends StatelessWidget {
       padding: const EdgeInsets.only(top: 60),
       child: Column(
         children: [
-          Text(text,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: context.dr.textMuted)),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: context.dr.textMuted),
+          ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
+            TextButton(
+              onPressed: onRetry,
+              child: Text(context.l10n.commonRetry),
+            ),
           ],
         ],
       ),

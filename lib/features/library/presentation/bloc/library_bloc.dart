@@ -38,6 +38,9 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
         classId: content.classId,
         className: content.className,
         books: content.books,
+        locked: content.locked,
+        lockedText: content.lockedText,
+        lockedNote: content.lockedNote,
         query: state.query,
       )),
     );

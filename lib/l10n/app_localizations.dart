@@ -915,6 +915,12 @@ abstract class AppL10n {
   /// **'və daha {count} tədbir'**
   String eventsMore(int count);
 
+  /// No description provided for @eventsNoneThisMonth.
+  ///
+  /// In az, this message translates to:
+  /// **'Bu ay tədbir yoxdur'**
+  String get eventsNoneThisMonth;
+
   /// No description provided for @eventsNoneToday.
   ///
   /// In az, this message translates to:
@@ -1676,6 +1682,18 @@ abstract class AppL10n {
   /// In az, this message translates to:
   /// **'Kitab tapılmadı'**
   String get libraryEmpty;
+
+  /// No description provided for @libraryLocked.
+  ///
+  /// In az, this message translates to:
+  /// **'Kitabxana borca görə bağlıdır'**
+  String get libraryLocked;
+
+  /// No description provided for @libraryLockedNote.
+  ///
+  /// In az, this message translates to:
+  /// **'Kitabxana ödəniş məsələsi həll olunandan sonra açılacaq. Ətraflı məlumat üçün məktəbə müraciət edin.'**
+  String get libraryLockedNote;
 
   /// No description provided for @librarySchoolPaid.
   ///

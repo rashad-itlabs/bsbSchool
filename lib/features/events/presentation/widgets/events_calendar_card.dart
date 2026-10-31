@@ -7,7 +7,8 @@ import '../../../../core/l10n/app_dates.dart';
 import '../../../../core/l10n/l10n.dart';
 
 /// The dashboard's school calendar: a month grid whose days carry a coloured
-/// dot per event, plus the selected day's entries listed underneath.
+/// dot per event, plus the month's entries listed underneath — one day's, once
+/// that day is tapped in the grid.
 ///
 /// The whole year arrives in one `GET /getEvent` call, so paging between months
 /// is pure local state — no refetch.
@@ -35,17 +36,18 @@ class EventsCalendarCard extends StatefulWidget {
 
 class _EventsCalendarCardState extends State<EventsCalendarCard> {
   /// How many entries the inline list shows before collapsing into a "+N".
-  static const _maxListedEvents = 4;
+  static const _maxListedEvents = 6;
 
   /// First day of the month on screen.
   late DateTime _visibleMonth;
 
-  /// The day whose events are listed under the grid.
-  late DateTime _selectedDay;
+  /// A day tapped in the grid: the list under it narrows to that day. Null —
+  /// the list covers the whole month on screen.
+  DateTime? _selectedDay;
 
-  /// The "+N" under the list was tapped: the selected day shows every entry.
-  /// Reset whenever the selection moves.
-  bool _showAllOfDay = false;
+  /// The "+N" under the list was tapped: every entry is shown.
+  /// Reset whenever the list switches between month and day.
+  bool _showAll = false;
 
   /// Events bucketed by day, rebuilt only when the feed itself changes — the
   /// alternative is re-scanning ~200 entries for all 42 cells on every rebuild.
@@ -55,7 +57,6 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _selectedDay = DateTime(now.year, now.month, now.day);
     _visibleMonth = DateTime(now.year, now.month);
     _byDay = _groupByDay(widget.events);
   }
@@ -92,20 +93,41 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
   List<SchoolEvent> _eventsOn(DateTime day) =>
       _byDay[DateTime(day.year, day.month, day.day)] ?? const [];
 
+  /// Every entry touching the month on screen, once each — a multi-day one
+  /// that began the month before included — in calendar order.
+  List<SchoolEvent> _eventsOfVisibleMonth() {
+    final first = _visibleMonth;
+    final last = DateTime(first.year, first.month + 1, 0);
+
+    return widget.events.where((event) {
+      final start = event.date;
+      final end = event.lastDay;
+      return start != null &&
+          end != null &&
+          !start.isAfter(last) &&
+          !end.isBefore(first);
+    }).toList()
+      ..sort((a, b) {
+        final byDate = a.date!.compareTo(b.date!);
+        return byDate != 0 ? byDate : (a.time ?? '').compareTo(b.time ?? '');
+      });
+  }
+
   void _shiftMonth(int delta) {
     setState(() {
       _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + delta);
+      // The list under the grid belongs to the month on screen.
+      _selectedDay = null;
+      _showAll = false;
+    });
+  }
 
-      // The panel under the grid must belong to the month on screen, so the
-      // selection follows along: today when it falls in the new month, its
-      // first day otherwise.
-      final now = DateTime.now();
-      final isCurrentMonth =
-          now.year == _visibleMonth.year && now.month == _visibleMonth.month;
-      _selectedDay = isCurrentMonth
-          ? DateTime(now.year, now.month, now.day)
-          : _visibleMonth;
-      _showAllOfDay = false;
+  /// Narrows the list to [day]; [day] again (or null) widens it back to the
+  /// month.
+  void _selectDay(DateTime? day) {
+    setState(() {
+      _selectedDay = day == _selectedDay ? null : day;
+      _showAll = false;
     });
   }
 
@@ -146,7 +168,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
               child: _monthGrid(),
             ),
             const SizedBox(height: 16),
-            _selectedDayPanel(),
+            _listPanel(),
           ],
         ],
       ),
@@ -262,11 +284,19 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
     final events = _eventsOn(day);
     final isWeekend = day.weekday >= DateTime.saturday;
 
+    // A red entry tints the whole date, not just its dot.
+    final red = events
+        .map((event) => eventColor(context, event.colorHex))
+        .where(isRedEventColor)
+        .firstOrNull;
+
     final Color textColor;
     if (isSelected) {
       textColor = Colors.black;
     } else if (isToday) {
       textColor = context.dr.accent;
+    } else if (red != null) {
+      textColor = context.dr.textMain;
     } else if (isWeekend) {
       textColor = context.dr.textMuted.withValues(alpha: 0.55);
     } else {
@@ -274,10 +304,7 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
     }
 
     return GestureDetector(
-      onTap: () => setState(() {
-        _selectedDay = day;
-        _showAllOfDay = false;
-      }),
+      onTap: () => _selectDay(day),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         height: 44,
@@ -289,7 +316,9 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
               height: 30,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? DrColors.accentGreen : Colors.transparent,
+                color: isSelected
+                    ? DrColors.accentGreen
+                    : red?.withValues(alpha: 0.25) ?? Colors.transparent,
                 shape: BoxShape.circle,
                 border: !isSelected && isToday
                     ? Border.all(
@@ -359,41 +388,65 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
     );
   }
 
-  Widget _selectedDayPanel() {
-    final events = _eventsOn(_selectedDay);
+  /// The month's entries; with a day tapped in the grid, that day's, under a
+  /// header that closes back to the month.
+  Widget _listPanel() {
+    final day = _selectedDay;
+    final events = day == null ? _eventsOfVisibleMonth() : _eventsOn(day);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(height: 1, color: context.dr.border),
         const SizedBox(height: 14),
-        Text(
-          AppDates.dayMonth(context, _selectedDay),
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: context.dr.textMain,
+        if (day != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppDates.dayMonth(context, day),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: context.dr.textMain,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _selectDay(null),
+                behavior: HitTestBehavior.opaque,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: context.dr.textMuted,
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 10),
+          const SizedBox(height: 10),
+        ],
         if (events.isEmpty)
           Text(
-            context.l10n.eventsNoneToday,
+            day == null
+                ? context.l10n.eventsNoneThisMonth
+                : context.l10n.eventsNoneToday,
             style: TextStyle(fontSize: 12, color: context.dr.textMuted),
           )
         else ...[
           for (final event
-              in events.take(_showAllOfDay ? events.length : _maxListedEvents))
+              in events.take(_showAll ? events.length : _maxListedEvents))
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
                 onTap: () => _showEventSheet(event),
-                child: _eventRow(event),
+                // The month list says each entry's days; under a day's header
+                // they would only repeat it.
+                child: _eventRow(event, showDays: day == null),
               ),
             ),
-          if (!_showAllOfDay && events.length > _maxListedEvents)
+          if (!_showAll && events.length > _maxListedEvents)
             GestureDetector(
-              onTap: () => setState(() => _showAllOfDay = true),
+              onTap: () => setState(() => _showAll = true),
               behavior: HitTestBehavior.opaque,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
@@ -502,10 +555,13 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
 
   /// Title and description wrap in full — they used to be cut to one line
   /// each, with the description's line breaks folded into " • ". The colour bar
-  /// is the row's left border, so it grows with the text.
-  Widget _eventRow(SchoolEvent event) {
+  /// is the row's left border, so it grows with the text. [showDays] puts the
+  /// entry's days above the title.
+  Widget _eventRow(SchoolEvent event, {required bool showDays}) {
     final color = eventColor(context, event.colorHex);
     final description = event.descriptionIn(_lang).trim();
+    final start = event.date;
+    final last = event.lastDay;
 
     return Container(
       padding: const EdgeInsets.only(left: 10),
@@ -519,6 +575,17 @@ class _EventsCalendarCardState extends State<EventsCalendarCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (showDays && start != null && last != null) ...[
+                  Text(
+                    AppDates.dayRange(context, start, last),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                ],
                 Text(
                   event.titleIn(_lang),
                   style: TextStyle(
@@ -624,4 +691,14 @@ Color eventColor(BuildContext context, String? hex) {
 
   final color = Color(raw.length == 6 ? 0xFF000000 | value : value);
   return color == const Color(0xFF000000) ? context.dr.textMain : color;
+}
+
+/// Whether a category colour reads as red — the panel's `#dc3545`, or any
+/// other strong red it may offer later. Its pink (`#d63384`) and orange
+/// (`#fd7e14`) swatches stay out.
+bool isRedEventColor(Color color) {
+  final hsv = HSVColor.fromColor(color);
+  return hsv.saturation >= 0.5 &&
+      hsv.value >= 0.4 &&
+      (hsv.hue >= 345 || hsv.hue <= 10);
 }

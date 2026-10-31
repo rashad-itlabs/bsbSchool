@@ -465,6 +465,9 @@ class AppL10nAz extends AppL10n {
   }
 
   @override
+  String get eventsNoneThisMonth => 'Bu ay tədbir yoxdur';
+
+  @override
   String get eventsNoneToday => 'Bu gün üçün tədbir yoxdur';
 
   @override
@@ -887,6 +890,13 @@ class AppL10nAz extends AppL10n {
 
   @override
   String get libraryEmpty => 'Kitab tapılmadı';
+
+  @override
+  String get libraryLocked => 'Kitabxana borca görə bağlıdır';
+
+  @override
+  String get libraryLockedNote =>
+      'Kitabxana ödəniş məsələsi həll olunandan sonra açılacaq. Ətraflı məlumat üçün məktəbə müraciət edin.';
 
   @override
   String get librarySchoolPaid => '£19.99 məktəb tərəfindən ödənilib';

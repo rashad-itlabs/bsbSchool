@@ -14,6 +14,11 @@ class LibraryState extends Equatable {
   final int? classId;
   final String? className;
 
+  /// Library closed over a debt — see `LibraryContent.locked`.
+  final bool locked;
+  final String? lockedText;
+  final String? lockedNote;
+
   final String query;
   final String subject;
 
@@ -24,12 +29,18 @@ class LibraryState extends Equatable {
     this.books = const [],
     this.classId,
     this.className,
+    this.locked = false,
+    this.lockedText,
+    this.lockedNote,
     this.query = '',
     this.subject = allSubjects,
     this.errorMessage,
   });
 
   bool get isLoading => status == LibraryStatus.loading;
+
+  /// The school closed the library: no search, no pills, just the message.
+  bool get isLocked => status == LibraryStatus.loaded && locked;
 
   /// The student has no class session, so there is nothing to show.
   bool get hasNoClass => status == LibraryStatus.loaded && classId == null;
@@ -68,6 +79,9 @@ class LibraryState extends Equatable {
       books: books ?? this.books,
       classId: classId ?? this.classId,
       className: className ?? this.className,
+      locked: locked,
+      lockedText: lockedText,
+      lockedNote: lockedNote,
       query: query ?? this.query,
       subject: subject ?? this.subject,
       // Intentionally not carried over: only the state that failed shows it.
@@ -76,6 +90,16 @@ class LibraryState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, books, classId, className, query, subject, errorMessage];
+  List<Object?> get props => [
+        status,
+        books,
+        classId,
+        className,
+        locked,
+        lockedText,
+        lockedNote,
+        query,
+        subject,
+        errorMessage,
+      ];
 }
